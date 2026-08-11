@@ -27,14 +27,5 @@
     "engines":  {
                     "node":  "\u003e=20.0.0",
                     "pnpm":  "\u003e=9.0.0"
-                },
-    "pnpm":  {
-                 "onlyBuiltDependencies":  [
-                                               "@prisma/engines",
-                                               "@scarf/scarf",
-                                               "bcrypt",
-                                               "prisma",
-                                               "unrs-resolver"
-                                           ]
-             }
+                }
 }
