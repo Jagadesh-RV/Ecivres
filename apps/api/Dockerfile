@@ -24,6 +24,6 @@ COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/node_modules ./node_modules
 
-EXPOSE 3000
+EXPOSE 5000
 
 CMD ["node", "apps/api/dist/main"]
