@@ -1,31 +1,40 @@
 {
-  "name": "ecivres-monorepo",
-  "version": "1.0.0",
-  "private": true,
-  "description": "EcivreS - local services marketplace monorepo",
-  "scripts": {
-    "dev": "pnpm -r run dev",
-    "dev:mobile": "pnpm --filter mobile run start",
-    "dev:api": "pnpm --filter api run start:dev",
-    "build": "pnpm -r run build",
-    "build:api": "pnpm --filter api run build",
-    "lint": "pnpm -r run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
-    "typecheck": "pnpm -r run typecheck",
-    "test": "pnpm -r run test",
-    "db:migrate": "pnpm --filter api run db:migrate",
-    "db:generate": "pnpm --filter api run db:generate",
-    "db:seed": "pnpm --filter api run db:seed",
-    "db:studio": "pnpm --filter api run db:studio",
-    "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
-  },
-  "devDependencies": {
-    "prettier": "^3.0.0"
-  },
-  "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
-  }
+    "name":  "ecivres-monorepo",
+    "version":  "1.0.0",
+    "private":  true,
+    "description":  "EcivreS - local services marketplace monorepo",
+    "scripts":  {
+                    "dev":  "pnpm -r run dev",
+                    "dev:mobile":  "pnpm --filter mobile run start",
+                    "dev:api":  "pnpm --filter api run start:dev",
+                    "build":  "pnpm -r run build",
+                    "build:api":  "pnpm --filter api run build",
+                    "lint":  "pnpm -r run lint",
+                    "format":  "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+                    "typecheck":  "pnpm -r run typecheck",
+                    "test":  "pnpm -r run test",
+                    "db:migrate":  "pnpm --filter api run db:migrate",
+                    "db:generate":  "pnpm --filter api run db:generate",
+                    "db:seed":  "pnpm --filter api run db:seed",
+                    "db:studio":  "pnpm --filter api run db:studio",
+                    "docker:up":  "docker compose up -d",
+                    "docker:down":  "docker compose down",
+                    "docker:logs":  "docker compose logs -f"
+                },
+    "devDependencies":  {
+                            "prettier":  "^3.0.0"
+                        },
+    "engines":  {
+                    "node":  "\u003e=20.0.0",
+                    "pnpm":  "\u003e=9.0.0"
+                },
+    "pnpm":  {
+                 "onlyBuiltDependencies":  [
+                                               "@prisma/engines",
+                                               "@scarf/scarf",
+                                               "bcrypt",
+                                               "prisma",
+                                               "unrs-resolver"
+                                           ]
+             }
 }
