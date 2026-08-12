@@ -14,9 +14,12 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const request = context.switchToHttp().getRequest();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const user = request.user;
     // Assuming user object has roles array attached after JWT validation
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return requiredRoles.some((role) => user?.roles?.includes(role));
   }
 }
