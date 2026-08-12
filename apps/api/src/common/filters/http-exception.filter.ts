@@ -19,18 +19,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      const res = exception.getResponse() as any;
+      const res = exception.getResponse() as string | Record<string, unknown>;
 
       message =
         typeof res === 'string'
           ? res
-          : res.message || res.error || exception.message;
+          : (res?.message as string) || (res?.error as string) || exception.message;
 
       // Basic mapping for code
-      if (status === 400) code = 'BAD_REQUEST';
-      else if (status === 401) code = 'UNAUTHORIZED';
-      else if (status === 403) code = 'FORBIDDEN';
-      else if (status === 404) code = 'NOT_FOUND';
+      if (status === HttpStatus.BAD_REQUEST) code = 'BAD_REQUEST';
+      else if (status === HttpStatus.UNAUTHORIZED) code = 'UNAUTHORIZED';
+      else if (status === HttpStatus.FORBIDDEN) code = 'FORBIDDEN';
+      else if (status === HttpStatus.NOT_FOUND) code = 'NOT_FOUND';
     }
 
     response.status(status).json({
