@@ -16,7 +16,21 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
-  imports: [AuthModule, CustomersModule, BookingsModule, UsersModule, ProvidersModule, PaymentsModule, RolesModule, CategoriesModule, ReviewsModule, PermissionsModule, ServicesModule, NotificationsModule, AdminModule],
+  imports: [
+    AuthModule,
+    CustomersModule,
+    BookingsModule,
+    UsersModule,
+    ProvidersModule,
+    PaymentsModule,
+    RolesModule,
+    CategoriesModule,
+    ReviewsModule,
+    PermissionsModule,
+    ServicesModule,
+    NotificationsModule,
+    AdminModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
