@@ -14,9 +14,7 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
-    const request = context.switchToHttp().getRequest() as {
-      user?: { roles?: string[] };
-    };
+    const request = context.switchToHttp().getRequest();
     const user = request.user;
     // Assuming user object has roles array attached after JWT validation
     return requiredRoles.some((role) => user?.roles?.includes(role));

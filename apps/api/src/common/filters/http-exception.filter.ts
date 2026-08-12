@@ -24,7 +24,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message =
         typeof res === 'string'
           ? res
-          : (res?.message as string) || (res?.error as string) || exception.message;
+          : (res?.message as string) ||
+            (res?.error as string) ||
+            exception.message;
 
       // Basic mapping for code
       if (status === HttpStatus.BAD_REQUEST) code = 'BAD_REQUEST';
