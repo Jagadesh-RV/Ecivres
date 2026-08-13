@@ -1,6 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 
+jest.mock('@prisma/client', () => {
+  return {
+    PrismaClient: jest.fn().mockImplementation(() => ({
+      user: {
+        findUnique: jest.fn(),
+      },
+    })),
+  };
+});
+
 describe('UsersService', () => {
   let service: UsersService;
 
@@ -16,3 +26,4 @@ describe('UsersService', () => {
     expect(service).toBeDefined();
   });
 });
+
