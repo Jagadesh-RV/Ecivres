@@ -1,7 +1,12 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
+import type { StringValue } from 'ms';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -69,7 +74,7 @@ export class AuthService {
       throw new UnauthorizedException('AUTH_INVALID_CREDENTIALS');
     }
 
-    const roles = user.userRoles.map(ur => ur.role.name);
+    const roles = user.userRoles.map((ur) => ur.role.name);
     return this.generateTokens(user.id, user.email, roles);
   }
 
@@ -78,7 +83,7 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshTokenString, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
-      
+
       const userId = payload.sub;
 
       // Find all refresh tokens for user
@@ -100,7 +105,7 @@ export class AuthService {
       }
 
       // Check expiration
-      const tokenRecord = userTokens.find(t => t.id === matchedTokenId);
+      const tokenRecord = userTokens.find((t) => t.id === matchedTokenId);
       if (tokenRecord && tokenRecord.expiresAt < new Date()) {
         throw new UnauthorizedException('AUTH_REFRESH_TOKEN_EXPIRED');
       }
@@ -117,7 +122,7 @@ export class AuthService {
         throw new UnauthorizedException('AUTH_UNAUTHORIZED');
       }
 
-      const roles = user.userRoles.map(ur => ur.role.name);
+      const roles = user.userRoles.map((ur) => ur.role.name);
       return this.generateTokens(user.id, user.email, roles);
     } catch (e) {
       throw new UnauthorizedException('AUTH_INVALID_TOKEN');
@@ -131,10 +136,12 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
         ignoreExpiration: true,
       });
-      
+
       const userId = payload.sub;
-      const userTokens = await this.prisma.refreshToken.findMany({ where: { userId } });
-      
+      const userTokens = await this.prisma.refreshToken.findMany({
+        where: { userId },
+      });
+
       let matchedTokenId: string | null = null;
       for (const token of userTokens) {
         if (await bcrypt.compare(refreshTokenString, token.tokenHash)) {
@@ -144,7 +151,9 @@ export class AuthService {
       }
 
       if (matchedTokenId) {
-        await this.prisma.refreshToken.delete({ where: { id: matchedTokenId } });
+        await this.prisma.refreshToken.delete({
+          where: { id: matchedTokenId },
+        });
       }
     } catch (e) {
       // Ignore invalid tokens on logout
@@ -155,17 +164,20 @@ export class AuthService {
     const payload = { sub: userId, email, roles };
 
     const accessToken = this.jwtService.sign(payload);
-    
+
     const refreshToken = this.jwtService.sign(
       { sub: userId },
-      { 
+      {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d') 
-      }
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRES_IN',
+          '7d',
+        ) as StringValue,
+      },
     );
 
     const tokenHash = await bcrypt.hash(refreshToken, 10);
-    
+
     // Parse '7d' to a date, assuming default 7 days for simplicity if we can't parse easily
     // In a production app, we'd use a better parser for expiration strings
     const expiresAt = new Date();
@@ -189,7 +201,7 @@ export class AuthService {
           email,
           roles,
         },
-      }
+      },
     };
   }
 }
