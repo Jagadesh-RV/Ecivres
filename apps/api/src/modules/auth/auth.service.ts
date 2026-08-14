@@ -74,7 +74,7 @@ export class AuthService {
       throw new UnauthorizedException('AUTH_INVALID_CREDENTIALS');
     }
 
-    const roles = user.userRoles.map((ur) => ur.role.name);
+    const roles = user.userRoles.filter(ur => ur.role).map((ur) => ur.role.name);
     return this.generateTokens(user.id, user.email, roles);
   }
 
@@ -122,7 +122,7 @@ export class AuthService {
         throw new UnauthorizedException('AUTH_UNAUTHORIZED');
       }
 
-      const roles = user.userRoles.map((ur) => ur.role.name);
+      const roles = user.userRoles.filter(ur => ur.role).map((ur) => ur.role.name);
       return this.generateTokens(user.id, user.email, roles);
     } catch (e) {
       throw new UnauthorizedException('AUTH_INVALID_TOKEN');
