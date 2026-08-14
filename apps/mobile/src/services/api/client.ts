@@ -1,27 +1,15 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { requestInterceptor, responseInterceptor, errorInterceptor } from './interceptors';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+// Use Expo environment variables, fallback to localhost for development if missing
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
 export const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-apiClient.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    // Refresh token logic can be implemented here
-    return Promise.reject(error);
-  }
-);
+apiClient.interceptors.request.use(requestInterceptor, errorInterceptor);
+apiClient.interceptors.response.use(responseInterceptor, errorInterceptor);
