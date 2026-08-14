@@ -1,14 +1,19 @@
 import axios from 'axios';
 import { requestInterceptor, responseInterceptor, errorInterceptor } from './interceptors';
 
-const BASE_URL = 'http://localhost:5000/api/v1'; // TODO: Use react-native-config for environments
+// In bare RN, you could use react-native-config. 
+// For now we'll use a hardcoded dev IP that works on Android Emulator.
+// Physical device testing will require this to be your PC's IP.
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3000'; 
 
-export const apiClient = axios.create({
+const client = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-apiClient.interceptors.request.use(requestInterceptor, errorInterceptor);
-apiClient.interceptors.response.use(responseInterceptor, errorInterceptor);
+client.interceptors.request.use(requestInterceptor, errorInterceptor);
+client.interceptors.response.use(responseInterceptor, errorInterceptor);
+
+export default client;
