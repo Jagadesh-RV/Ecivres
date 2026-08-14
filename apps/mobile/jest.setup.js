@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
