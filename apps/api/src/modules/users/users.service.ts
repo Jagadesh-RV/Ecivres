@@ -22,11 +22,11 @@ export class UsersService {
     }
 
     const { password, ...result } = user;
-    
+
     // Map roles for easier access on frontend
     const mappedResult = {
       ...result,
-      roles: result.userRoles.map(ur => ur.role.name),
+      roles: result.userRoles.map((ur) => ur.role.name),
     };
 
     return mappedResult;
