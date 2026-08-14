@@ -34,7 +34,7 @@ export const errorInterceptor = async (error: any) => {
           return axios(originalRequest);
         }
       }
-    } catch (e) {
+    } catch {
       // Refresh failed, clear session
       await SecureStore.deleteItemAsync('access_token');
       await SecureStore.deleteItemAsync('refresh_token');
