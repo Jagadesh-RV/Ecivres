@@ -29,7 +29,10 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token using a refresh token' })
   @ApiResponse({ status: 200, description: 'Tokens refreshed' })
-  @ApiResponse({ status: 401, description: 'AUTH_INVALID_TOKEN or AUTH_REFRESH_TOKEN_REVOKED' })
+  @ApiResponse({
+    status: 401,
+    description: 'AUTH_INVALID_TOKEN or AUTH_REFRESH_TOKEN_REVOKED',
+  })
   async refresh(@Body() refreshDto: RefreshTokenDto) {
     return this.authService.refreshToken(refreshDto.refresh_token);
   }
