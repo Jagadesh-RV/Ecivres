@@ -14,7 +14,7 @@ jest.mock('@prisma/client', () => {
         findMany: jest.fn(),
         create: jest.fn(),
         delete: jest.fn(),
-      }
+      },
     })),
   };
 });
