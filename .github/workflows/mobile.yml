@@ -24,4 +24,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run checks
-        run: pnpm lint --filter mobile
+        run: pnpm --filter mobile run lint

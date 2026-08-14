@@ -1,29 +1,35 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useAuthStore } from '../../stores/authStore';
 import { authApi } from '../../services/api/auth';
 
-export const LoginScreen = ({ navigation }: any) => {
-  const login = useAuthStore(state => state.login);
+export const RegisterScreen = ({ navigation }: any) => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
+  const handleRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await authApi.login({ email, password });
-      
-      if (response.success && response.data) {
-        await login(response.data.user, response.data.accessToken, response.data.refreshToken);
-      }
+      await authApi.register({ name, email, password });
+      Alert.alert('Success', 'Registration successful, please login');
+      navigation.navigate('Login');
     } catch (e: any) {
-      Alert.alert('Login Failed', e.response?.data?.message || 'An error occurred');
+      const message = Array.isArray(e.response?.data?.message) 
+        ? e.response.data.message[0] 
+        : e.response?.data?.message || 'An error occurred';
+      Alert.alert('Registration Failed', message);
     } finally {
       setLoading(false);
     }
@@ -31,7 +37,14 @@ export const LoginScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Register</Text>
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Full Name"
+        value={name}
+        onChangeText={setName}
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -47,14 +60,21 @@ export const LoginScreen = ({ navigation }: any) => {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+      />
       
       {loading ? (
         <ActivityIndicator size="large" />
       ) : (
         <>
-          <Button title="Login" onPress={handleLogin} />
+          <Button title="Register" onPress={handleRegister} />
           <View style={styles.spacer} />
-          <Button title="Register" onPress={() => navigation.navigate('Register')} color="gray" />
+          <Button title="Back to Login" onPress={() => navigation.navigate('Login')} color="gray" />
         </>
       )}
     </View>

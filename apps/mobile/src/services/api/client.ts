@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { requestInterceptor, responseInterceptor, errorInterceptor } from './interceptors';
 
-const BASE_URL = 'http://localhost:5000/api/v1'; // TODO: Use react-native-config for environments
+// Use Expo environment variables, fallback to localhost for development if missing
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
