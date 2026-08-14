@@ -14,6 +14,7 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { ServicesModule } from './modules/services/services.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AdminModule } from './modules/admin/admin.module';
     ServicesModule,
     NotificationsModule,
     AdminModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
