@@ -1,14 +1,10 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateProviderProfileDto, UpdateProviderProfileDto } from './dto/provider-profile.dto';
 
 @Injectable()
 export class ProvidersService {
-  private prisma: PrismaClient;
-
-  constructor() {
-    this.prisma = new PrismaClient();
-  }
+  constructor(private prisma: PrismaService) {}
 
   async getProfile(userId: string) {
     const profile = await this.prisma.providerProfile.findUnique({
