@@ -1,25 +1,51 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  private prisma: PrismaClient;
 
-  canActivate(context: ExecutionContext): boolean {
+  constructor(private reflector: Reflector) {
+    this.prisma = new PrismaClient();
+  }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );
-    if (!requiredRoles) {
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const request = context.switchToHttp().getRequest();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const user = request.user;
-    // Assuming user object has roles array attached after JWT validation
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    return requiredRoles.some((role) => user?.roles?.includes(role));
+
+    if (!user || !user.id) {
+      return false;
+    }
+
+    const userWithRoles = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: {
+        userRoles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!userWithRoles) {
+      return false;
+    }
+
+    const userRoles = userWithRoles.userRoles
+      .filter((ur) => ur.role)
+      .map((ur) => ur.role!.name);
+
+    return requiredRoles.some((role) => userRoles.includes(role));
   }
 }
