@@ -5,9 +5,10 @@ import { useAuthStore } from '../stores/authStore';
 import { AuthNavigator } from './AuthNavigator';
 import { CustomerNavigator } from './CustomerNavigator';
 import { ProviderNavigator } from './ProviderNavigator';
+import { ProfileSetupNavigator } from './ProfileSetupNavigator';
 
 export const AppNavigator = () => {
-  const { isAuthenticated, user, isLoading, restoreSession } = useAuthStore();
+  const { isAuthenticated, user, isProfileComplete, isLoading, restoreSession } = useAuthStore();
 
   useEffect(() => {
     restoreSession();
@@ -26,7 +27,13 @@ export const AppNavigator = () => {
       return <AuthNavigator />;
     }
     
-    if (user.roles?.includes('provider')) {
+    if (!isProfileComplete) {
+      return <ProfileSetupNavigator />;
+    }
+    
+    // Convert role to uppercase if it's stored differently or just check generic string match
+    // Actually the backend returns uppercase roles (e.g. 'PROVIDER') based on seed
+    if (user.roles?.includes('PROVIDER') || user.roles?.includes('provider')) {
       return <ProviderNavigator />;
     }
     
