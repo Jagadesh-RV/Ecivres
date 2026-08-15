@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
 import type { StringValue } from 'ms';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
@@ -13,14 +13,11 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  private prisma: PrismaClient;
-
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {
-    this.prisma = new PrismaClient();
-  }
+    private prisma: PrismaService,
+  ) {}
 
   async register(registerDto: RegisterDto) {
     const { email, password, name } = registerDto;
