@@ -14,6 +14,8 @@ export class UsersService {
       where: { id },
       include: {
         userRoles: { include: { role: true } },
+        customerProfile: true,
+        providerProfile: true,
       },
     });
 
@@ -27,6 +29,8 @@ export class UsersService {
     const mappedResult = {
       ...result,
       roles: result.userRoles.filter(ur => ur.role).map((ur) => ur.role!.name),
+      hasCustomerProfile: !!result.customerProfile,
+      hasProviderProfile: !!result.providerProfile,
     };
 
     return mappedResult;
