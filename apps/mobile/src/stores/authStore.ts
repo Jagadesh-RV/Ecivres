@@ -1,54 +1,64 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import client from '../services/api/client';
+import { apiClient } from '../services/api/client';
 
 interface AuthState {
   user: any | null;
   isAuthenticated: boolean;
-  isInitializing: boolean;
-  hasSeenOnboarding: boolean;
+  isProfileComplete: boolean;
+  isLoading: boolean;
   login: (userData: any, accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
+  updateUser: (userData: any) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  isInitializing: true,
-  hasSeenOnboarding: false,
-  
+  isProfileComplete: false,
+  isLoading: true,
   login: async (userData, accessToken, refreshToken) => {
     await AsyncStorage.setItem('access_token', accessToken);
-    if (refreshToken) await AsyncStorage.setItem('refresh_token', refreshToken);
-    set({ user: userData, isAuthenticated: true });
+    await AsyncStorage.setItem('refresh_token', refreshToken);
+    
+    // Check if user has required profile based on their role
+    const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
+    
+    set({ user: userData, isAuthenticated: true, isProfileComplete, isLoading: false });
   },
 
   logout: async () => {
     await AsyncStorage.removeItem('access_token');
     await AsyncStorage.removeItem('refresh_token');
-    set({ user: null, isAuthenticated: false });
+    set({ user: null, isAuthenticated: false, isProfileComplete: false, isLoading: false });
   },
 
   restoreSession: async () => {
     try {
-      const hasSeenOnboardingStr = await AsyncStorage.getItem('has_seen_onboarding');
-      const hasSeenOnboarding = hasSeenOnboardingStr === 'true';
-      set({ hasSeenOnboarding });
-
-      const token = await AsyncStorage.getItem('access_token');
-      if (token) {
-        // We have a token, let's fetch the current user profile
-        const response = await client.get('/users/me');
-        set({ user: response.data, isAuthenticated: true });
+      const accessToken = await AsyncStorage.getItem('access_token');
+      if (accessToken) {
+        // Fetch current user from /users/me
+        try {
+          const response = await apiClient.get('/users/me');
+          const userData = response.data;
+          const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
+          set({ user: userData, isAuthenticated: true, isProfileComplete, isLoading: false });
+        } catch (e) {
+          // If token is invalid or request fails, logout
+          await AsyncStorage.removeItem('access_token');
+          await AsyncStorage.removeItem('refresh_token');
+          set({ isAuthenticated: false, isProfileComplete: false, isLoading: false });
+        }
+      } else {
+        set({ isAuthenticated: false, isProfileComplete: false, isLoading: false });
       }
     } catch {
-      // If fetching fails (e.g. invalid token), clear it
-      await AsyncStorage.removeItem('access_token');
-      await AsyncStorage.removeItem('refresh_token');
-      set({ user: null, isAuthenticated: false });
-    } finally {
-      set({ isInitializing: false });
+      set({ isAuthenticated: false, isProfileComplete: false, isLoading: false });
     }
+  },
+  updateUser: (userData) => {
+    const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
+    set({ user: userData, isProfileComplete });
   }
 }));
