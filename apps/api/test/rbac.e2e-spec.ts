@@ -7,7 +7,7 @@ import { Roles } from '../src/common/decorators/roles.decorator';
 import { PermissionsGuard } from '../src/common/guards/permissions.guard';
 import { Permissions } from '../src/common/decorators/permissions.decorator';
 import { JwtAuthGuard } from '../src/modules/auth/guards/jwt-auth.guard';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../src/prisma/prisma.service';
 
 @Controller('test-rbac')
 class TestRbacController {
@@ -28,14 +28,13 @@ class TestRbacController {
 
 describe('RBAC & Permissions (e2e)', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let adminToken: string;
   let customerToken: string;
   let adminId: string;
   let customerId: string;
 
   beforeAll(async () => {
-    prisma = new PrismaClient();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
       controllers: [TestRbacController],
@@ -43,6 +42,8 @@ describe('RBAC & Permissions (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    
+    prisma = app.get(PrismaService);
 
     // 1. Setup Admin User (has ADMIN role and read:test permission)
     const adminUser = await prisma.user.create({
