@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import client from '../services/api/client';
 
 interface AuthState {
   user: any | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  isInitializing: boolean;
+  hasSeenOnboarding: boolean;
   login: (userData: any, accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
@@ -13,29 +15,40 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  isLoading: true,
+  isInitializing: true,
+  hasSeenOnboarding: false,
+  
   login: async (userData, accessToken, refreshToken) => {
     await AsyncStorage.setItem('access_token', accessToken);
-    await AsyncStorage.setItem('refresh_token', refreshToken);
-    set({ user: userData, isAuthenticated: true, isLoading: false });
+    if (refreshToken) await AsyncStorage.setItem('refresh_token', refreshToken);
+    set({ user: userData, isAuthenticated: true });
   },
+
   logout: async () => {
     await AsyncStorage.removeItem('access_token');
     await AsyncStorage.removeItem('refresh_token');
-    set({ user: null, isAuthenticated: false, isLoading: false });
+    set({ user: null, isAuthenticated: false });
   },
+
   restoreSession: async () => {
     try {
-      const accessToken = await AsyncStorage.getItem('access_token');
-      // If we have a token, we might want to fetch user profile, but for now we'll just set authenticated
-      // A more robust implementation would fetch the current user profile here.
-      if (accessToken) {
-        set({ isAuthenticated: true, isLoading: false });
-      } else {
-        set({ isAuthenticated: false, isLoading: false });
+      const hasSeenOnboardingStr = await AsyncStorage.getItem('has_seen_onboarding');
+      const hasSeenOnboarding = hasSeenOnboardingStr === 'true';
+      set({ hasSeenOnboarding });
+
+      const token = await AsyncStorage.getItem('access_token');
+      if (token) {
+        // We have a token, let's fetch the current user profile
+        const response = await client.get('/users/me');
+        set({ user: response.data, isAuthenticated: true });
       }
     } catch {
-      set({ isAuthenticated: false, isLoading: false });
+      // If fetching fails (e.g. invalid token), clear it
+      await AsyncStorage.removeItem('access_token');
+      await AsyncStorage.removeItem('refresh_token');
+      set({ user: null, isAuthenticated: false });
+    } finally {
+      set({ isInitializing: false });
     }
   }
 }));

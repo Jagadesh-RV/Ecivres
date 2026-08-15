@@ -1,34 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  private prisma: PrismaClient;
+  constructor(private prisma: PrismaService) {}
 
-  constructor() {
-    this.prisma = new PrismaClient();
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
   }
 
-  async findById(id: string) {
-    const user = await this.prisma.user.findUnique({
+  async findOneById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
       where: { id },
-      include: {
-        userRoles: { include: { role: true } },
-      },
     });
+  }
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const { password, ...result } = user;
-
-    // Map roles for easier access on frontend
-    const mappedResult = {
-      ...result,
-      roles: result.userRoles.filter(ur => ur.role).map((ur) => ur.role!.name),
-    };
-
-    return mappedResult;
+  async create(data: Prisma.UserCreateInput): Promise<User> {
+    return this.prisma.user.create({
+      data,
+    });
   }
 }
