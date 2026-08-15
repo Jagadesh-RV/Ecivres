@@ -5,25 +5,22 @@ import { useAuthStore } from '../stores/authStore';
 import { AuthNavigator } from './AuthNavigator';
 import { CustomerNavigator } from './CustomerNavigator';
 import { ProviderNavigator } from './ProviderNavigator';
+import { SplashScreen } from '../screens/auth/SplashScreen';
 
 export const AppNavigator = () => {
-  const { isAuthenticated, user, isLoading, restoreSession } = useAuthStore();
+  const { isAuthenticated, user, isInitializing, hasSeenOnboarding, restoreSession } = useAuthStore();
 
   useEffect(() => {
     restoreSession();
   }, [restoreSession]);
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   const getNavigator = () => {
+    if (isInitializing) {
+      return <SplashScreen />;
+    }
+
     if (!isAuthenticated || !user) {
-      return <AuthNavigator />;
+      return <AuthNavigator initialRouteName={hasSeenOnboarding ? 'Welcome' : 'Onboarding'} />;
     }
     
     if (user.roles?.includes('provider')) {
