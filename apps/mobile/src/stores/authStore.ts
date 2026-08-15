@@ -27,11 +27,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     
     set({ user: userData, isAuthenticated: true, isProfileComplete, isLoading: false });
   },
+
   logout: async () => {
     await AsyncStorage.removeItem('access_token');
     await AsyncStorage.removeItem('refresh_token');
     set({ user: null, isAuthenticated: false, isProfileComplete: false, isLoading: false });
   },
+
   restoreSession: async () => {
     try {
       const accessToken = await AsyncStorage.getItem('access_token');

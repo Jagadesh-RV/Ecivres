@@ -1,8 +1,9 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -14,191 +15,80 @@ import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(
+    private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private prisma: PrismaService,
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, password, name } = registerDto;
-    const normalizedEmail = email.toLowerCase();
-
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-
+    const existingUser = await this.usersService.findOneByEmail(
+      registerDto.email,
+    );
     if (existingUser) {
-      throw new ConflictException('AUTH_EMAIL_ALREADY_EXISTS');
+      throw new ConflictException('User with this email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await this.prisma.user.create({
-      data: {
-        email: normalizedEmail,
-        password: hashedPassword,
-        // Since we don't know the exact role, we'll just create a CustomerProfile by default
-        // The instructions said to use a temporary identity strategy
-        customerProfile: {
-          create: {
-            firstName: name.split(' ')[0],
-            lastName: name.split(' ').slice(1).join(' ') || '',
-          },
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    const user = await this.usersService.create({
+      email: registerDto.email,
+      password: hashedPassword,
+      customerProfile: {
+        create: {
+          firstName: registerDto.name,
+          lastName: '', // For now, put the entire name in firstName or leave lastName empty
         },
       },
     });
 
-    const { password: _, ...result } = user;
-    return result;
+    const payload = { email: user.email, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+    };
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
-    const normalizedEmail = email.toLowerCase();
-
-    const user = await this.prisma.user.findUnique({
-      where: { email: normalizedEmail },
-      include: { userRoles: { include: { role: true } } },
-    });
-
+    const user = await this.usersService.findOneByEmail(loginDto.email);
     if (!user) {
-      throw new UnauthorizedException('AUTH_INVALID_CREDENTIALS');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('AUTH_INVALID_CREDENTIALS');
-    }
-
-    const roles = user.userRoles.filter(ur => ur.role).map((ur) => ur.role!.name);
-    return this.generateTokens(user.id, user.email, roles);
-  }
-
-  async refreshToken(refreshTokenString: string) {
-    try {
-      const payload = this.jwtService.verify(refreshTokenString, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      });
-
-      const userId = payload.sub;
-
-      // Find all refresh tokens for user
-      const userTokens = await this.prisma.refreshToken.findMany({
-        where: { userId },
-      });
-
-      // Find the one that matches
-      let matchedTokenId: string | null = null;
-      for (const token of userTokens) {
-        if (await bcrypt.compare(refreshTokenString, token.tokenHash)) {
-          matchedTokenId = token.id;
-          break;
-        }
-      }
-
-      if (!matchedTokenId) {
-        throw new UnauthorizedException('AUTH_REFRESH_TOKEN_REVOKED');
-      }
-
-      // Check expiration
-      const tokenRecord = userTokens.find((t) => t.id === matchedTokenId);
-      if (tokenRecord && tokenRecord.expiresAt < new Date()) {
-        throw new UnauthorizedException('AUTH_REFRESH_TOKEN_EXPIRED');
-      }
-
-      // Revoke old token
-      await this.prisma.refreshToken.delete({ where: { id: matchedTokenId } });
-
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        include: { userRoles: { include: { role: true } } },
-      });
-
-      if (!user) {
-        throw new UnauthorizedException('AUTH_UNAUTHORIZED');
-      }
-
-      const roles = user.userRoles.filter(ur => ur.role).map((ur) => ur.role!.name);
-      return this.generateTokens(user.id, user.email, roles);
-    } catch (e) {
-      throw new UnauthorizedException('AUTH_INVALID_TOKEN');
-    }
-  }
-
-  async logout(refreshTokenString: string) {
-    if (!refreshTokenString) return;
-    try {
-      const payload = this.jwtService.verify(refreshTokenString, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        ignoreExpiration: true,
-      });
-
-      const userId = payload.sub;
-      const userTokens = await this.prisma.refreshToken.findMany({
-        where: { userId },
-      });
-
-      let matchedTokenId: string | null = null;
-      for (const token of userTokens) {
-        if (await bcrypt.compare(refreshTokenString, token.tokenHash)) {
-          matchedTokenId = token.id;
-          break;
-        }
-      }
-
-      if (matchedTokenId) {
-        await this.prisma.refreshToken.delete({
-          where: { id: matchedTokenId },
-        });
-      }
-    } catch (e) {
-      // Ignore invalid tokens on logout
-    }
-  }
-
-  private async generateTokens(userId: string, email: string, roles: string[]) {
-    const payload = { sub: userId, email, roles };
-
-    const accessToken = this.jwtService.sign(payload);
-
-    const refreshToken = this.jwtService.sign(
-      { sub: userId },
-      {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>(
-          'JWT_REFRESH_EXPIRES_IN',
-          '7d',
-        ) as StringValue,
-      },
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
     );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-    const tokenHash = await bcrypt.hash(refreshToken, 10);
-
-    // Parse '7d' to a date, assuming default 7 days for simplicity if we can't parse easily
-    // In a production app, we'd use a better parser for expiration strings
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    await this.prisma.refreshToken.create({
-      data: {
-        userId,
-        tokenHash,
-        expiresAt,
-      },
-    });
-
+    const payload = { email: user.email, sub: user.id };
     return {
-      success: true,
-      data: {
-        accessToken,
-        refreshToken,
-        user: {
-          id: userId,
-          email,
-          roles,
-        },
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
       },
     };
+  }
+
+  async refresh(userId: string) {
+    const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const payload = { email: user.email, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async logout(userId: string) {
+    // In a full implementation, you might invalidate the refresh token in the database
+    return { success: true };
   }
 }

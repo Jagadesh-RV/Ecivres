@@ -34,6 +34,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ServicesModule,
     NotificationsModule,
     AdminModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
