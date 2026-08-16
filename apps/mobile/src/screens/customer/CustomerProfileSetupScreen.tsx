@@ -18,7 +18,7 @@ export default function CustomerProfileSetupScreen() {
 
     setLoading(true);
     try {
-      await apiClient.post('/customers/profile', {
+      await apiClient.post('/users/profiles/customer', {
         firstName,
         lastName,
         phone,

@@ -57,12 +57,17 @@ export const errorInterceptor = async (error: any) => {
     }
 
     try {
-      const response = await axios.post(`${baseURL}/auth/refresh`, {}, {
-        headers: { Authorization: `Bearer ${refreshToken}` }
+      const response = await axios.post(`${baseURL}/auth/refresh`, {
+        refresh_token: refreshToken
       });
 
       const newAccessToken = response.data.access_token;
+      const newRefreshToken = response.data.refresh_token;
+      
       await AsyncStorage.setItem('access_token', newAccessToken);
+      if (newRefreshToken) {
+        await AsyncStorage.setItem('refresh_token', newRefreshToken);
+      }
       
       axios.defaults.headers.common.Authorization = 'Bearer ' + newAccessToken;
       originalRequest.headers.Authorization = 'Bearer ' + newAccessToken;
