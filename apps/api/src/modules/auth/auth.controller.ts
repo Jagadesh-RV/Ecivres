@@ -29,17 +29,15 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@CurrentUser() user: any) {
-    return this.authService.refresh(user.id);
+  async refresh(@Body('refresh_token') refreshToken: string) {
+    return this.authService.refresh(refreshToken);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@CurrentUser() user: any) {
-    return this.authService.logout(user.id);
+  async logout(@Body('refresh_token') refreshToken: string) {
+    return this.authService.logout(refreshToken);
   }
 }
