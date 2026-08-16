@@ -34,17 +34,6 @@ export const RegisterScreen = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-<<<<<<< HEAD
-      setLoading(true);
-      await authApi.register({ name, email, password });
-      Alert.alert('Success', 'Registration successful, please login');
-      navigation.navigate('Login');
-    } catch (e: any) {
-      const message = Array.isArray(e.response?.data?.message) 
-        ? e.response.data.message[0] 
-        : e.response?.data?.message || `An error occurred: ${e.message}`;
-      Alert.alert('Registration Failed', message);
-=======
       const payload = {
         name: data.name,
         email: data.email,
@@ -54,7 +43,6 @@ export const RegisterScreen = () => {
       await login(response.data.user, response.data.access_token, '');
     } catch (error: any) {
       Alert.alert('Registration Failed', error.response?.data?.message || 'Something went wrong');
->>>>>>> 74a7cf7c715b4a21ac0af2e480892cf5c8311303
     } finally {
       setIsLoading(false);
     }
