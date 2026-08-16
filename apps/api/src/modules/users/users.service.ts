@@ -39,4 +39,78 @@ export class UsersService {
   async create(data: any) {
     return this.prisma.user.create({ data });
   }
+
+  async createCustomerProfile(userId: string, data: { firstName: string; lastName: string; phone?: string }) {
+    const existing = await this.prisma.customerProfile.findUnique({ where: { userId } });
+    if (existing) {
+      throw new Error('Customer profile already exists');
+    }
+
+    const role = await this.prisma.role.findUnique({ where: { name: 'CUSTOMER' } });
+    if (!role) {
+      throw new Error('CUSTOMER role not found in database');
+    }
+
+    return this.prisma.$transaction(async (prisma) => {
+      const profile = await prisma.customerProfile.create({
+        data: {
+          userId,
+          ...data,
+        },
+      });
+
+      await prisma.userRole.upsert({
+        where: {
+          userId_roleId: {
+            userId,
+            roleId: role.id,
+          },
+        },
+        create: {
+          userId,
+          roleId: role.id,
+        },
+        update: {},
+      });
+
+      return profile;
+    });
+  }
+
+  async createProviderProfile(userId: string, data: { businessName: string; description?: string; phone?: string; address?: string }) {
+    const existing = await this.prisma.providerProfile.findUnique({ where: { userId } });
+    if (existing) {
+      throw new Error('Provider profile already exists');
+    }
+
+    const role = await this.prisma.role.findUnique({ where: { name: 'PROVIDER' } });
+    if (!role) {
+      throw new Error('PROVIDER role not found in database');
+    }
+
+    return this.prisma.$transaction(async (prisma) => {
+      const profile = await prisma.providerProfile.create({
+        data: {
+          userId,
+          ...data,
+        },
+      });
+
+      await prisma.userRole.upsert({
+        where: {
+          userId_roleId: {
+            userId,
+            roleId: role.id,
+          },
+        },
+        create: {
+          userId,
+          roleId: role.id,
+        },
+        update: {},
+      });
+
+      return profile;
+    });
+  }
 }
