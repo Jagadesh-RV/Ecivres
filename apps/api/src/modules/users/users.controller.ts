@@ -1,19 +1,19 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
-  @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current logged-in user profile' })
+  @Get('me')
   async getProfile(@CurrentUser() user: any) {
-    return this.usersService.findById(user.id);
+    const fullUser = await this.usersService.findOneById(user.id);
+    if (!fullUser) return null;
+    const { password, ...result } = fullUser;
+    return result;
   }
 }

@@ -14,17 +14,13 @@ export const AppNavigator = () => {
     restoreSession();
   }, [restoreSession]);
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   const getNavigator = () => {
+    if (isInitializing) {
+      return <SplashScreen />;
+    }
+
     if (!isAuthenticated || !user) {
-      return <AuthNavigator />;
+      return <AuthNavigator initialRouteName={hasSeenOnboarding ? 'Welcome' : 'Onboarding'} />;
     }
     
     if (!isProfileComplete) {

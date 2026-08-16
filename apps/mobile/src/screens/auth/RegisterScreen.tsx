@@ -1,26 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { authApi } from '../../services/api/auth';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useAuthStore } from '../../stores/authStore';
+import { Button, TextInput, PasswordInput, ScreenContainer } from '../../components/ui';
+import { colors, typography, spacing } from '../../theme';
+import client from '../../services/api/client';
 
-export const RegisterScreen = ({ navigation }: any) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+const registerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
-  const handleRegister = async () => {
-    if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill all fields');
-      return;
-    }
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
+export const RegisterScreen = () => {
+  const navigation = useNavigation<any>();
+  const login = useAuthStore((state) => state.login);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' }
+  });
+
+  const onSubmit = async (data: RegisterFormValues) => {
+    setIsLoading(true);
     try {
+<<<<<<< HEAD
       setLoading(true);
       await authApi.register({ name, email, password });
       Alert.alert('Success', 'Registration successful, please login');
@@ -30,60 +44,154 @@ export const RegisterScreen = ({ navigation }: any) => {
         ? e.response.data.message[0] 
         : e.response?.data?.message || `An error occurred: ${e.message}`;
       Alert.alert('Registration Failed', message);
+=======
+      const payload = {
+        name: data.name,
+        email: data.email,
+        password: data.password
+      };
+      const response = await client.post('/auth/register', payload);
+      await login(response.data.user, response.data.access_token, '');
+    } catch (error: any) {
+      Alert.alert('Registration Failed', error.response?.data?.message || 'Something went wrong');
+>>>>>>> 74a7cf7c715b4a21ac0af2e480892cf5c8311303
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
-      
-      {loading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <>
-          <Button title="Register" onPress={handleRegister} />
-          <View style={styles.spacer} />
-          <Button title="Back to Login" onPress={() => navigation.navigate('Login')} color="gray" />
-        </>
-      )}
-    </View>
+    <ScreenContainer>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Sign up to get started</Text>
+        </View>
+
+        <View style={styles.form}>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Full Name"
+                placeholder="Enter your full name"
+                autoCapitalize="words"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                error={errors.name?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Email"
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                error={errors.email?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <PasswordInput
+                label="Password"
+                placeholder="Create a password"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                error={errors.password?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <PasswordInput
+                label="Confirm Password"
+                placeholder="Repeat your password"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                error={errors.confirmPassword?.message}
+              />
+            )}
+          />
+        </View>
+
+        <View style={styles.footer}>
+          <Button 
+            title="Sign Up" 
+            onPress={() => handleSubmit(onSubmit)()} 
+            isLoading={isLoading} 
+            style={styles.button}
+          />
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.loginLink}>Log in</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  title: { fontSize: 24, marginBottom: 20, textAlign: 'center', fontWeight: 'bold' },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 15, borderRadius: 5 },
-  spacer: { height: 10 },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  header: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.xxl,
+  },
+  title: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: typography.fontSize.xxxl,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.fontSize.md,
+    color: colors.textMuted,
+  },
+  form: {
+    flex: 1,
+  },
+  footer: {
+    paddingVertical: spacing.xl,
+  },
+  button: {
+    marginBottom: spacing.xl,
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  loginText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.fontSize.sm,
+    color: colors.textMuted,
+  },
+  loginLink: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.fontSize.sm,
+    color: colors.secondary,
+  },
 });
