@@ -37,6 +37,6 @@ async function bootstrap() {
     origin: process.env.CORS_ORIGINS?.split(',') || '*',
   });
 
-  await app.listen(process.env.API_PORT ?? 5000, '0.0.0.0');
+  await app.listen(process.env.API_PORT ?? 5001, '0.0.0.0');
 }
 void bootstrap();
