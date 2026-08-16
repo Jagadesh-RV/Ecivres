@@ -29,6 +29,23 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         {
+          provide: 'UsersService',
+          useValue: {
+            findOneByEmail: jest.fn(),
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: 'PrismaService',
+          useValue: {
+            refreshToken: {
+              create: jest.fn(),
+              delete: jest.fn(),
+              findMany: jest.fn(),
+            },
+          },
+        },
+        {
           provide: JwtService,
           useValue: {
             sign: jest.fn(),
