@@ -14,6 +14,9 @@ export class UsersController {
   async getProfile(@CurrentUser() user: any) {
     const fullUser = await this.usersService.findOneById(user.id);
     if (!fullUser) return null;
+    return fullUser;
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('profiles/customer')
   async createCustomerProfile(
