@@ -2,6 +2,7 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UsersService } from './users.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
 @Controller('users')
@@ -13,7 +14,6 @@ export class UsersController {
   async getProfile(@CurrentUser() user: any) {
     const fullUser = await this.usersService.findOneById(user.id);
     if (!fullUser) return null;
-    const { password, ...result } = fullUser;
-    return result;
+    return fullUser;
   }
 }

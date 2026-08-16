@@ -15,12 +15,16 @@ export const AppNavigator = () => {
   }, [restoreSession]);
 
   const getNavigator = () => {
-    if (isInitializing) {
-      return <SplashScreen />;
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
     }
 
     if (!isAuthenticated || !user) {
-      return <AuthNavigator initialRouteName={hasSeenOnboarding ? 'Welcome' : 'Onboarding'} />;
+      return <AuthNavigator />;
     }
     
     if (!isProfileComplete) {
