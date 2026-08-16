@@ -19,7 +19,7 @@ export default function ProviderProfileSetupScreen() {
 
     setLoading(true);
     try {
-      await apiClient.post('/providers/profile', {
+      await apiClient.post('/users/profiles/provider', {
         businessName,
         description,
         phone,
