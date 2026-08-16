@@ -29,9 +29,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    await AsyncStorage.removeItem('access_token');
-    await AsyncStorage.removeItem('refresh_token');
-    set({ user: null, isAuthenticated: false, isProfileComplete: false, isLoading: false });
+    try {
+      const refreshToken = await AsyncStorage.getItem('refresh_token');
+      if (refreshToken) {
+        await apiClient.post('/auth/logout', { refresh_token: refreshToken });
+      }
+    } catch (e) {
+      // Ignore errors on logout
+    } finally {
+      await AsyncStorage.removeItem('access_token');
+      await AsyncStorage.removeItem('refresh_token');
+      set({ user: null, isAuthenticated: false, isProfileComplete: false, isLoading: false });
+    }
   },
 
   restoreSession: async () => {
