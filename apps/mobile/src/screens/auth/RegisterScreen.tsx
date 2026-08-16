@@ -28,7 +28,7 @@ export const RegisterScreen = ({ navigation }: any) => {
     } catch (e: any) {
       const message = Array.isArray(e.response?.data?.message) 
         ? e.response.data.message[0] 
-        : e.response?.data?.message || 'An error occurred';
+        : e.response?.data?.message || `An error occurred: ${e.message}`;
       Alert.alert('Registration Failed', message);
     } finally {
       setLoading(false);
