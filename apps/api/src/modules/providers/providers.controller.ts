@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -28,5 +28,11 @@ export class ProvidersController {
   @ApiOperation({ summary: 'Update provider profile' })
   async updateProfile(@CurrentUser() user: any, @Body() updateDto: UpdateProviderProfileDto) {
     return this.providersService.updateProfile(user.id, updateDto);
+  }
+
+  @Get('public/:userId')
+  @ApiOperation({ summary: 'Get public provider profile by user ID' })
+  async getPublicProfile(@Param('userId') userId: string) {
+    return this.providersService.getPublicProfile(userId);
   }
 }
