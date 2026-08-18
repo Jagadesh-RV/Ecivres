@@ -14,7 +14,10 @@ export class BookingsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a booking' })
-  async create(@CurrentUser() user: any, @Body() createBookingDto: CreateBookingDto) {
+  async create(
+    @CurrentUser() user: any,
+    @Body() createBookingDto: CreateBookingDto,
+  ) {
     return this.bookingsService.create(user.id, createBookingDto);
   }
 
