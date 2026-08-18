@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBookingDto } from './dto/booking.dto';
 
@@ -34,9 +38,9 @@ export class BookingsService {
         service: {
           include: {
             provider: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
