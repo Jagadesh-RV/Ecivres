@@ -24,7 +24,7 @@ export class UsersService {
     // Map roles for easier access on frontend
     const mappedResult = {
       ...result,
-      roles: result.userRoles.filter(ur => ur.role).map((ur) => ur.role!.name),
+      roles: result.userRoles.filter((ur) => ur.role).map((ur) => ur.role.name),
       hasCustomerProfile: !!result.customerProfile,
       hasProviderProfile: !!result.providerProfile,
     };
@@ -40,13 +40,20 @@ export class UsersService {
     return this.prisma.user.create({ data });
   }
 
-  async createCustomerProfile(userId: string, data: { firstName: string; lastName: string; phone?: string }) {
-    const existing = await this.prisma.customerProfile.findUnique({ where: { userId } });
+  async createCustomerProfile(
+    userId: string,
+    data: { firstName: string; lastName: string; phone?: string },
+  ) {
+    const existing = await this.prisma.customerProfile.findUnique({
+      where: { userId },
+    });
     if (existing) {
       throw new Error('Customer profile already exists');
     }
 
-    const role = await this.prisma.role.findUnique({ where: { name: 'CUSTOMER' } });
+    const role = await this.prisma.role.findUnique({
+      where: { name: 'CUSTOMER' },
+    });
     if (!role) {
       throw new Error('CUSTOMER role not found in database');
     }
@@ -77,13 +84,25 @@ export class UsersService {
     });
   }
 
-  async createProviderProfile(userId: string, data: { businessName: string; description?: string; phone?: string; address?: string }) {
-    const existing = await this.prisma.providerProfile.findUnique({ where: { userId } });
+  async createProviderProfile(
+    userId: string,
+    data: {
+      businessName: string;
+      description?: string;
+      phone?: string;
+      address?: string;
+    },
+  ) {
+    const existing = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
     if (existing) {
       throw new Error('Provider profile already exists');
     }
 
-    const role = await this.prisma.role.findUnique({ where: { name: 'PROVIDER' } });
+    const role = await this.prisma.role.findUnique({
+      where: { name: 'PROVIDER' },
+    });
     if (!role) {
       throw new Error('PROVIDER role not found in database');
     }
