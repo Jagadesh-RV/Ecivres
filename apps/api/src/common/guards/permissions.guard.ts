@@ -51,7 +51,7 @@ export class PermissionsGuard implements CanActivate {
     }
 
     const userPermissions = new Set<string>();
-    
+
     for (const ur of userWithRoles.userRoles) {
       if (ur.role && ur.role.rolePermissions) {
         for (const rp of ur.role.rolePermissions) {
@@ -62,6 +62,8 @@ export class PermissionsGuard implements CanActivate {
       }
     }
 
-    return requiredPermissions.every((permission) => userPermissions.has(permission));
+    return requiredPermissions.every((permission) =>
+      userPermissions.has(permission),
+    );
   }
 }

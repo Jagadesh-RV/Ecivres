@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useAuthStore } from '../../stores/authStore';
-import { apiClient } from '../../services/api/client';
+import apiClient from '../../services/api/client';
 
 export default function CustomerProfileSetupScreen() {
   const { updateUser } = useAuthStore();

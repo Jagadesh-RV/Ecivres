@@ -1,6 +1,13 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateCustomerProfileDto, UpdateCustomerProfileDto } from './dto/customer-profile.dto';
+import {
+  CreateCustomerProfileDto,
+  UpdateCustomerProfileDto,
+} from './dto/customer-profile.dto';
 
 @Injectable()
 export class CustomersService {
@@ -10,7 +17,7 @@ export class CustomersService {
     const profile = await this.prisma.customerProfile.findUnique({
       where: { userId },
     });
-    
+
     if (!profile) {
       throw new NotFoundException('Customer profile not found');
     }
@@ -28,7 +35,9 @@ export class CustomersService {
     }
 
     // Ensure the user also gets the CUSTOMER role if they don't have it
-    const role = await this.prisma.role.findUnique({ where: { name: 'CUSTOMER' } });
+    const role = await this.prisma.role.findUnique({
+      where: { name: 'CUSTOMER' },
+    });
     if (role) {
       await this.prisma.userRole.upsert({
         where: { userId_roleId: { userId, roleId: role.id } },
