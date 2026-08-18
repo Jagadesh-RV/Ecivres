@@ -40,7 +40,7 @@ export const RegisterScreen = () => {
         password: data.password
       };
       const response = await client.post('/auth/register', payload);
-      await login(response.data.user, response.data.access_token, '');
+      await login(response.data.user, response.data.access_token, response.data.refresh_token || '');
     } catch (error: any) {
       Alert.alert('Registration Failed', error.response?.data?.message || 'Something went wrong');
     } finally {

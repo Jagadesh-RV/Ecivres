@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, Controller, Get, UseGuards } from '@nestjs/common';
-import * as request from 'supertest';
+
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { RolesGuard } from '../src/common/guards/roles.guard';
 import { Roles } from '../src/common/decorators/roles.decorator';
@@ -42,7 +43,7 @@ describe('RBAC & Permissions (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-    
+
     prisma = app.get(PrismaService);
 
     // 1. Setup Admin User (has ADMIN role and read:test permission)
@@ -67,7 +68,12 @@ describe('RBAC & Permissions (e2e)', () => {
     });
 
     await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: adminRole.id, permissionId: readTestPermission.id } },
+      where: {
+        roleId_permissionId: {
+          roleId: adminRole.id,
+          permissionId: readTestPermission.id,
+        },
+      },
       create: { roleId: adminRole.id, permissionId: readTestPermission.id },
       update: {},
     });
@@ -94,7 +100,9 @@ describe('RBAC & Permissions (e2e)', () => {
     });
 
     await prisma.userRole.upsert({
-      where: { userId_roleId: { userId: customerUser.id, roleId: customerRole.id } },
+      where: {
+        userId_roleId: { userId: customerUser.id, roleId: customerRole.id },
+      },
       create: { userId: customerUser.id, roleId: customerRole.id },
       update: {},
     });
@@ -106,16 +114,26 @@ describe('RBAC & Permissions (e2e)', () => {
     // In our test we just mocked the password as 'hashedpassword' which won't work with bcrypt compare.
     // Instead we can generate tokens directly using AuthService
     const authService = app.get('AuthService');
-    const adminTokenData = await authService.generateTokens(adminUser.id, adminUser.email, ['ADMIN']);
+    const adminTokenData = await authService.generateTokens(
+      adminUser.id,
+      adminUser.email,
+      ['ADMIN'],
+    );
     adminToken = adminTokenData.data.accessToken;
 
-    const customerTokenData = await authService.generateTokens(customerUser.id, customerUser.email, ['CUSTOMER']);
+    const customerTokenData = await authService.generateTokens(
+      customerUser.id,
+      customerUser.email,
+      ['CUSTOMER'],
+    );
     customerToken = customerTokenData.data.accessToken;
   });
 
   afterAll(async () => {
     // Cleanup
-    await prisma.user.deleteMany({ where: { id: { in: [adminId, customerId] } } });
+    await prisma.user.deleteMany({
+      where: { id: { in: [adminId, customerId] } },
+    });
     await app.close();
     await prisma.$disconnect();
   });

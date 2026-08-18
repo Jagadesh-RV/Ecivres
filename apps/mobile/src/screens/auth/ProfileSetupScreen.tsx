@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAuthStore } from '../../stores/authStore';
 
 export default function ProfileSetupScreen({ navigation }: any) {
-  const { user } = useAuthStore();
+  const {} = useAuthStore();
 
   const handleSelectRole = (role: 'Customer' | 'Provider') => {
     if (role === 'Customer') {

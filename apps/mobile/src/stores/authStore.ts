@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiClient } from '../services/api/client';
+import * as Keychain from 'react-native-keychain';
+import apiClient from '../services/api/client';
 
 interface AuthState {
   user: any | null;
@@ -19,8 +19,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isProfileComplete: false,
   isLoading: true,
   login: async (userData, accessToken, refreshToken) => {
-    await AsyncStorage.setItem('access_token', accessToken);
-    await AsyncStorage.setItem('refresh_token', refreshToken);
+    await Keychain.setGenericPassword('auth', JSON.stringify({ access_token: accessToken, refresh_token: refreshToken }));
     
     // Check if user has required profile based on their role
     const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
@@ -30,33 +29,39 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      const refreshToken = await AsyncStorage.getItem('refresh_token');
-      if (refreshToken) {
-        await apiClient.post('/auth/logout', { refresh_token: refreshToken });
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        const tokens = JSON.parse(credentials.password);
+        if (tokens.refresh_token) {
+          await apiClient.post('/auth/logout', { refresh_token: tokens.refresh_token });
+        }
       }
-    } catch (e) {
+    } catch {
       // Ignore errors on logout
     } finally {
-      await AsyncStorage.removeItem('access_token');
-      await AsyncStorage.removeItem('refresh_token');
+      await Keychain.resetGenericPassword();
       set({ user: null, isAuthenticated: false, isProfileComplete: false, isLoading: false });
     }
   },
 
   restoreSession: async () => {
     try {
-      const accessToken = await AsyncStorage.getItem('access_token');
-      if (accessToken) {
-        // Fetch current user from /users/me
-        try {
-          const response = await apiClient.get('/users/me');
-          const userData = response.data;
-          const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
-          set({ user: userData, isAuthenticated: true, isProfileComplete, isLoading: false });
-        } catch (e) {
-          // If token is invalid or request fails, logout
-          await AsyncStorage.removeItem('access_token');
-          await AsyncStorage.removeItem('refresh_token');
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        const tokens = JSON.parse(credentials.password);
+        if (tokens.access_token) {
+          // Fetch current user from /users/me
+          try {
+            const response = await apiClient.get('/users/me');
+            const userData = response.data;
+            const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
+            set({ user: userData, isAuthenticated: true, isProfileComplete, isLoading: false });
+          } catch {
+            // If token is invalid or request fails, logout
+            await Keychain.resetGenericPassword();
+            set({ isAuthenticated: false, isProfileComplete: false, isLoading: false });
+          }
+        } else {
           set({ isAuthenticated: false, isProfileComplete: false, isLoading: false });
         }
       } else {

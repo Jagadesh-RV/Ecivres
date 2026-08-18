@@ -30,7 +30,7 @@ export const LoginScreen = () => {
     setIsLoading(true);
     try {
       const response = await client.post('/auth/login', data);
-      await login(response.data.user, response.data.access_token, '');
+      await login(response.data.user, response.data.access_token, response.data.refresh_token || '');
     } catch (error: any) {
       Alert.alert('Login Failed', error.response?.data?.message || 'Invalid credentials');
     } finally {

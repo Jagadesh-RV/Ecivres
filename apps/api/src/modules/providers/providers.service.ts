@@ -1,6 +1,13 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateProviderProfileDto, UpdateProviderProfileDto } from './dto/provider-profile.dto';
+import {
+  CreateProviderProfileDto,
+  UpdateProviderProfileDto,
+} from './dto/provider-profile.dto';
 
 @Injectable()
 export class ProvidersService {
@@ -10,7 +17,7 @@ export class ProvidersService {
     const profile = await this.prisma.providerProfile.findUnique({
       where: { userId },
     });
-    
+
     if (!profile) {
       throw new NotFoundException('Provider profile not found');
     }
@@ -28,7 +35,9 @@ export class ProvidersService {
     }
 
     // Ensure the user also gets the PROVIDER role if they don't have it
-    const role = await this.prisma.role.findUnique({ where: { name: 'PROVIDER' } });
+    const role = await this.prisma.role.findUnique({
+      where: { name: 'PROVIDER' },
+    });
     if (role) {
       await this.prisma.userRole.upsert({
         where: { userId_roleId: { userId, roleId: role.id } },
@@ -58,5 +67,26 @@ export class ProvidersService {
       where: { userId },
       data: updateDto,
     });
+  }
+
+  async getPublicProfile(userId: string) {
+    const profile = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        businessName: true,
+        description: true,
+        phone: true,
+        address: true,
+        isVerified: true,
+        userId: true,
+      },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Provider not found');
+    }
+
+    return profile;
   }
 }
