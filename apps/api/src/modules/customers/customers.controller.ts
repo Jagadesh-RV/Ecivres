@@ -3,7 +3,10 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CustomersService } from './customers.service';
-import { CreateCustomerProfileDto, UpdateCustomerProfileDto } from './dto/customer-profile.dto';
+import {
+  CreateCustomerProfileDto,
+  UpdateCustomerProfileDto,
+} from './dto/customer-profile.dto';
 
 @ApiTags('customers')
 @Controller('customers')
@@ -20,13 +23,19 @@ export class CustomersController {
 
   @Post('profile')
   @ApiOperation({ summary: 'Create customer profile' })
-  async createProfile(@CurrentUser() user: any, @Body() createDto: CreateCustomerProfileDto) {
+  async createProfile(
+    @CurrentUser() user: any,
+    @Body() createDto: CreateCustomerProfileDto,
+  ) {
     return this.customersService.createProfile(user.id, createDto);
   }
 
   @Patch('profile')
   @ApiOperation({ summary: 'Update customer profile' })
-  async updateProfile(@CurrentUser() user: any, @Body() updateDto: UpdateCustomerProfileDto) {
+  async updateProfile(
+    @CurrentUser() user: any,
+    @Body() updateDto: UpdateCustomerProfileDto,
+  ) {
     return this.customersService.updateProfile(user.id, updateDto);
   }
 }
