@@ -59,4 +59,25 @@ export class ProvidersService {
       data: updateDto,
     });
   }
+
+  async getPublicProfile(userId: string) {
+    const profile = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        businessName: true,
+        description: true,
+        phone: true,
+        address: true,
+        isVerified: true,
+        userId: true,
+      },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Provider not found');
+    }
+
+    return profile;
+  }
 }
