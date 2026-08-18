@@ -33,7 +33,10 @@ describe('BookingsController', () => {
   });
 
   it('should create a booking', async () => {
-    await controller.create({ id: 'user1' }, { serviceId: '1', scheduledAt: '2026-10-10T10:00:00Z' });
+    await controller.create(
+      { id: 'user1' },
+      { serviceId: '1', scheduledAt: '2026-10-10T10:00:00Z' },
+    );
     expect(service.create).toHaveBeenCalled();
   });
 
