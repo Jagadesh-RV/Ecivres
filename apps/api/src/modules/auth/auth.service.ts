@@ -59,13 +59,12 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
     const refresh_token = await this.generateRefreshToken(user.id);
 
+    const fullUser = await this.usersService.findOneById(user.id);
+
     return {
       access_token,
       refresh_token,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: fullUser,
     };
   }
 
@@ -87,13 +86,12 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
     const refresh_token = await this.generateRefreshToken(user.id);
 
+    const fullUser = await this.usersService.findOneById(user.id);
+
     return {
       access_token,
       refresh_token,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: fullUser,
     };
   }
 
