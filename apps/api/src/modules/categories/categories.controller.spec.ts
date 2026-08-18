@@ -14,7 +14,9 @@ describe('CategoriesController', () => {
         {
           provide: CategoriesService,
           useValue: {
-            findAll: jest.fn().mockResolvedValue([{ id: '1', name: 'Cleaning' }]),
+            findAll: jest
+              .fn()
+              .mockResolvedValue([{ id: '1', name: 'Cleaning' }]),
           },
         },
       ],
