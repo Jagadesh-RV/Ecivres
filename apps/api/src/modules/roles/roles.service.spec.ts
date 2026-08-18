@@ -14,7 +14,9 @@ describe('RolesService', () => {
           provide: PrismaService,
           useValue: {
             role: {
-              findMany: jest.fn().mockResolvedValue([{ id: '1', name: 'ADMIN' }]),
+              findMany: jest
+                .fn()
+                .mockResolvedValue([{ id: '1', name: 'ADMIN' }]),
             },
           },
         },
