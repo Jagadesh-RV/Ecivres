@@ -41,7 +41,10 @@ describe('ServicesController', () => {
   });
 
   it('should create a service', async () => {
-    await controller.create({ id: 'user1' }, { name: 'test', price: 10, duration: 60, categoryId: '1' });
+    await controller.create(
+      { id: 'user1' },
+      { name: 'test', price: 10, duration: 60, categoryId: '1' },
+    );
     expect(service.create).toHaveBeenCalled();
   });
 });
