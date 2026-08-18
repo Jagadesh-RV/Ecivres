@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAuthStore } from '../../stores/authStore';
 
 export default function ProfileSetupScreen({ navigation }: any) {
-  const { isProfileComplete, checkProfileStatus } = useAuthStore();
+  const { isProfileComplete } = useAuthStore();
 
   const handleSelectRole = (role: 'Customer' | 'Provider') => {
     if (role === 'Customer') {
