@@ -23,21 +23,11 @@ export const ForgotPasswordScreen = () => {
   });
 
   const onSubmit = async (_data: ForgotPasswordFormValues) => {
-    setIsLoading(true);
-    try {
-      // Placeholder for backend API call
-      // await client.post('/auth/forgot-password', data);
-      await new Promise<void>(resolve => setTimeout(resolve, 1000));
-      Alert.alert(
-        'Email Sent', 
-        'If an account exists with this email, you will receive password reset instructions.',
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-      );
-    } catch {
-      Alert.alert('Error', 'Failed to process request. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
+    Alert.alert(
+      'Not Available',
+      'Forgot password functionality is not yet available.',
+      [{ text: 'OK', onPress: () => navigation.goBack() }]
+    );
   };
 
   return (

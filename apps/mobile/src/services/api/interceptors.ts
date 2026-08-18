@@ -1,14 +1,17 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain';
 import { useAuthStore } from '../../stores/authStore';
 
 // We need the baseURL to create a separate axios instance to avoid circular loops on retry
 const baseURL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3000'; // fallback for emulator
 
 export const requestInterceptor = async (config: InternalAxiosRequestConfig) => {
-  const token = await AsyncStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const credentials = await Keychain.getGenericPassword();
+  if (credentials) {
+    const tokens = JSON.parse(credentials.password);
+    if (tokens.access_token) {
+      config.headers.Authorization = `Bearer ${tokens.access_token}`;
+    }
   }
   return config;
 };
@@ -49,7 +52,12 @@ export const errorInterceptor = async (error: any) => {
     originalRequest._retry = true;
     isRefreshing = true;
 
-    const refreshToken = await AsyncStorage.getItem('refresh_token');
+    let refreshToken = null;
+    const credentials = await Keychain.getGenericPassword();
+    if (credentials) {
+      const tokens = JSON.parse(credentials.password);
+      refreshToken = tokens.refresh_token;
+    }
     
     if (!refreshToken) {
       useAuthStore.getState().logout();
@@ -62,12 +70,9 @@ export const errorInterceptor = async (error: any) => {
       });
 
       const newAccessToken = response.data.access_token;
-      const newRefreshToken = response.data.refresh_token;
+      const newRefreshToken = response.data.refresh_token || refreshToken;
       
-      await AsyncStorage.setItem('access_token', newAccessToken);
-      if (newRefreshToken) {
-        await AsyncStorage.setItem('refresh_token', newRefreshToken);
-      }
+      await Keychain.setGenericPassword('auth', JSON.stringify({ access_token: newAccessToken, refresh_token: newRefreshToken }));
       
       axios.defaults.headers.common.Authorization = 'Bearer ' + newAccessToken;
       originalRequest.headers.Authorization = 'Bearer ' + newAccessToken;
