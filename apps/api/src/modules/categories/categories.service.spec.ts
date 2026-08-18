@@ -14,7 +14,9 @@ describe('CategoriesService', () => {
           provide: PrismaService,
           useValue: {
             category: {
-              findMany: jest.fn().mockResolvedValue([{ id: '1', name: 'Cleaning' }]),
+              findMany: jest
+                .fn()
+                .mockResolvedValue([{ id: '1', name: 'Cleaning' }]),
             },
           },
         },
@@ -32,6 +34,8 @@ describe('CategoriesService', () => {
   it('should call findMany and return array of categories', async () => {
     const result = await service.findAll();
     expect(result).toEqual([{ id: '1', name: 'Cleaning' }]);
-    expect(prisma.category.findMany).toHaveBeenCalledWith({ orderBy: { name: 'asc' } });
+    expect(prisma.category.findMany).toHaveBeenCalledWith({
+      orderBy: { name: 'asc' },
+    });
   });
 });
