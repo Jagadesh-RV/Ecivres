@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, Controller, Get, UseGuards } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { RolesGuard } from '../src/common/guards/roles.guard';
 import { Roles } from '../src/common/decorators/roles.decorator';
