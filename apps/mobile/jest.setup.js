@@ -5,9 +5,11 @@ jest.mock('react-native-keychain', () => ({
   resetGenericPassword: jest.fn(),
 }));
 
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
-);
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  setItem: jest.fn(),
+  getItem: jest.fn(),
+  removeItem: jest.fn(),
+}));
 
 jest.mock('react-native-safe-area-context', () => {
   const React = require('react');
