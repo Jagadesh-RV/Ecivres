@@ -1,5 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ServicesService } from './services.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/service.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -14,7 +29,10 @@ export class ServicesController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new service' })
-  async create(@CurrentUser() user: any, @Body() createServiceDto: CreateServiceDto) {
+  async create(
+    @CurrentUser() user: any,
+    @Body() createServiceDto: CreateServiceDto,
+  ) {
     return this.servicesService.create(user.id, createServiceDto);
   }
 
@@ -33,7 +51,11 @@ export class ServicesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a service' })
-  async update(@CurrentUser() user: any, @Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
+  async update(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() updateServiceDto: UpdateServiceDto,
+  ) {
     return this.servicesService.update(user.id, id, updateServiceDto);
   }
 
