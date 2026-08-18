@@ -7,7 +7,7 @@ EcivreS is a mobile-first local-services marketplace.
 - Customer & Service Provider roles in a unified mobile application
 - REST API powered by NestJS and PostgreSQL
 - Role-Based Access Control (RBAC) architecture
-- JWT-based authentication
+- JWT-based authentication (fully implemented with refresh token rotation and secure token storage via React Native Keychain)
 - Booking and service request lifecycle
 - Payments, reviews, and notifications structure
 
