@@ -15,7 +15,7 @@ type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export const ForgotPasswordScreen = () => {
   const navigation = useNavigation<any>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const { control, handleSubmit, formState: { errors } } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
