@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import * as Keychain from 'react-native-keychain';
-import { apiClient } from '../services/api/client';
+import client from '../services/api/client';
 
 interface AuthState {
   user: any | null;
@@ -33,10 +33,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (credentials) {
         const tokens = JSON.parse(credentials.password);
         if (tokens.refresh_token) {
-          await apiClient.post('/auth/logout', { refresh_token: tokens.refresh_token });
+          await client.post('/auth/logout', { refresh_token: tokens.refresh_token });
         }
       }
-    } catch (e) {
+    } catch {
       // Ignore errors on logout
     } finally {
       await Keychain.resetGenericPassword();
@@ -52,11 +52,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         if (tokens.access_token) {
           // Fetch current user from /users/me
           try {
-            const response = await apiClient.get('/users/me');
+            const response = await client.get('/users/me');
             const userData = response.data;
             const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
             set({ user: userData, isAuthenticated: true, isProfileComplete, isLoading: false });
-          } catch (e) {
+          } catch {
             // If token is invalid or request fails, logout
             await Keychain.resetGenericPassword();
             set({ isAuthenticated: false, isProfileComplete: false, isLoading: false });
