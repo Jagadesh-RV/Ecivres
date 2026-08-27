@@ -18,7 +18,7 @@ export default function CreateServicePage() {
   const router = useRouter();
   const [error, setError] = useState("");
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ServiceFormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(serviceSchema),
   });
 
@@ -30,7 +30,7 @@ export default function CreateServicePage() {
     },
   });
 
-  const onSubmit = async (data: ServiceFormData) => {
+  const onSubmit = async (data: any) => {
     try {
       setError("");
       await client.post("/services", data);
