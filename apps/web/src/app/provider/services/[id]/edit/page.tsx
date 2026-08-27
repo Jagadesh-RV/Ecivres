@@ -21,7 +21,7 @@ export default function EditServicePage() {
   const id = params.id as string;
   const [error, setError] = useState("");
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ServiceFormData>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(serviceSchema),
   });
 
@@ -53,7 +53,7 @@ export default function EditServicePage() {
     }
   }, [service, reset]);
 
-  const onSubmit = async (data: ServiceFormData) => {
+  const onSubmit = async (data: any) => {
     try {
       setError("");
       await client.patch(`/services/${id}`, data);
