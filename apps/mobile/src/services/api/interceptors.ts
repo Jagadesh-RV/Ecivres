@@ -3,7 +3,7 @@ import * as Keychain from 'react-native-keychain';
 import { useAuthStore } from '../../stores/authStore';
 
 // We need the baseURL to create a separate axios instance to avoid circular loops on retry
-const baseURL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3000'; // fallback for emulator
+const baseURL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001/api/v1';
 
 export const requestInterceptor = async (config: InternalAxiosRequestConfig) => {
   const credentials = await Keychain.getGenericPassword();

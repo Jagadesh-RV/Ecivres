@@ -3,7 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigation } from '@react-navigation/native';
 
-export const CustomerDashboard = () => {
+type Props = {
+  navigation: NativeStackNavigationProp<CustomerStackParamList, 'CustomerDashboard'>;
+};
+
+export const CustomerDashboard = ({ navigation }: Props) => {
   const logout = useAuthStore(state => state.logout);
   const navigation = useNavigation<any>();
 

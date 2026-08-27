@@ -1,0 +1,38 @@
+# Phase 4: Service Marketplace Core - Walkthrough
+
+## What Was Accomplished
+
+During Phase 4, the core marketplace flow was implemented across the backend and the mobile application, focusing on service discovery and booking initiation.
+
+### Backend Implementation
+- **Categories API**: Implemented `GET /api/v1/categories` to allow mobile fetching of the category hierarchy.
+- **Services API**: Implemented the full CRUD lifecycle. Customers can `GET` filtered lists and specific details, while Providers can `POST`, `PATCH`, and `DELETE` their own services securely.
+- **Bookings API**: Established `POST /api/v1/bookings` for customers to initiate appointments.
+- **Providers API**: Expanded with `GET /api/v1/providers/public/:userId` to safely expose provider profiles (like `businessName` and `description`) to customers without leaking authentication secrets.
+
+### Mobile Implementation
+- **API Services**: Created `categoryService`, `serviceService`, and `bookingService` inside `apps/mobile/src/services/api/` leveraging the authenticated Axios client.
+- **Customer UI Flows**:
+  - `CustomerDashboard`: Revamped to showcase "Top Categories" and "Featured Services".
+  - `CategoryListScreen`: A dedicated screen for browsing all marketplace categories.
+  - `ServiceListScreen`: Displays available services matching a selected category.
+  - `ServiceDetailsScreen`: Detailed view showcasing price, duration, descriptions, and a "BOOK SERVICE" CTA.
+  - `ProviderDetailsScreen`: Displays verified provider business information.
+- **Navigation**: Configured `CustomerNavigator.tsx` to handle the routing and parameter passing (`categoryId`, `serviceId`) seamlessly between these screens.
+
+### Testing & Verification
+- Due to the offline Docker daemon on the host environment, live E2E programmatic database tests could not be executed.
+- Instead, we successfully authored and executed **22 unit test suites (42 individual tests)** in the `apps/api` covering controllers, services, and authorization logic utilizing Jest and Prisma mocks.
+- The mobile application underwent strict `pnpm typecheck` and `pnpm lint` validations to ensure type safety across the new React Navigation parameters.
+- Mobile `lucide-react-native` Jest configuration was successfully patched, ensuring the mobile test suite remains functional.
+
+## Visual Changes
+
+The generic placeholder `CustomerDashboard` was fully replaced with an interactive marketplace layout, and routing paths to 4 new dedicated screens were integrated into the `CustomerNavigator`.
+
+## Next Steps
+
+With the Customer discovery and booking flow completed, the next logical phases could include:
+1. Provider Dashboard enhancements to accept/reject incoming pending bookings.
+2. Building out the Payment capture mechanisms.
+3. Review and Rating modules for completed services.
