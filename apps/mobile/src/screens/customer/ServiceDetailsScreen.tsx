@@ -1,92 +1,97 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Button, ScrollView, Alert } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
-import { CustomerStackParamList } from '../../navigation/types';
-import { getServiceDetails } from '../../services/api/serviceService';
-import { createBooking } from '../../services/api/bookingService';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { serviceService } from '../../services/api/serviceService';
+import { Service } from '../../types';
 
-type Props = {
-  navigation: NativeStackNavigationProp<CustomerStackParamList, 'ServiceDetails'>;
-  route: RouteProp<CustomerStackParamList, 'ServiceDetails'>;
-};
-
-export const ServiceDetailsScreen = ({ navigation, route }: Props) => {
+export const ServiceDetailsScreen = () => {
+  const route = useRoute<any>();
+  const navigation = useNavigation<any>();
   const { serviceId } = route.params;
-  const [service, setService] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [booking, setBooking] = useState(false);
 
-  useEffect(() => {
-    const loadDetails = async () => {
-      try {
-        const data = await getServiceDetails(serviceId);
-        setService(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadDetails();
+  const [service, setService] = useState<Service | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchServiceDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await serviceService.getServiceById(serviceId);
+      setService(data);
+    } catch (err: any) {
+      setError(err.message || 'Service is no longer available');
+    } finally {
+      setLoading(false);
+    }
   }, [serviceId]);
 
-  const handleBook = async () => {
-    setBooking(true);
-    try {
-      // In a real app we'd have a date picker, but we use a default date for the foundation MVP
-      const scheduledAt = new Date();
-      scheduledAt.setDate(scheduledAt.getDate() + 1); // Tomorrow
-      await createBooking({ serviceId, scheduledAt: scheduledAt.toISOString() });
-      Alert.alert('Success', 'Booking created successfully!');
-      navigation.navigate('CustomerDashboard');
-    } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.message || 'Booking failed');
-    } finally {
-      setBooking(false);
-    }
+  useEffect(() => {
+    fetchServiceDetails();
+  }, [fetchServiceDetails]);
+
+  const handleBookService = () => {
+    Alert.alert('Coming Soon', 'Booking functionality will be available in Phase 5.');
   };
 
-  if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" /></View>;
-  }
-
-  if (!service) {
-    return <View style={styles.center}><Text>Service not found</Text></View>;
-  }
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" /></View>;
+  if (error) return <View style={styles.center}><Text style={styles.error}>{error}</Text><TouchableOpacity onPress={fetchServiceDetails}><Text style={styles.retry}>Retry</Text></TouchableOpacity></View>;
+  if (!service) return null;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{service.name}</Text>
-      <Text style={styles.category}>{service.category?.name}</Text>
-      <Text style={styles.price}>${service.price}</Text>
-      <Text style={styles.duration}>{service.duration} mins</Text>
-      <Text style={styles.desc}>{service.description}</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{service.name}</Text>
+        <Text style={styles.category}>{service.category?.name}</Text>
+      </View>
+
+      <View style={styles.detailsCard}>
+        <Text style={styles.description}>{service.description || 'No description available.'}</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Price:</Text>
+          <Text style={styles.value}>${service.price.toFixed(2)}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Duration:</Text>
+          <Text style={styles.value}>{service.duration} mins</Text>
+        </View>
+      </View>
 
       {service.provider && (
-        <View style={styles.providerCard}>
-          <Text style={styles.providerTitle}>Provider</Text>
-          <Text>{service.provider.businessName}</Text>
-          <Button title="View Provider" onPress={() => navigation.navigate('ProviderDetails', { providerId: service.provider.userId })} />
-        </View>
+        <TouchableOpacity 
+          style={styles.providerCard}
+          onPress={() => navigation.navigate('ProviderDetails', { provider: service.provider })}
+        >
+          <Text style={styles.providerLabel}>Provided By</Text>
+          <Text style={styles.providerName}>{service.provider.businessName}</Text>
+          <Text style={styles.viewProfile}>View Profile →</Text>
+        </TouchableOpacity>
       )}
 
-      <View style={styles.bookSection}>
-        <Button title={booking ? "Booking..." : "BOOK SERVICE"} onPress={handleBook} disabled={booking} />
-      </View>
+      <TouchableOpacity style={styles.bookButton} onPress={handleBookService}>
+        <Text style={styles.bookButtonText}>BOOK SERVICE</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  category: { fontSize: 14, color: 'blue', marginVertical: 5 },
-  price: { fontSize: 20, color: 'green', marginTop: 10 },
-  duration: { fontSize: 16, color: '#666' },
-  desc: { fontSize: 16, marginTop: 15, lineHeight: 24 },
-  providerCard: { marginTop: 30, padding: 15, backgroundColor: '#f0f0f0', borderRadius: 8 },
-  providerTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  bookSection: { marginTop: 40, marginBottom: 40 },
+  error: { color: 'red', marginBottom: 10 },
+  retry: { color: '#007AFF', fontWeight: 'bold' },
+  container: { padding: 16 },
+  header: { marginBottom: 24 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 4 },
+  category: { fontSize: 16, color: '#007AFF', fontWeight: '600' },
+  detailsCard: { padding: 16, backgroundColor: '#fff', borderRadius: 8, marginBottom: 24, elevation: 1 },
+  description: { fontSize: 16, color: '#444', lineHeight: 24, marginBottom: 16 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  label: { fontSize: 16, color: '#666' },
+  value: { fontSize: 16, fontWeight: 'bold' },
+  providerCard: { padding: 16, backgroundColor: '#f8f9fa', borderRadius: 8, marginBottom: 24, borderWidth: 1, borderColor: '#eee' },
+  providerLabel: { fontSize: 12, color: '#666', textTransform: 'uppercase', marginBottom: 4 },
+  providerName: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+  viewProfile: { fontSize: 14, color: '#007AFF' },
+  bookButton: { backgroundColor: '#2ecc71', padding: 16, borderRadius: 8, alignItems: 'center' },
+  bookButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold', letterSpacing: 1 },
 });
