@@ -1,7 +1,7 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { useAuthStore } from '../stores/auth-store';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1';
+const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api/v1';
 
 export const client = axios.create({
   baseURL,
