@@ -5,7 +5,6 @@ import { CategoryListScreen } from '../screens/customer/CategoryListScreen';
 import { ServiceListScreen } from '../screens/customer/ServiceListScreen';
 import { ServiceDetailsScreen } from '../screens/customer/ServiceDetailsScreen';
 import { ProviderDetailsScreen } from '../screens/customer/ProviderDetailsScreen';
-import { CustomerStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<CustomerStackParamList>();
 
@@ -16,7 +15,7 @@ export const CustomerNavigator = () => {
       <Stack.Screen name="CategoryList" component={CategoryListScreen} options={{ title: 'Categories' }} />
       <Stack.Screen name="ServiceList" component={ServiceListScreen} options={{ title: 'Services' }} />
       <Stack.Screen name="ServiceDetails" component={ServiceDetailsScreen} options={{ title: 'Service Details' }} />
-      <Stack.Screen name="ProviderDetails" component={ProviderDetailsScreen} options={{ title: 'Provider Info' }} />
+      <Stack.Screen name="ProviderDetails" component={ProviderDetailsScreen} options={{ title: 'Provider Details' }} />
     </Stack.Navigator>
   );
 };

@@ -1,32 +1,51 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateServiceDto, UpdateServiceDto } from './dto/service.dto';
+import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
+import { ServiceQueryDto } from './dto/service-query.dto';
 
 @Injectable()
 export class ServicesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(categoryId?: string) {
-    const where = categoryId ? { categoryId } : {};
+  async create(userId: string, createServiceDto: CreateServiceDto) {
+    const providerProfile = await this.prisma.providerProfile.findUnique({
+      where: { userId }
+    });
+
+    if (!providerProfile) {
+      throw new ForbiddenException('Only registered providers can create services');
+    }
+
+    return this.prisma.service.create({
+      data: {
+        ...createServiceDto,
+        providerId: providerProfile.id,
+      },
+    });
+  }
+
+  async findAll(query: ServiceQueryDto) {
+    const { categoryId, providerId, minPrice, maxPrice } = query;
+    
+    const where: any = {};
+    if (categoryId) where.categoryId = categoryId;
+    if (providerId) where.providerId = providerId;
+    
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = parseFloat(minPrice);
+      if (maxPrice) where.price.lte = parseFloat(maxPrice);
+    }
+
     return this.prisma.service.findMany({
       where,
       include: {
         category: true,
         provider: {
-          select: {
-            id: true,
-            businessName: true,
-            isVerified: true,
-            userId: true, // Safe public data
-          },
-        },
-      },
-      orderBy: { name: 'asc' },
+          include: { user: { select: { email: true } } }
+        }
+      }
     });
   }
 
@@ -35,90 +54,33 @@ export class ServicesService {
       where: { id },
       include: {
         category: true,
-        provider: {
-          select: {
-            id: true,
-            businessName: true,
-            description: true,
-            phone: true,
-            address: true,
-            isVerified: true,
-            userId: true,
-          },
-        },
-      },
+        provider: true,
+      }
     });
-
     if (!service) {
       throw new NotFoundException(`Service with ID ${id} not found`);
     }
-
     return service;
   }
 
-  async create(userId: string, createDto: CreateServiceDto) {
-    const provider = await this.prisma.providerProfile.findUnique({
-      where: { userId },
-    });
-
-    if (!provider) {
-      throw new BadRequestException('User does not have a provider profile');
-    }
-
-    return this.prisma.service.create({
-      data: {
-        ...createDto,
-        providerId: provider.id,
-      },
-    });
-  }
-
-  async update(userId: string, id: string, updateDto: UpdateServiceDto) {
-    const provider = await this.prisma.providerProfile.findUnique({
-      where: { userId },
-    });
-
-    if (!provider) {
-      throw new ForbiddenException('User does not have a provider profile');
-    }
-
-    const service = await this.prisma.service.findUnique({
-      where: { id },
-    });
-
-    if (!service) {
-      throw new NotFoundException(`Service with ID ${id} not found`);
-    }
-
-    if (service.providerId !== provider.id) {
-      throw new ForbiddenException('You do not own this service');
+  async update(id: string, userId: string, updateServiceDto: UpdateServiceDto) {
+    const service = await this.findOne(id);
+    
+    if (service.provider.userId !== userId) {
+      throw new ForbiddenException('You can only update your own services');
     }
 
     return this.prisma.service.update({
       where: { id },
-      data: updateDto,
+      data: updateServiceDto,
     });
   }
 
-  async remove(userId: string, id: string) {
-    const provider = await this.prisma.providerProfile.findUnique({
-      where: { userId },
-    });
-
-    if (!provider) {
-      throw new ForbiddenException('User does not have a provider profile');
-    }
-
-    const service = await this.prisma.service.findUnique({
-      where: { id },
-    });
-
-    if (!service) {
-      throw new NotFoundException(`Service with ID ${id} not found`);
-    }
-
-    if (service.providerId !== provider.id) {
-      throw new ForbiddenException('You do not own this service');
+  async remove(id: string, userId: string) {
+    const service = await this.findOne(id);
+    
+    if (service.provider.userId !== userId) {
+      throw new ForbiddenException('You can only delete your own services');
     }
 
     return this.prisma.service.delete({
