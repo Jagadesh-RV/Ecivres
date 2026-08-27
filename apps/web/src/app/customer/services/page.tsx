@@ -7,7 +7,9 @@ import { useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function ServicesPage() {
+import { Suspense } from "react";
+
+function ServicesList() {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("categoryId");
 
@@ -65,5 +67,17 @@ export default function ServicesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ServicesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+      </div>
+    }>
+      <ServicesList />
+    </Suspense>
   );
 }
