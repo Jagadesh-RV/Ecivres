@@ -12,7 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-export default function ProfileSetupPage() {
+import { Suspense } from "react";
+
+function ProfileSetupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { updateUser, user } = useAuthStore();
@@ -128,5 +130,17 @@ export default function ProfileSetupPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function ProfileSetupPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[calc(100vh-140px)] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+      </div>
+    }>
+      <ProfileSetupForm />
+    </Suspense>
   );
 }
