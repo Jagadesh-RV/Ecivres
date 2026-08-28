@@ -1,11 +1,23 @@
 import client from './client';
 
-export const createBooking = async (data: { serviceId: string; scheduledAt: string }) => {
-  const response = await client.post('/bookings', data);
-  return response.data;
-};
+export const bookingService = {
+  createBooking: async (data: { serviceId: string; scheduledAt: string }) => {
+    const response = await client.post('/bookings', data);
+    return response.data;
+  },
 
-export const getMyBookings = async () => {
-  const response = await client.get('/bookings');
-  return response.data;
+  getCustomerBookings: async () => {
+    const response = await client.get('/bookings/customer');
+    return response.data;
+  },
+
+  getProviderBookings: async () => {
+    const response = await client.get('/bookings/provider');
+    return response.data;
+  },
+
+  updateBookingStatus: async (id: string, status: string) => {
+    const response = await client.patch(`/bookings/${id}/status`, { status });
+    return response.data;
+  }
 };

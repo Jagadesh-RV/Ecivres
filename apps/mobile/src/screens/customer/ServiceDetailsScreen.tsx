@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { serviceService } from '../../services/api/serviceService';
+import { bookingService } from '../../services/api/bookingService';
+import { reviewService } from '../../services/api/reviewService';
 import { Service } from '../../types';
+import { Star } from 'lucide-react-native';
 
 export const ServiceDetailsScreen = () => {
   const route = useRoute<any>();
@@ -13,12 +16,18 @@ export const ServiceDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+
   const fetchServiceDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await serviceService.getServiceById(serviceId);
       setService(data);
+      const revs = await reviewService.getServiceReviews(serviceId);
+      setReviews(revs);
     } catch (err: any) {
       setError(err.message || 'Service is no longer available');
     } finally {
@@ -30,8 +39,26 @@ export const ServiceDetailsScreen = () => {
     fetchServiceDetails();
   }, [fetchServiceDetails]);
 
-  const handleBookService = () => {
-    Alert.alert('Coming Soon', 'Booking functionality will be available in Phase 5.');
+  const handleBookService = async () => {
+    if (!bookingDate) {
+      Alert.alert('Missing Info', 'Please enter a date and time.');
+      return;
+    }
+    
+    try {
+      setBookingLoading(true);
+      await bookingService.createBooking({
+        serviceId: serviceId,
+        scheduledAt: new Date(bookingDate).toISOString()
+      });
+      Alert.alert('Success', 'Booking request sent successfully!', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
+    } catch (err: any) {
+      Alert.alert('Booking Failed', err.response?.data?.message || err.message);
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) return <View style={styles.center}><ActivityIndicator size="large" /></View>;
@@ -60,17 +87,55 @@ export const ServiceDetailsScreen = () => {
       {service.provider && (
         <TouchableOpacity 
           style={styles.providerCard}
-          onPress={() => navigation.navigate('ProviderDetails', { provider: service.provider })}
+          onPress={() => navigation.navigate('ProviderDetails', { providerId: service.provider?.id })}
         >
           <Text style={styles.providerLabel}>Provided By</Text>
-          <Text style={styles.providerName}>{service.provider.businessName}</Text>
+          <Text style={styles.providerName}>{service.provider.businessName || service.provider.userId}</Text>
           <Text style={styles.viewProfile}>View Profile →</Text>
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={styles.bookButton} onPress={handleBookService}>
-        <Text style={styles.bookButtonText}>BOOK SERVICE</Text>
-      </TouchableOpacity>
+      <View style={styles.bookingSection}>
+        <Text style={styles.sectionTitle}>Book Appointment</Text>
+        <TextInput 
+          style={styles.input}
+          placeholder="YYYY-MM-DD HH:MM"
+          value={bookingDate}
+          onChangeText={setBookingDate}
+        />
+        <TouchableOpacity style={styles.bookButton} onPress={handleBookService} disabled={bookingLoading}>
+          {bookingLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.bookButtonText}>BOOK SERVICE</Text>}
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.reviewsSection}>
+        <Text style={styles.sectionTitle}>Reviews ({reviews.length})</Text>
+        {reviews.length === 0 ? (
+          <Text style={styles.noReviews}>No reviews yet.</Text>
+        ) : (
+          reviews.map(review => (
+            <View key={review.id} style={styles.reviewCard}>
+              <View style={styles.reviewHeader}>
+                <Text style={styles.reviewerName}>
+                  {review.author?.customerProfile?.firstName} {review.author?.customerProfile?.lastName}
+                </Text>
+                <View style={styles.stars}>
+                  {[1,2,3,4,5].map(star => (
+                    <Star
+                      key={star}
+                      size={14}
+                      color={star <= review.rating ? "#FBBF24" : "#D1D5DB"}
+                      fill={star <= review.rating ? "#FBBF24" : "transparent"}
+                    />
+                  ))}
+                </View>
+              </View>
+              {review.comment && <Text style={styles.reviewComment}>{review.comment}</Text>}
+              <Text style={styles.reviewDate}>{new Date(review.createdAt).toLocaleDateString()}</Text>
+            </View>
+          ))
+        )}
+      </View>
     </ScrollView>
   );
 };
@@ -92,6 +157,17 @@ const styles = StyleSheet.create({
   providerLabel: { fontSize: 12, color: '#666', textTransform: 'uppercase', marginBottom: 4 },
   providerName: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
   viewProfile: { fontSize: 14, color: '#007AFF' },
+  bookingSection: { marginBottom: 24, backgroundColor: '#fff', padding: 16, borderRadius: 8, elevation: 1 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 16 },
   bookButton: { backgroundColor: '#2ecc71', padding: 16, borderRadius: 8, alignItems: 'center' },
   bookButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold', letterSpacing: 1 },
+  reviewsSection: { marginBottom: 32 },
+  noReviews: { color: '#666', fontStyle: 'italic' },
+  reviewCard: { backgroundColor: '#fff', padding: 16, borderRadius: 8, marginBottom: 12, elevation: 1 },
+  reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  reviewerName: { fontWeight: 'bold' },
+  stars: { flexDirection: 'row' },
+  reviewComment: { color: '#444', marginBottom: 8 },
+  reviewDate: { fontSize: 12, color: '#999' },
 });
