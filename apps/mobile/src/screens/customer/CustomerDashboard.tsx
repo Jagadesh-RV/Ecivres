@@ -23,6 +23,14 @@ export const CustomerDashboard = ({ navigation }: Props) => {
         <Text style={styles.cardDescription}>Explore available categories and services.</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity 
+        style={styles.card}
+        onPress={() => navigation.navigate('CustomerBookings')}
+      >
+        <Text style={styles.cardTitle}>My Bookings</Text>
+        <Text style={styles.cardDescription}>View and manage your service appointments.</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
