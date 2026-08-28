@@ -44,10 +44,13 @@ export class UsersService {
     userId: string,
     data: { firstName: string; lastName: string; phone?: string },
   ) {
+    console.log('createCustomerProfile called for userId:', userId);
     const existing = await this.prisma.customerProfile.findUnique({
       where: { userId },
     });
+    console.log('existing profile?', !!existing);
     if (existing) {
+      console.log('Throwing ConflictException for profile');
       throw new ConflictException('Customer profile already exists');
     }
 
@@ -59,13 +62,16 @@ export class UsersService {
     }
 
     return this.prisma.$transaction(async (prisma) => {
+      console.log('Creating profile record...');
       const profile = await prisma.customerProfile.create({
         data: {
           userId,
-          ...data,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
         },
       });
-
+      console.log('Upserting userRole...');
       await prisma.userRole.upsert({
         where: {
           userId_roleId: {
@@ -111,7 +117,10 @@ export class UsersService {
       const profile = await prisma.providerProfile.create({
         data: {
           userId,
-          ...data,
+          businessName: data.businessName,
+          description: data.description,
+          phone: data.phone,
+          address: data.address,
         },
       });
 
