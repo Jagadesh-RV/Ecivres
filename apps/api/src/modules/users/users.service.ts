@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -44,28 +44,34 @@ export class UsersService {
     userId: string,
     data: { firstName: string; lastName: string; phone?: string },
   ) {
+    console.log('createCustomerProfile called for userId:', userId);
     const existing = await this.prisma.customerProfile.findUnique({
       where: { userId },
     });
+    console.log('existing profile?', !!existing);
     if (existing) {
-      throw new Error('Customer profile already exists');
+      console.log('Throwing ConflictException for profile');
+      throw new ConflictException('Customer profile already exists');
     }
 
     const role = await this.prisma.role.findUnique({
       where: { name: 'CUSTOMER' },
     });
     if (!role) {
-      throw new Error('CUSTOMER role not found in database');
+      throw new NotFoundException('CUSTOMER role not found in database. Please seed the database.');
     }
 
     return this.prisma.$transaction(async (prisma) => {
+      console.log('Creating profile record...');
       const profile = await prisma.customerProfile.create({
         data: {
           userId,
-          ...data,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
         },
       });
-
+      console.log('Upserting userRole...');
       await prisma.userRole.upsert({
         where: {
           userId_roleId: {
@@ -97,21 +103,24 @@ export class UsersService {
       where: { userId },
     });
     if (existing) {
-      throw new Error('Provider profile already exists');
+      throw new ConflictException('Provider profile already exists');
     }
 
     const role = await this.prisma.role.findUnique({
       where: { name: 'PROVIDER' },
     });
     if (!role) {
-      throw new Error('PROVIDER role not found in database');
+      throw new NotFoundException('PROVIDER role not found in database. Please seed the database.');
     }
 
     return this.prisma.$transaction(async (prisma) => {
       const profile = await prisma.providerProfile.create({
         data: {
           userId,
-          ...data,
+          businessName: data.businessName,
+          description: data.description,
+          phone: data.phone,
+          address: data.address,
         },
       });
 
