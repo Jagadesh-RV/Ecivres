@@ -1,9 +1,12 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Patch, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/booking.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UpdateBookingStatusDto } from './dto/update-booking.dto';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('bookings')
 @Controller('bookings')
@@ -25,5 +28,25 @@ export class BookingsController {
   @ApiOperation({ summary: 'Get current user bookings' })
   async findAll(@CurrentUser() user: any) {
     return this.bookingsService.findAllForCustomer(user.id);
+  }
+
+  @Get('provider')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Get current provider bookings' })
+  async findAllForProvider(@CurrentUser() user: any) {
+    return this.bookingsService.findAllForProvider(user.id);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Update booking status (Provider only)' })
+  async updateStatus(
+    @CurrentUser() user: any,
+    @Param('id') bookingId: string,
+    @Body() updateBookingStatusDto: UpdateBookingStatusDto,
+  ) {
+    return this.bookingsService.updateStatus(bookingId, user.id, updateBookingStatusDto);
   }
 }
