@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -48,14 +48,14 @@ export class UsersService {
       where: { userId },
     });
     if (existing) {
-      throw new Error('Customer profile already exists');
+      throw new ConflictException('Customer profile already exists');
     }
 
     const role = await this.prisma.role.findUnique({
       where: { name: 'CUSTOMER' },
     });
     if (!role) {
-      throw new Error('CUSTOMER role not found in database');
+      throw new NotFoundException('CUSTOMER role not found in database. Please seed the database.');
     }
 
     return this.prisma.$transaction(async (prisma) => {
@@ -97,14 +97,14 @@ export class UsersService {
       where: { userId },
     });
     if (existing) {
-      throw new Error('Provider profile already exists');
+      throw new ConflictException('Provider profile already exists');
     }
 
     const role = await this.prisma.role.findUnique({
       where: { name: 'PROVIDER' },
     });
     if (!role) {
-      throw new Error('PROVIDER role not found in database');
+      throw new NotFoundException('PROVIDER role not found in database. Please seed the database.');
     }
 
     return this.prisma.$transaction(async (prisma) => {
