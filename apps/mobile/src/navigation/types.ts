@@ -4,4 +4,5 @@ export type CustomerStackParamList = {
   ServiceList: { categoryId?: string };
   ServiceDetails: { serviceId: string };
   ProviderDetails: { providerId: string };
+  CustomerBookings: undefined;
 };
