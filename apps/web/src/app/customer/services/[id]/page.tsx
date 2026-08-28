@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ReviewList } from "@/components/reviews/ReviewList";
 
 export default function ServiceDetailsPage() {
   const params = useParams();
@@ -151,6 +152,11 @@ export default function ServiceDetailsPage() {
             </Dialog>
           </div>
         </div>
+      </div>
+      
+      {/* Reviews Section */}
+      <div className="mt-16">
+        <ReviewList serviceId={id} />
       </div>
     </div>
   );
