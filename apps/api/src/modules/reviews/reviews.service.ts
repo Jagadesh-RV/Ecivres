@@ -44,21 +44,22 @@ export class ReviewsService {
       data: {
         rating: createDto.rating,
         comment: createDto.comment,
-        customerId: customer.id,
-        serviceId: createDto.serviceId,
+        authorId: userId,
         bookingId: createDto.bookingId,
       },
       include: {
-        customer: true,
+        author: true,
       }
     });
   }
 
   async findByService(serviceId: string) {
     return this.prisma.review.findMany({
-      where: { serviceId },
+      where: { booking: { serviceId } },
       include: {
-        customer: true,
+        author: {
+          include: { customerProfile: true }
+        }
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -66,7 +67,7 @@ export class ReviewsService {
 
   async getProviderStats(providerId: string) {
     const reviews = await this.prisma.review.findMany({
-      where: { service: { providerId } },
+      where: { booking: { service: { providerId } } },
       select: { rating: true },
     });
 
