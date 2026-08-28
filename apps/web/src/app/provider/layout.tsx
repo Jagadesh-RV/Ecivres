@@ -15,6 +15,7 @@ export default function ProviderLayout({
     { href: "/provider", label: "Dashboard" },
     { href: "/provider/services", label: "My Services" },
     { href: "/provider/services/create", label: "Create Service" },
+    { href: "/provider/bookings", label: "Incoming Bookings" },
   ];
 
   return (

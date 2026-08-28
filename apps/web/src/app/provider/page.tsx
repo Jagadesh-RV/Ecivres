@@ -2,23 +2,39 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/axios";
+import { bookingsApi } from "@/lib/api/bookings";
 import { useAuthStore } from "@/stores/auth-store";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { PlusCircle, Activity } from "lucide-react";
+import { PlusCircle, Activity, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ProviderDashboard() {
   const { user } = useAuthStore();
 
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ["provider-services"],
     queryFn: async () => {
       const { data } = await client.get("/services/provider/me");
       return data; 
     },
   });
+
+  const { data: bookings, isLoading: isLoadingBookings } = useQuery({
+    queryKey: ["provider-bookings"],
+    queryFn: bookingsApi.getProviderBookings,
+  });
+
+  const pendingBookings = bookings?.filter((b: any) => b.status === "PENDING") || [];
+  
+  // A naive "today" filter
+  const todayAppointments = bookings?.filter((b: any) => {
+    if (b.status !== "CONFIRMED") return false;
+    const d = new Date(b.scheduledAt);
+    const now = new Date();
+    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }) || [];
 
   return (
     <div className="space-y-8">
@@ -34,7 +50,25 @@ export default function ProviderDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{services?.length || 0}</div>
+            {isLoadingServices ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{services?.length || 0}</div>}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoadingBookings ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{pendingBookings.length}</div>}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Today's Appointments</CardTitle>
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoadingBookings ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{todayAppointments.length}</div>}
           </CardContent>
         </Card>
       </div>
@@ -49,7 +83,7 @@ export default function ProviderDashboard() {
           </Link>
         </div>
         
-        {isLoading ? (
+        {isLoadingServices ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1,2].map(i => (
               <Card key={i} className="overflow-hidden">

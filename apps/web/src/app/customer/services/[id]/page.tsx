@@ -7,11 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Clock, DollarSign, User } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { bookingsApi } from "@/lib/api/bookings";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ReviewList } from "@/components/reviews/ReviewList";
 
 export default function ServiceDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isBookingLoading, setIsBookingLoading] = useState(false);
 
   const { data: service, isLoading } = useQuery({
     queryKey: ["service", id],
@@ -42,6 +56,30 @@ export default function ServiceDetailsPage() {
       </div>
     );
   }
+
+  const handleBookService = async () => {
+    try {
+      setIsBookingLoading(true);
+      
+      // We set scheduledAt to tomorrow at 10 AM by default for this MVP
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+      date.setHours(10, 0, 0, 0);
+
+      await bookingsApi.createBooking({
+        serviceId: id,
+        scheduledAt: date.toISOString(),
+      });
+      
+      toast.success("Booking requested successfully!");
+      setIsBookingOpen(false);
+      router.push("/customer/bookings");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to book service");
+    } finally {
+      setIsBookingLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -84,11 +122,41 @@ export default function ServiceDetailsPage() {
           </div>
 
           <div className="pt-4 flex gap-4">
-            <Button size="lg" className="w-full md:w-auto px-12">
-              Book Now
-            </Button>
+            <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
+              <DialogTrigger render={<Button size="lg" className="w-full md:w-auto px-12" />}>
+                Book Now
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Book Service</DialogTitle>
+                  <DialogDescription>
+                    Request an appointment for {service.name} with {service.provider?.businessName}.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-6 space-y-4">
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="font-medium text-sm text-muted-foreground mb-1">Appointment Time</p>
+                    <p>Tomorrow at 10:00 AM</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Note: A full calendar and time picker will be available in the next release. For now, this will request an appointment for tomorrow at 10:00 AM.
+                  </p>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setIsBookingOpen(false)}>Cancel</Button>
+                  <Button onClick={handleBookService} disabled={isBookingLoading}>
+                    {isBookingLoading ? "Confirming..." : "Confirm Booking"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
+      </div>
+      
+      {/* Reviews Section */}
+      <div className="mt-16">
+        <ReviewList serviceId={id} />
       </div>
     </div>
   );

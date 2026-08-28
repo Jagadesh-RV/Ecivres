@@ -15,6 +15,7 @@ export default function CustomerLayout({
     { href: "/customer", label: "Dashboard" },
     { href: "/customer/categories", label: "Categories" },
     { href: "/customer/services", label: "Services" },
+    { href: "/customer/bookings", label: "My Bookings" },
   ];
 
   return (
