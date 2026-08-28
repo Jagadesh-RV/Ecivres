@@ -122,10 +122,8 @@ export default function ServiceDetailsPage() {
 
           <div className="pt-4 flex gap-4">
             <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="w-full md:w-auto px-12">
-                  Book Now
-                </Button>
+              <DialogTrigger render={<Button size="lg" className="w-full md:w-auto px-12" />}>
+                Book Now
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
