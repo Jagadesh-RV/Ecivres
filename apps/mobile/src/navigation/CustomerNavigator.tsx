@@ -6,6 +6,7 @@ import { ServiceListScreen } from '../screens/customer/ServiceListScreen';
 import { ServiceDetailsScreen } from '../screens/customer/ServiceDetailsScreen';
 import { ProviderDetailsScreen } from '../screens/customer/ProviderDetailsScreen';
 import { CustomerBookingsScreen } from '../screens/customer/CustomerBookingsScreen';
+import { CustomerStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<CustomerStackParamList>();
 
