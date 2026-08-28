@@ -17,7 +17,7 @@ client.interceptors.request.use(
       try {
         const { access_token } = JSON.parse(tokens);
         if (access_token) {
-          config.headers.Authorization = `Bearer ${access_token}`;
+          config.headers.set('Authorization', `Bearer ${access_token}`);
         }
       } catch (e) {
         // ignore JSON parse error
@@ -52,7 +52,9 @@ client.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then(token => {
-          originalRequest.headers.Authorization = 'Bearer ' + token;
+          if (originalRequest.headers) {
+            originalRequest.headers.set('Authorization', 'Bearer ' + token);
+          }
           return axios(originalRequest);
         }).catch(err => {
           return Promise.reject(err);
@@ -86,8 +88,10 @@ client.interceptors.response.use(
         
         localStorage.setItem('auth', JSON.stringify({ access_token: newAccessToken, refresh_token: newRefreshToken }));
         
-        client.defaults.headers.common.Authorization = 'Bearer ' + newAccessToken;
-        originalRequest.headers.Authorization = 'Bearer ' + newAccessToken;
+        client.defaults.headers.common['Authorization'] = 'Bearer ' + newAccessToken;
+        if (originalRequest.headers) {
+          originalRequest.headers.set('Authorization', 'Bearer ' + newAccessToken);
+        }
         
         processQueue(null, newAccessToken);
         return client(originalRequest);
