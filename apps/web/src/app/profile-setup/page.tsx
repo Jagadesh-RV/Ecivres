@@ -42,6 +42,17 @@ function ProfileSetupForm() {
         router.push("/customer");
       }
     } catch (err: any) {
+      // If profile already exists (409), fetch the latest user data and redirect
+      if (err.response?.status === 409) {
+        try {
+          const meRes = await client.get("/auth/me");
+          updateUser(meRes.data);
+          router.push(role === "PROVIDER" ? "/provider" : "/customer");
+          return;
+        } catch (meErr) {
+          console.error("Failed to fetch user after 409", meErr);
+        }
+      }
       setError(err.response?.data?.message || "Profile setup failed. Please try again.");
     }
   };
