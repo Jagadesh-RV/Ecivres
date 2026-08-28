@@ -49,6 +49,7 @@ export class BookingsService {
     return this.prisma.booking.findMany({
       where: { customerId: userId },
       include: {
+        review: true,
         service: {
           include: {
             provider: true,
