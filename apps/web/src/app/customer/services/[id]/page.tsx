@@ -47,6 +47,7 @@ export default function ServiceDetailsPage() {
     );
   }
 
+  if (!service) {
     return (
       <div className="text-center py-24">
         <h2 className="text-2xl font-bold">Service not found</h2>
