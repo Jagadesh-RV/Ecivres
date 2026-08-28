@@ -6,6 +6,7 @@ import { ServiceQueryDto } from './dto/service-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
+@ApiTags('services')
 @Controller('services')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}

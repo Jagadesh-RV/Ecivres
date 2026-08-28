@@ -31,9 +31,17 @@ describe('AuthController', () => {
   });
 
   it('should call register with correct dto', async () => {
-    const registerDto = { name: 'Test', email: 'test@test.com', password: 'password' };
-    const result = { access_token: 'token', refresh_token: 'refresh', user: { id: '1', email: 'test@test.com' } };
-    jest.spyOn(authService, 'register').mockResolvedValue(result as any);
+    const registerDto = {
+      name: 'Test',
+      email: 'test@test.com',
+      password: 'password',
+    };
+    const result = {
+      access_token: 'token',
+      refresh_token: 'refresh',
+      user: { id: '1', email: 'test@test.com' },
+    };
+    jest.spyOn(authService, 'register').mockResolvedValue(result);
 
     expect(await controller.register(registerDto)).toBe(result);
     expect(authService.register).toHaveBeenCalledWith(registerDto);
@@ -41,8 +49,12 @@ describe('AuthController', () => {
 
   it('should call login with correct dto', async () => {
     const loginDto = { email: 'test@test.com', password: 'password' };
-    const result = { access_token: 'token', refresh_token: 'refresh', user: { id: '1', email: 'test@test.com' } };
-    jest.spyOn(authService, 'login').mockResolvedValue(result as any);
+    const result = {
+      access_token: 'token',
+      refresh_token: 'refresh',
+      user: { id: '1', email: 'test@test.com' },
+    };
+    jest.spyOn(authService, 'login').mockResolvedValue(result);
 
     expect(await controller.login(loginDto)).toBe(result);
     expect(authService.login).toHaveBeenCalledWith(loginDto);

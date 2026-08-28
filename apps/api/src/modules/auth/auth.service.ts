@@ -24,7 +24,7 @@ export class AuthService {
   private async generateRefreshToken(userId: string): Promise<string> {
     const refreshToken = crypto.randomBytes(64).toString('hex');
     const tokenHash = await bcrypt.hash(refreshToken, 10);
-    
+
     // Expires in 7 days
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
@@ -59,13 +59,12 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
     const refresh_token = await this.generateRefreshToken(user.id);
 
+    const fullUser = await this.usersService.findOneById(user.id);
+
     return {
       access_token,
       refresh_token,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: fullUser,
     };
   }
 
@@ -87,13 +86,12 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
     const refresh_token = await this.generateRefreshToken(user.id);
 
+    const fullUser = await this.usersService.findOneById(user.id);
+
     return {
       access_token,
       refresh_token,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: fullUser,
     };
   }
 
@@ -105,14 +103,17 @@ export class AuthService {
     // Find all unexpired tokens (in a real scenario, we might clean up expired ones)
     const activeTokens = await this.prisma.refreshToken.findMany({
       where: {
-        expiresAt: { gt: new Date() }
+        expiresAt: { gt: new Date() },
       },
-      include: { user: true }
+      include: { user: true },
     });
 
     let matchedToken = null;
     for (const tokenRecord of activeTokens) {
-      const isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
+      const isMatch = await bcrypt.compare(
+        refreshTokenStr,
+        tokenRecord.tokenHash,
+      );
       if (isMatch) {
         matchedToken = tokenRecord;
         break;
@@ -125,7 +126,7 @@ export class AuthService {
 
     // Delete the old token (Token rotation)
     await this.prisma.refreshToken.delete({
-      where: { id: matchedToken.id }
+      where: { id: matchedToken.id },
     });
 
     const user = matchedToken.user;
@@ -146,15 +147,18 @@ export class AuthService {
 
     const activeTokens = await this.prisma.refreshToken.findMany({
       where: {
-        expiresAt: { gt: new Date() }
-      }
+        expiresAt: { gt: new Date() },
+      },
     });
 
     for (const tokenRecord of activeTokens) {
-      const isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
+      const isMatch = await bcrypt.compare(
+        refreshTokenStr,
+        tokenRecord.tokenHash,
+      );
       if (isMatch) {
         await this.prisma.refreshToken.delete({
-          where: { id: tokenRecord.id }
+          where: { id: tokenRecord.id },
         });
         break;
       }

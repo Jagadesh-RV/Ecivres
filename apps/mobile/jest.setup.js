@@ -21,4 +21,11 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaInsets: jest.fn().mockImplementation(() => inset),
   };
 });
-
+jest.mock('lucide-react-native', () => ({
+  Eye: 'Eye',
+  EyeOff: 'EyeOff',
+  User: 'User',
+  Lock: 'Lock',
+  Mail: 'Mail',
+  ChevronRight: 'ChevronRight',
+}));

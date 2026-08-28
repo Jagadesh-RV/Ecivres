@@ -14,7 +14,9 @@ describe('PermissionsController', () => {
         {
           provide: PermissionsService,
           useValue: {
-            findAll: jest.fn().mockResolvedValue([{ id: '1', name: 'read:test' }]),
+            findAll: jest
+              .fn()
+              .mockResolvedValue([{ id: '1', name: 'read:test' }]),
           },
         },
       ],

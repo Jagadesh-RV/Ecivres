@@ -14,7 +14,9 @@ describe('PermissionsService', () => {
           provide: PrismaService,
           useValue: {
             permission: {
-              findMany: jest.fn().mockResolvedValue([{ id: '1', name: 'read:test' }]),
+              findMany: jest
+                .fn()
+                .mockResolvedValue([{ id: '1', name: 'read:test' }]),
             },
           },
         },

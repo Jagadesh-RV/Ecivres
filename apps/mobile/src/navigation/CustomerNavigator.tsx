@@ -6,7 +6,7 @@ import { ServiceListScreen } from '../screens/customer/ServiceListScreen';
 import { ServiceDetailsScreen } from '../screens/customer/ServiceDetailsScreen';
 import { ProviderDetailsScreen } from '../screens/customer/ProviderDetailsScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<CustomerStackParamList>();
 
 export const CustomerNavigator = () => {
   return (

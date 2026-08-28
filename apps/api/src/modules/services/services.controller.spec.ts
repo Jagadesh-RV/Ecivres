@@ -1,18 +1,50 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServicesController } from './services.controller';
+import { ServicesService } from './services.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 describe('ServicesController', () => {
   let controller: ServicesController;
+  let service: ServicesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ServicesController],
-    }).compile();
+      providers: [
+        {
+          provide: ServicesService,
+          useValue: {
+            findAll: jest.fn().mockResolvedValue([]),
+            findOne: jest.fn().mockResolvedValue({ id: '1' }),
+            create: jest.fn().mockResolvedValue({ id: '1' }),
+            update: jest.fn().mockResolvedValue({ id: '1' }),
+            remove: jest.fn().mockResolvedValue({ id: '1' }),
+          },
+        },
+      ],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<ServicesController>(ServicesController);
+    service = module.get<ServicesService>(ServicesService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('should get all services', async () => {
+    await controller.findAll();
+    expect(service.findAll).toHaveBeenCalled();
+  });
+
+  it('should create a service', async () => {
+    await controller.create(
+      { id: 'user1' },
+      { name: 'test', price: 10, duration: 60, categoryId: '1' },
+    );
+    expect(service.create).toHaveBeenCalled();
   });
 });
