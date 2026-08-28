@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { Clock, Calendar as CalendarIcon, DollarSign, User, MapPin } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { ReviewModal } from "../reviews/ReviewModal";
 
 interface CustomerBookingCardProps {
   booking: any;
@@ -14,6 +16,8 @@ export function CustomerBookingCard({ booking, onCancel }: CustomerBookingCardPr
   const isConfirmed = booking.status === "CONFIRMED";
   const isCompleted = booking.status === "COMPLETED";
   const isCancelled = booking.status === "CANCELLED";
+  
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   const getStatusColor = () => {
     if (isPending) return "bg-yellow-100 text-yellow-800 border-yellow-200";
@@ -69,9 +73,14 @@ export function CustomerBookingCard({ booking, onCancel }: CustomerBookingCardPr
             Cancel Booking
           </Button>
         )}
-        {isCompleted && (
-          <Button variant="outline" className="w-full sm:w-auto">
+        {isCompleted && !booking.review && (
+          <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsReviewOpen(true)}>
             Leave a Review
+          </Button>
+        )}
+        {isCompleted && booking.review && (
+          <Button variant="outline" className="w-full sm:w-auto" disabled>
+            Reviewed
           </Button>
         )}
         <Link href={`/customer/services/${booking.serviceId}`}>
@@ -80,6 +89,14 @@ export function CustomerBookingCard({ booking, onCancel }: CustomerBookingCardPr
           </Button>
         </Link>
       </div>
+
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        bookingId={booking.id}
+        serviceId={booking.serviceId}
+        serviceName={booking.service.name}
+      />
     </div>
   );
 }
