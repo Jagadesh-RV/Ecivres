@@ -16,7 +16,7 @@ export class ReviewsController {
   @Roles('CUSTOMER')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new review (Customer only)' })
-  create(@Request() req, @Body() createDto: CreateReviewDto) {
+  create(@Request() req: any, @Body() createDto: CreateReviewDto) {
     return this.reviewsService.create(req.user.id, createDto);
   }
 
