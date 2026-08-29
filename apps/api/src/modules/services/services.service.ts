@@ -25,7 +25,7 @@ export class ServicesService {
     });
   }
 
-  async findAll(query: ServiceQueryDto) {
+  async findAll(query: ServiceQueryDto = {}) {
     const { categoryId, providerId, minPrice, maxPrice } = query;
     
     const where: any = {};

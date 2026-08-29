@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 describe('ServicesController', () => {
   let controller: ServicesController;
@@ -20,6 +21,10 @@ describe('ServicesController', () => {
             update: jest.fn().mockResolvedValue({ id: '1' }),
             remove: jest.fn().mockResolvedValue({ id: '1' }),
           },
+        },
+        {
+          provide: PrismaService,
+          useValue: {},
         },
       ],
     })

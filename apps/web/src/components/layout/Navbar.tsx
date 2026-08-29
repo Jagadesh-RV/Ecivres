@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuthStore } from "../../stores/auth-store";
 import { Button } from "../ui/button";
 import { UserNav } from "./UserNav";
+import { NotificationBell } from "./NotificationBell";
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -27,7 +28,10 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
-            <UserNav />
+            <>
+              <NotificationBell />
+              <UserNav />
+            </>
           ) : (
             <>
               <Link href="/login">

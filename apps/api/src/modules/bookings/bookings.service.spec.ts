@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookingsService } from './bookings.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('BookingsService', () => {
   let service: BookingsService;
@@ -24,8 +25,14 @@ describe('BookingsService', () => {
                 .mockResolvedValue({ id: 'cust1', user: { id: 'user1' } }),
             },
             service: {
-              findUnique: jest.fn().mockResolvedValue({ id: 'srv1' }),
+              findUnique: jest.fn().mockResolvedValue({ id: 'srv1', provider: { userId: 'prov1' } }),
             },
+          },
+        },
+        {
+          provide: NotificationsService,
+          useValue: {
+            create: jest.fn().mockResolvedValue({}),
           },
         },
       ],

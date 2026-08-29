@@ -34,6 +34,14 @@ export function ProviderBookingRow({ booking, onUpdateStatus, isUpdating }: Prov
           <Badge className={`${getStatusColor()} border`}>
             {booking.status}
           </Badge>
+          {booking.payment && (
+            <Badge className={booking.payment.status === "SUCCESS"
+              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+              : "bg-orange-100 text-orange-800 border-orange-200"
+            }>
+              {booking.payment.status === "SUCCESS" ? "Paid" : "Awaiting Payment"}
+            </Badge>
+          )}
           <span className="text-sm font-medium text-foreground">
             {booking.service.name}
           </span>

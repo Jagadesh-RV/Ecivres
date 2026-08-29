@@ -22,7 +22,11 @@ describe('ServicesService', () => {
               findMany: jest.fn().mockResolvedValue([]),
               findUnique: jest
                 .fn()
-                .mockResolvedValue({ id: '1', providerId: 'prov1' }),
+                .mockResolvedValue({
+                  id: '1',
+                  providerId: 'prov1',
+                  provider: { id: 'prov1', userId: 'user1' },
+                }),
               create: jest.fn().mockResolvedValue({ id: '1' }),
               update: jest.fn().mockResolvedValue({ id: '1' }),
               delete: jest.fn().mockResolvedValue({ id: '1' }),
@@ -59,7 +63,7 @@ describe('ServicesService', () => {
         duration: 60,
         categoryId: '1',
       }),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('should throw ForbiddenException if user tries to update another providers service', async () => {
@@ -67,7 +71,7 @@ describe('ServicesService', () => {
       .spyOn(prisma.providerProfile, 'findUnique')
       .mockResolvedValue({ id: 'prov2', userId: 'user2' } as any);
     await expect(
-      service.update('user2', '1', { name: 'test2' }),
+      service.update('1', 'user2', { name: 'test2' }),
     ).rejects.toThrow(ForbiddenException);
   });
 });

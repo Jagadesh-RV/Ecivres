@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from './categories.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 describe('CategoriesController', () => {
   let controller: CategoriesController;
@@ -18,6 +19,10 @@ describe('CategoriesController', () => {
               .fn()
               .mockResolvedValue([{ id: '1', name: 'Cleaning' }]),
           },
+        },
+        {
+          provide: PrismaService,
+          useValue: {},
         },
       ],
     })

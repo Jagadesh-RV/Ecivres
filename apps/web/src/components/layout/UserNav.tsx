@@ -20,7 +20,7 @@ export function UserNav() {
 
   if (!user) return null;
 
-  const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
+  const initials = user.role === "ADMIN" ? "AD" : `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
 
   const handleLogout = async () => {
     await logout();
@@ -28,6 +28,7 @@ export function UserNav() {
   };
 
   const getDashboardLink = () => {
+    if (user.role === "ADMIN") return "/admin";
     return user.role === "PROVIDER" ? "/provider" : "/customer";
   };
 
@@ -42,7 +43,9 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
+            <p className="text-sm font-medium leading-none">
+              {user.role === "ADMIN" ? "Administrator" : `${user.firstName || ""} ${user.lastName || ""}`}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>

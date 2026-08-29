@@ -5,6 +5,7 @@ export type CustomerStackParamList = {
   ServiceDetails: { serviceId: string };
   ProviderDetails: { providerId: string };
   CustomerBookings: undefined;
+  Notifications: undefined;
 };
 
 export type ProviderStackParamList = {
@@ -13,4 +14,5 @@ export type ProviderStackParamList = {
   ProviderBookings: undefined;
   ProviderServices: undefined;
   ProviderServiceForm: { serviceId?: string };
+  Notifications: undefined;
 };

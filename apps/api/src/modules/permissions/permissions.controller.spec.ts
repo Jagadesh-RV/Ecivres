@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PermissionsController } from './permissions.controller';
 import { PermissionsService } from './permissions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 describe('PermissionsController', () => {
   let controller: PermissionsController;
@@ -18,6 +19,10 @@ describe('PermissionsController', () => {
               .fn()
               .mockResolvedValue([{ id: '1', name: 'read:test' }]),
           },
+        },
+        {
+          provide: PrismaService,
+          useValue: {},
         },
       ],
     })
