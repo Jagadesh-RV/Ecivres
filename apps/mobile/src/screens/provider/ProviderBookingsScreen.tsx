@@ -50,14 +50,24 @@ export const ProviderBookingsScreen = () => {
       <View style={styles.card}>
         <View style={styles.header}>
           <Text style={styles.serviceName}>{item.service.name}</Text>
-          <Text style={[
-            styles.status, 
-            isPending && styles.statusPending,
-            isConfirmed && styles.statusConfirmed,
-            isCompleted && styles.statusCompleted
-          ]}>
-            {item.status}
-          </Text>
+          <View style={styles.badgeRow}>
+            <Text style={[
+              styles.status, 
+              isPending && styles.statusPending,
+              isConfirmed && styles.statusConfirmed,
+              isCompleted && styles.statusCompleted
+            ]}>
+              {item.status}
+            </Text>
+            {item.payment && (
+              <Text style={[
+                styles.paymentBadge,
+                item.payment.status === 'SUCCESS' ? styles.paymentSuccess : styles.paymentPending
+              ]}>
+                {item.payment.status === 'SUCCESS' ? 'Paid' : 'Unpaid'}
+              </Text>
+            )}
+          </View>
         </View>
         <Text style={styles.customerName}>Customer: {customerName}</Text>
         <Text style={styles.date}>{new Date(item.scheduledAt).toLocaleString()}</Text>
@@ -136,6 +146,10 @@ const styles = StyleSheet.create({
   statusPending: { backgroundColor: '#fef3c7', color: '#92400e' },
   statusConfirmed: { backgroundColor: '#dbeafe', color: '#1e40af' },
   statusCompleted: { backgroundColor: '#d1fae5', color: '#065f46' },
+  badgeRow: { flexDirection: 'row', gap: 8 },
+  paymentBadge: { fontSize: 12, fontWeight: 'bold', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, overflow: 'hidden' },
+  paymentPending: { backgroundColor: '#ffedd5', color: '#ea580c' },
+  paymentSuccess: { backgroundColor: '#d1fae5', color: '#059669' },
   customerName: { fontSize: 14, color: '#4b5563', marginBottom: 4 },
   date: { fontSize: 14, color: '#6b7280', marginBottom: 8 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
