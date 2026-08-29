@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RolesController } from './roles.controller';
 import { RolesService } from './roles.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 describe('RolesController', () => {
   let controller: RolesController;
@@ -16,6 +17,10 @@ describe('RolesController', () => {
           useValue: {
             findAll: jest.fn().mockResolvedValue([{ id: '1', name: 'ADMIN' }]),
           },
+        },
+        {
+          provide: PrismaService,
+          useValue: {},
         },
       ],
     })
