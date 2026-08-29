@@ -30,6 +30,31 @@ async function main() {
     create: { name: 'PROVIDER', description: 'Service Provider' },
   });
 
+  // Create Permissions
+  const manageCategoriesPermission = await prisma.permission.upsert({
+    where: { name: 'manage:categories' },
+    update: {},
+    create: {
+      name: 'manage:categories',
+      description: 'Manage service categories (create and delete)',
+    },
+  });
+
+  // Link Permissions to Roles
+  await prisma.rolePermission.upsert({
+    where: {
+      roleId_permissionId: {
+        roleId: adminRole.id,
+        permissionId: manageCategoriesPermission.id,
+      },
+    },
+    update: {},
+    create: {
+      roleId: adminRole.id,
+      permissionId: manageCategoriesPermission.id,
+    },
+  });
+
   // Create an Admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
   const adminUser = await prisma.user.upsert({
