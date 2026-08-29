@@ -34,8 +34,15 @@ export class BookingsService {
         customerId: customer.user.id, // Booking expects user ID based on schema `customer User @relation(...)` wait, schema says `customerId String`, `customer User`. So customerId is User ID.
         serviceId: service.id,
         scheduledAt: new Date(createBookingDto.scheduledAt),
+        payment: {
+          create: {
+            amount: service.price,
+            status: 'PENDING',
+          },
+        },
       },
       include: {
+        payment: true,
         service: {
           include: {
             provider: true,
@@ -50,6 +57,7 @@ export class BookingsService {
       where: { customerId: userId },
       include: {
         review: true,
+        payment: true,
         service: {
           include: {
             provider: true,
@@ -76,6 +84,7 @@ export class BookingsService {
         },
       },
       include: {
+        payment: true,
         customer: {
           include: {
             customerProfile: true,
@@ -117,6 +126,7 @@ export class BookingsService {
       where: { id: bookingId },
       data: { status: updateDto.status },
       include: {
+        payment: true,
         customer: {
           include: {
             customerProfile: true,
