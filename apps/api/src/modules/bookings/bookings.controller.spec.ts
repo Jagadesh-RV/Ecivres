@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookingsController } from './bookings.controller';
 import { BookingsService } from './bookings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 describe('BookingsController', () => {
   let controller: BookingsController;
@@ -17,6 +18,10 @@ describe('BookingsController', () => {
             create: jest.fn().mockResolvedValue({ id: '1' }),
             findAllForCustomer: jest.fn().mockResolvedValue([]),
           },
+        },
+        {
+          provide: PrismaService,
+          useValue: {},
         },
       ],
     })

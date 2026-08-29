@@ -4,6 +4,7 @@ import { ProviderDashboard } from '../screens/provider/ProviderDashboard';
 import { ProviderBookingsScreen } from '../screens/provider/ProviderBookingsScreen';
 import { ProviderServicesScreen } from '../screens/provider/ProviderServicesScreen';
 import { ProviderServiceFormScreen } from '../screens/provider/ProviderServiceFormScreen';
+import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { ProviderStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<ProviderStackParamList>();
@@ -15,6 +16,7 @@ export const ProviderNavigator = () => {
       <Stack.Screen name="ProviderBookings" component={ProviderBookingsScreen} options={{ title: 'Manage Bookings' }} />
       <Stack.Screen name="ProviderServices" component={ProviderServicesScreen} options={{ title: 'Manage Services' }} />
       <Stack.Screen name="ProviderServiceForm" component={ProviderServiceFormScreen} options={{ title: 'Service Details' }} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notifications' }} />
     </Stack.Navigator>
   );
 };

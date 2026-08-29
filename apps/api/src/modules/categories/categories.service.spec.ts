@@ -35,7 +35,11 @@ describe('CategoriesService', () => {
     const result = await service.findAll();
     expect(result).toEqual([{ id: '1', name: 'Cleaning' }]);
     expect(prisma.category.findMany).toHaveBeenCalledWith({
-      orderBy: { name: 'asc' },
+      include: {
+        _count: {
+          select: { services: true }
+        }
+      }
     });
   });
 });
