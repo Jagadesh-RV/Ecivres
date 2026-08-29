@@ -27,6 +27,7 @@ export class BookingsService {
 
     const service = await this.prisma.service.findUnique({
       where: { id: createBookingDto.serviceId },
+      include: { provider: true },
     });
 
     if (!service) {
