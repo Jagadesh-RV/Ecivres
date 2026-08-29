@@ -30,9 +30,11 @@ export default function LoginPage() {
       
       await login(user, access_token, refresh_token);
 
-      const isProfileComplete = user.hasCustomerProfile || user.hasProviderProfile;
+      const isProfileComplete = user.hasCustomerProfile || user.hasProviderProfile || user.role === "ADMIN";
       if (!isProfileComplete) {
         router.push("/profile-setup");
+      } else if (user.role === "ADMIN") {
+        router.push("/admin");
       } else if (user.role === "PROVIDER") {
         router.push("/provider");
       } else {
