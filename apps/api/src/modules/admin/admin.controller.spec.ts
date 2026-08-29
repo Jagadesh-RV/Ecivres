@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminController } from './admin.controller';
+import { AdminService } from './admin.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 describe('AdminController', () => {
@@ -9,6 +10,13 @@ describe('AdminController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminController],
       providers: [
+        {
+          provide: AdminService,
+          useValue: {
+            findAllUsers: jest.fn().mockResolvedValue([]),
+            verifyProvider: jest.fn().mockResolvedValue({ id: '1' }),
+          },
+        },
         {
           provide: PrismaService,
           useValue: {},
