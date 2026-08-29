@@ -3,6 +3,7 @@
 Based strictly on the verified, current state of the repository, the following roadmap dictates the immediate sequence of development tasks.
 
 ## 🔴 MUST DO (Immediate Priority)
+
 These tasks block foundational functionality or present architectural flaws.
 
 1. **Fix Registration Role Mapping:**
@@ -13,6 +14,7 @@ These tasks block foundational functionality or present architectural flaws.
    - Create the state machine logic in `BookingsService` to transition `BookingStatus` from `PENDING` -> `CONFIRMED` -> `COMPLETED`.
 
 ## 🟡 SHOULD DO (Short-Term Priority)
+
 These tasks enhance the user experience and ensure code stability.
 
 1. **Mobile Secure Storage:**
@@ -23,6 +25,7 @@ These tasks enhance the user experience and ensure code stability.
    - Implement the `ProviderDashboard` to show a list of their active services and pending booking requests.
 
 ## 🔵 LATER (Long-Term Goals)
+
 These features are scaffolded but are not critical for an MVP.
 
 1. **Payments Integration:**
