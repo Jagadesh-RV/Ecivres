@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PaymentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async createPayment(bookingId: string) {
     const booking = await this.prisma.booking.findUnique({
@@ -31,7 +35,7 @@ export class PaymentsService {
   async processPayment(bookingId: string, transactionId: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { bookingId },
-      include: { booking: true },
+      include: { booking: { include: { service: { include: { provider: true } } } } },
     });
 
     if (!payment) {
@@ -49,6 +53,18 @@ export class PaymentsService {
         transactionId,
       },
     });
+
+    // Notify provider of successful payment
+    try {
+      const providerUserId = payment.booking.service.provider.userId;
+      await this.notificationsService.create(
+        providerUserId,
+        'Payment Received',
+        `Payment of $${payment.amount} has been received for "${payment.booking.service.name}".`,
+      );
+    } catch (err) {
+      console.error('Failed to send payment notification', err);
+    }
 
     // Optionally update booking status if needed
     // In our case we keep the booking status as CONFIRMED or update it. 
