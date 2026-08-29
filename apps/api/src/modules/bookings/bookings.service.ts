@@ -6,10 +6,14 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBookingDto } from './dto/booking.dto';
 import { UpdateBookingStatusDto, BookingStatus } from './dto/update-booking.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class BookingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async create(userId: string, createBookingDto: CreateBookingDto) {
     const customer = await this.prisma.customerProfile.findUnique({
@@ -29,7 +33,7 @@ export class BookingsService {
       throw new NotFoundException('Service not found');
     }
 
-    return this.prisma.booking.create({
+    const newBooking = await this.prisma.booking.create({
       data: {
         customerId: customer.user.id, // Booking expects user ID based on schema `customer User @relation(...)` wait, schema says `customerId String`, `customer User`. So customerId is User ID.
         serviceId: service.id,
@@ -50,6 +54,21 @@ export class BookingsService {
         },
       },
     });
+
+    // Notify provider of a new booking request
+    try {
+      const providerUserId = service.provider.userId;
+      const clientName = customer.firstName ? `${customer.firstName} ${customer.lastName || ''}` : 'A customer';
+      await this.notificationsService.create(
+        providerUserId,
+        'New Booking Request',
+        `${clientName} has booked your service "${service.name}" for ${newBooking.scheduledAt.toLocaleString()}`,
+      );
+    } catch (err) {
+      console.error('Failed to send booking notification', err);
+    }
+
+    return newBooking;
   }
 
   async findAllForCustomer(userId: string) {
@@ -122,7 +141,7 @@ export class BookingsService {
       throw new BadRequestException('You do not have permission to update this booking');
     }
 
-    return this.prisma.booking.update({
+    const updatedBooking = await this.prisma.booking.update({
       where: { id: bookingId },
       data: { status: updateDto.status },
       include: {
@@ -135,5 +154,18 @@ export class BookingsService {
         service: true,
       },
     });
+
+    // Notify customer of status change
+    try {
+      await this.notificationsService.create(
+        updatedBooking.customerId,
+        'Booking Status Updated',
+        `Your booking for "${updatedBooking.service.name}" has been updated to ${updatedBooking.status}`,
+      );
+    } catch (err) {
+      console.error('Failed to send status update notification', err);
+    }
+
+    return updatedBooking;
   }
 }
