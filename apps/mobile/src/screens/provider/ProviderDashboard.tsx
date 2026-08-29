@@ -61,6 +61,14 @@ export const ProviderDashboard = () => {
         <Text style={styles.cardDescription}>Add, edit, or remove the services you offer.</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity 
+        style={styles.card}
+        onPress={() => navigation.navigate('Notifications')}
+      >
+        <Text style={styles.cardTitle}>Notifications</Text>
+        <Text style={styles.cardDescription}>View updates on bookings and payments.</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
