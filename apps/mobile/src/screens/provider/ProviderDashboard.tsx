@@ -36,9 +36,35 @@ export const ProviderDashboard = () => {
     }
   };
 
+  const handleAcceptBooking = async (id: string) => {
+    try {
+      setLoading(true);
+      await bookingService.updateBookingStatus(id, 'CONFIRMED');
+      await fetchData();
+    } catch (err) {
+      console.log('Failed to accept booking');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectBooking = async (id: string) => {
+    try {
+      setLoading(true);
+      await bookingService.updateBookingStatus(id, 'CANCELLED');
+      await fetchData();
+    } catch (err) {
+      console.log('Failed to reject booking');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [user]);
+
+  const pendingBookings = bookings.filter(b => b.status === 'PENDING');
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -65,6 +91,41 @@ export const ProviderDashboard = () => {
         <Text style={styles.cardTitle}>Manage Bookings</Text>
         <Text style={styles.cardDescription}>View incoming requests and upcoming appointments.</Text>
       </TouchableOpacity>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Pending Booking Requests</Text>
+        {pendingBookings.length === 0 ? (
+          <Text style={styles.emptyText}>No pending requests at the moment.</Text>
+        ) : (
+          pendingBookings.map(booking => (
+            <View key={booking.id} style={styles.bookingItem}>
+              <View style={styles.bookingDetails}>
+                <Text style={styles.bookingService}>{booking.service?.name}</Text>
+                <Text style={styles.bookingTime}>
+                  {new Date(booking.scheduledAt).toLocaleString()}
+                </Text>
+                <Text style={styles.bookingCustomer}>
+                  Customer: {booking.customer?.email}
+                </Text>
+              </View>
+              <View style={styles.actionContainer}>
+                <TouchableOpacity 
+                  style={[styles.actionBtn, styles.acceptBtn]} 
+                  onPress={() => handleAcceptBooking(booking.id)}
+                >
+                  <Text style={styles.acceptBtnText}>Accept</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.actionBtn, styles.rejectBtn]} 
+                  onPress={() => handleRejectBooking(booking.id)}
+                >
+                  <Text style={styles.rejectBtnText}>Reject</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+      </View>
 
       <TouchableOpacity 
         style={styles.card}
@@ -120,11 +181,22 @@ const styles = StyleSheet.create({
   cardDescription: { fontSize: 14, color: '#4b5563', lineHeight: 20 },
   logoutButton: { marginTop: 24, backgroundColor: '#fee2e2', padding: 16, borderRadius: 12, alignItems: 'center' },
   logoutText: { color: '#b91c1c', fontWeight: 'bold', fontSize: 16 },
-  section: { marginTop: 24, backgroundColor: '#fff', padding: 20, borderRadius: 12, borderHeight: 1, borderColor: '#e5e7eb', elevation: 1 },
+  section: { marginTop: 24, backgroundColor: '#fff', padding: 20, borderRadius: 12, borderWidth: 1, borderColor: '#e5e7eb', elevation: 1 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 },
   emptyText: { fontSize: 14, color: '#6b7280', fontStyle: 'italic' },
   serviceItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
   serviceName: { fontSize: 16, fontWeight: '600', color: '#111827' },
   serviceDuration: { fontSize: 14, color: '#6b7280', marginTop: 2 },
   servicePrice: { fontSize: 16, fontWeight: 'bold', color: '#10b981' },
+  bookingItem: { paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
+  bookingDetails: { marginBottom: 12 },
+  bookingService: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  bookingTime: { fontSize: 14, color: '#6b7280', marginTop: 2 },
+  bookingCustomer: { fontSize: 14, color: '#4b5563', marginTop: 4 },
+  actionContainer: { flexDirection: 'row', gap: 12 },
+  actionBtn: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+  acceptBtn: { backgroundColor: '#10b981' },
+  acceptBtnText: { color: '#fff', fontWeight: 'bold' },
+  rejectBtn: { backgroundColor: '#ef4444' },
+  rejectBtnText: { color: '#fff', fontWeight: 'bold' },
 });
