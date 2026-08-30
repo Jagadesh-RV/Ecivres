@@ -3,28 +3,41 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../stores/authStore';
 import { reviewService } from '../../services/api/reviewService';
+import { serviceService } from '../../services/api/serviceService';
+import { bookingService } from '../../services/api/bookingService';
 
 export const ProviderDashboard = () => {
   const logout = useAuthStore(state => state.logout);
   const user = useAuthStore(state => state.user);
   const navigation = useNavigation<any>();
   const [stats, setStats] = useState({ averageRating: 0, totalReviews: 0 });
+  const [services, setServices] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        if (user?.id) {
-          const data = await reviewService.getProviderStats(user.id);
-          setStats(data);
+  const fetchData = async () => {
+    try {
+      if (user?.id) {
+        const statsData = await reviewService.getProviderStats(user.id);
+        setStats(statsData);
+
+        if (user?.providerProfile?.id) {
+          const servicesData = await serviceService.getAllServices({ providerId: user.providerProfile.id });
+          setServices(servicesData);
+
+          const bookingsData = await bookingService.getProviderBookings();
+          setBookings(bookingsData);
         }
-      } catch (err) {
-        console.log('Could not load stats');
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchStats();
+    } catch (err) {
+      console.log('Could not load provider dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [user]);
 
   return (
@@ -69,6 +82,23 @@ export const ProviderDashboard = () => {
         <Text style={styles.cardDescription}>View updates on bookings and payments.</Text>
       </TouchableOpacity>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Active Services Offered</Text>
+        {services.length === 0 ? (
+          <Text style={styles.emptyText}>You haven't listed any services yet.</Text>
+        ) : (
+          services.map(service => (
+            <View key={service.id} style={styles.serviceItem}>
+              <View>
+                <Text style={styles.serviceName}>{service.name}</Text>
+                <Text style={styles.serviceDuration}>{service.duration} mins</Text>
+              </View>
+              <Text style={styles.servicePrice}>${service.price}</Text>
+            </View>
+          ))
+        )}
+      </View>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
@@ -88,6 +118,13 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#fff', padding: 20, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: '#e5e7eb', elevation: 1 },
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 8 },
   cardDescription: { fontSize: 14, color: '#4b5563', lineHeight: 20 },
-  logoutButton: { marginTop: 'auto', backgroundColor: '#fee2e2', padding: 16, borderRadius: 12, alignItems: 'center' },
+  logoutButton: { marginTop: 24, backgroundColor: '#fee2e2', padding: 16, borderRadius: 12, alignItems: 'center' },
   logoutText: { color: '#b91c1c', fontWeight: 'bold', fontSize: 16 },
+  section: { marginTop: 24, backgroundColor: '#fff', padding: 20, borderRadius: 12, borderHeight: 1, borderColor: '#e5e7eb', elevation: 1 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 },
+  emptyText: { fontSize: 14, color: '#6b7280', fontStyle: 'italic' },
+  serviceItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
+  serviceName: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  serviceDuration: { fontSize: 14, color: '#6b7280', marginTop: 2 },
+  servicePrice: { fontSize: 16, fontWeight: 'bold', color: '#10b981' },
 });
