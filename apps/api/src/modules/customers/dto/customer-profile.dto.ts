@@ -16,6 +16,11 @@ export class CreateCustomerProfileDto {
   @IsString()
   @IsOptional()
   phone?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string;
 }
 
 export class UpdateCustomerProfileDto {
@@ -33,4 +38,9 @@ export class UpdateCustomerProfileDto {
   @IsString()
   @IsOptional()
   phone?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string;
 }
