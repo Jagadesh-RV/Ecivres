@@ -21,6 +21,12 @@ export class PaymentsController {
     return this.paymentsService.processPayment(bookingId, txId);
   }
 
+  @Post(':bookingId/intent')
+  @ApiOperation({ summary: 'Create a Stripe Payment Intent for booking' })
+  async createIntent(@Param('bookingId') bookingId: string) {
+    return this.paymentsService.createPaymentIntent(bookingId);
+  }
+
   @Get(':bookingId')
   @ApiOperation({ summary: 'Get payment status of a booking' })
   async getPayment(@Param('bookingId') bookingId: string) {
