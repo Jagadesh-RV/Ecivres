@@ -3,12 +3,20 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import helmet from 'helmet';
+import compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // API Versioning
   app.setGlobalPrefix('api/v1');
+
+  // Security Headers (XSS, Clickjacking protection)
+  app.use(helmet());
+
+  // Gzip Compression for Performance
+  app.use(compression());
 
   // Global Exception Filter
   app.useGlobalFilters(new HttpExceptionFilter());
