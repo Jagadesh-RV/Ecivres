@@ -170,4 +170,34 @@ export class BookingsService {
 
     return updatedBooking;
   }
+
+  async cancelBooking(bookingId: string, userId: string, reason?: string) {
+    const booking = await this.findOne(bookingId);
+
+    if (booking.customerId !== userId) {
+      throw new ForbiddenException('You can only cancel your own bookings');
+    }
+
+    if (booking.status === 'COMPLETED' || booking.status === 'CANCELLED') {
+      throw new BadRequestException(`Cannot cancel a booking that is already ${booking.status.toLowerCase()}`);
+    }
+
+    const updated = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: 'CANCELLED' },
+      include: { service: { include: { provider: true } } },
+    });
+
+    try {
+      await this.notificationsService.create(
+        updated.service.provider.userId,
+        'Booking Cancelled',
+        `A booking for "${updated.service.name}" was cancelled${reason ? ': ' + reason : '.'}`,
+      );
+    } catch (err) {
+      console.error('Failed to send cancellation notification', err);
+    }
+
+    return updated;
+  }
 }
