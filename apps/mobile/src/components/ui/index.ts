@@ -8,3 +8,4 @@ export * from './Avatar';
 export * from './SearchBar';
 export * from './Card';
 export * from './Divider';
+export * from './EmptyState';
