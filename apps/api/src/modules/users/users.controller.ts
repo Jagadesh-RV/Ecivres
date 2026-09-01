@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateCustomerProfileDto } from './dto/update-customer-profile.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
@@ -29,6 +30,15 @@ export class UsersController {
       changePasswordDto.currentPassword,
       changePasswordDto.newPassword,
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profiles/customer')
+  async updateCustomerProfile(
+    @CurrentUser() user: any,
+    @Body() updateCustomerProfileDto: UpdateCustomerProfileDto,
+  ) {
+    return this.usersService.updateCustomerProfile(user.id, updateCustomerProfileDto);
   }
 
   @UseGuards(JwtAuthGuard)

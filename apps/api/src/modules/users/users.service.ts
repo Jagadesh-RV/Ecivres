@@ -64,6 +64,24 @@ export class UsersService {
     return { message: 'Password changed successfully' };
   }
 
+  async updateCustomerProfile(
+    userId: string,
+    data: { firstName?: string; lastName?: string; phone?: string; avatarUrl?: string },
+  ) {
+    const profile = await this.prisma.customerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Customer profile not found');
+    }
+
+    return this.prisma.customerProfile.update({
+      where: { userId },
+      data,
+    });
+  }
+
   async createCustomerProfile(
     userId: string,
     data: { firstName: string; lastName: string; phone?: string },

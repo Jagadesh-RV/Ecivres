@@ -5,6 +5,7 @@ import { CreateBookingDto } from './dto/booking.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UpdateBookingStatusDto } from './dto/update-booking.dto';
+import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 
@@ -48,5 +49,15 @@ export class BookingsController {
     @Body() updateBookingStatusDto: UpdateBookingStatusDto,
   ) {
     return this.bookingsService.updateStatus(bookingId, user.id, updateBookingStatusDto);
+  }
+
+  @Post(':id/cancel')
+  @ApiOperation({ summary: 'Cancel a booking (Customer only)' })
+  async cancel(
+    @CurrentUser() user: any,
+    @Param('id') bookingId: string,
+    @Body() cancelBookingDto: CancelBookingDto,
+  ) {
+    return this.bookingsService.cancelBooking(bookingId, user.id, cancelBookingDto?.reason);
   }
 }
