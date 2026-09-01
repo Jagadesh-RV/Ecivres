@@ -19,5 +19,10 @@ export const bookingService = {
   updateBookingStatus: async (id: string, status: string) => {
     const response = await client.patch(`/bookings/${id}/status`, { status });
     return response.data;
+  },
+
+  cancelBooking: async (id: string, reason?: string) => {
+    const response = await client.post(`/bookings/${id}/cancel`, { reason });
+    return response.data;
   }
 };
