@@ -5,3 +5,4 @@ export * from './ScreenContainer';
 export * from './Badge';
 export * from './RatingStars';
 export * from './Avatar';
+export * from './SearchBar';
