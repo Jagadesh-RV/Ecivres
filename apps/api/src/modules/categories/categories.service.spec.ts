@@ -17,6 +17,8 @@ describe('CategoriesService', () => {
               findMany: jest
                 .fn()
                 .mockResolvedValue([{ id: '1', name: 'Cleaning' }]),
+              findUnique: jest.fn().mockResolvedValue(null),
+              create: jest.fn(),
             },
           },
         },
