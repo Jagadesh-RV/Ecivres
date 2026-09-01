@@ -26,7 +26,7 @@ export class ServicesService {
   }
 
   async findAll(query: ServiceQueryDto = {}) {
-    const { categoryId, providerId, minPrice, maxPrice } = query;
+    const { categoryId, providerId, minPrice, maxPrice, search } = query;
     
     const where: any = {};
     if (categoryId) where.categoryId = categoryId;
@@ -36,6 +36,13 @@ export class ServicesService {
       where.price = {};
       if (minPrice) where.price.gte = parseFloat(minPrice);
       if (maxPrice) where.price.lte = parseFloat(maxPrice);
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
     }
 
     return this.prisma.service.findMany({
