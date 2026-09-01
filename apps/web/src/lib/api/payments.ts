@@ -20,4 +20,9 @@ export const paymentsApi = {
     const response = await client.post(`/payments/${bookingId}/pay`, { transactionId });
     return response.data;
   },
+
+  createPaymentIntent: async (bookingId: string): Promise<{ clientSecret: string, amount: number, paymentId: string, transactionId: string }> => {
+    const response = await client.post(`/payments/${bookingId}/intent`);
+    return response.data;
+  },
 };
