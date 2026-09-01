@@ -4,6 +4,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
+jest.mock('bcrypt');
+
 describe('UsersService', () => {
   let service: UsersService;
   let prismaService: any;
@@ -77,8 +79,8 @@ describe('UsersService', () => {
 
   describe('changePassword', () => {
     it('should update password when current password is valid', async () => {
-      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => true);
-      jest.spyOn(bcrypt, 'hash').mockImplementation(async () => 'newhashedpassword');
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('newhashedpassword');
       prismaService.user.findUnique.mockResolvedValue(mockUser);
       prismaService.user.update.mockResolvedValue({ ...mockUser, password: 'newhashedpassword' });
 
@@ -89,7 +91,7 @@ describe('UsersService', () => {
     });
 
     it('should throw BadRequestException when current password is invalid', async () => {
-      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => false);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       prismaService.user.findUnique.mockResolvedValue(mockUser);
 
       await expect(service.changePassword('user-1', 'wrongpass', 'newpass123')).rejects.toThrow(BadRequestException);
