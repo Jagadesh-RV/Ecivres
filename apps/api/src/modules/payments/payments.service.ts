@@ -1,13 +1,62 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { StripeService } from './stripe.service';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
+    private stripeService: StripeService,
   ) {}
+
+  async createPaymentIntent(bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { service: true, payment: true },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    let payment = booking.payment;
+    if (!payment) {
+      payment = await this.prisma.payment.create({
+        data: {
+          bookingId: booking.id,
+          amount: booking.service.price,
+          status: 'PENDING',
+        },
+      });
+    }
+
+    if (payment.status === 'SUCCESS') {
+      throw new BadRequestException('Booking is already paid');
+    }
+
+    const stripeIntent = await this.stripeService.createPaymentIntent(
+      payment.amount,
+      'usd',
+      { bookingId: booking.id, paymentId: payment.id }
+    );
+
+    // Save intent ID as transaction ID
+    await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        transactionId: stripeIntent.id,
+      },
+    });
+
+    return {
+      clientSecret: stripeIntent.client_secret,
+      amount: payment.amount,
+      paymentId: payment.id,
+      transactionId: stripeIntent.id,
+    };
+  }
 
   async createPayment(bookingId: string) {
     const booking = await this.prisma.booking.findUnique({
@@ -66,9 +115,6 @@ export class PaymentsService {
       console.error('Failed to send payment notification', err);
     }
 
-    // Optionally update booking status if needed
-    // In our case we keep the booking status as CONFIRMED or update it. 
-    // Let's leave booking status as is, or set it to CONFIRMED if it was PENDING.
     if (payment.booking.status === 'PENDING') {
       await this.prisma.booking.update({
         where: { id: bookingId },

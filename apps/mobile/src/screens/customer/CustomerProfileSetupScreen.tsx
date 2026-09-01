@@ -8,6 +8,7 @@ export default function CustomerProfileSetupScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -22,6 +23,7 @@ export default function CustomerProfileSetupScreen() {
         firstName,
         lastName,
         phone,
+        avatarUrl,
       });
 
       // Refetch user profile to update Zustand state
@@ -59,6 +61,15 @@ export default function CustomerProfileSetupScreen() {
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Avatar Image URL (Optional)"
+        value={avatarUrl}
+        onChangeText={setAvatarUrl}
+        autoCapitalize="none"
+        autoCorrect={false}
       />
 
       <TouchableOpacity 

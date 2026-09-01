@@ -60,10 +60,11 @@ export class BookingsService {
     try {
       const providerUserId = service.provider.userId;
       const clientName = customer.firstName ? `${customer.firstName} ${customer.lastName || ''}` : 'A customer';
+      const dateStr = newBooking.scheduledAt ? new Date(newBooking.scheduledAt).toLocaleString() : '';
       await this.notificationsService.create(
         providerUserId,
         'New Booking Request',
-        `${clientName} has booked your service "${service.name}" for ${newBooking.scheduledAt.toLocaleString()}`,
+        `${clientName} has booked your service "${service.name}"${dateStr ? ' for ' + dateStr : ''}`,
       );
     } catch (err) {
       console.error('Failed to send booking notification', err);

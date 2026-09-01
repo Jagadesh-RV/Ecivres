@@ -40,6 +40,15 @@ async function main() {
     },
   });
 
+  const manageServicesPermission = await prisma.permission.upsert({
+    where: { name: 'manage:services' },
+    update: {},
+    create: {
+      name: 'manage:services',
+      description: 'Manage service listings (create, update, delete)',
+    },
+  });
+
   // Link Permissions to Roles
   await prisma.rolePermission.upsert({
     where: {
@@ -52,6 +61,20 @@ async function main() {
     create: {
       roleId: adminRole.id,
       permissionId: manageCategoriesPermission.id,
+    },
+  });
+
+  await prisma.rolePermission.upsert({
+    where: {
+      roleId_permissionId: {
+        roleId: providerRole.id,
+        permissionId: manageServicesPermission.id,
+      },
+    },
+    update: {},
+    create: {
+      roleId: providerRole.id,
+      permissionId: manageServicesPermission.id,
     },
   });
 

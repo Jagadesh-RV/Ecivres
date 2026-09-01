@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UsersService } from './users.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
@@ -15,6 +16,19 @@ export class UsersController {
     const fullUser = await this.usersService.findOneById(user.id);
     if (!fullUser) return null;
     return fullUser;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  async changePassword(
+    @CurrentUser() user: any,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.usersService.changePassword(
+      user.id,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

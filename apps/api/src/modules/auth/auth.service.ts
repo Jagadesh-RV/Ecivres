@@ -166,4 +166,63 @@ export class AuthService {
 
     return { success: true };
   }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
+      return { message: 'If an account with that email exists, reset instructions have been sent.' };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = await bcrypt.hash(resetToken, 10);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.prisma.refreshToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: `RESET:${resetTokenHash}`,
+        expiresAt,
+      },
+    });
+
+    return {
+      message: 'If an account with that email exists, reset instructions have been sent.',
+      resetToken,
+    };
+  }
+
+  async resetPassword(resetDto: { token: string; newPassword: string }) {
+    const activeTokens = await this.prisma.refreshToken.findMany({
+      where: {
+        tokenHash: { startsWith: 'RESET:' },
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    let matchedTokenRecord = null;
+    for (const tokenRecord of activeTokens) {
+      const rawHash = tokenRecord.tokenHash.replace('RESET:', '');
+      const isMatch = await bcrypt.compare(resetDto.token, rawHash);
+      if (isMatch) {
+        matchedTokenRecord = tokenRecord;
+        break;
+      }
+    }
+
+    if (!matchedTokenRecord) {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+
+    const hashedPassword = await bcrypt.hash(resetDto.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: matchedTokenRecord.userId },
+      data: { password: hashedPassword },
+    });
+
+    await this.prisma.refreshToken.delete({
+      where: { id: matchedTokenRecord.id },
+    });
+
+    return { message: 'Password reset successful' };
+  }
 }

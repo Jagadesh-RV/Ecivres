@@ -9,5 +9,10 @@ export const paymentService = {
   payForBooking: async (bookingId: string, transactionId?: string) => {
     const response = await client.post(`/payments/${bookingId}/pay`, { transactionId });
     return response.data;
+  },
+
+  createPaymentIntent: async (bookingId: string) => {
+    const response = await client.post(`/payments/${bookingId}/intent`);
+    return response.data;
   }
 };

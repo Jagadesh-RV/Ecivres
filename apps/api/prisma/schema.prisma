@@ -71,6 +71,7 @@ model CustomerProfile {
   firstName String
   lastName  String
   phone     String?
+  avatarUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
