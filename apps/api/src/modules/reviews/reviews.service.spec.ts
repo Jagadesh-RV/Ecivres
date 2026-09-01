@@ -1,17 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReviewsService } from './reviews.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('ReviewsService', () => {
   let service: ReviewsService;
+  let prismaService: any;
 
   beforeEach(async () => {
+    prismaService = {
+      customerProfile: { findUnique: jest.fn() },
+      booking: { findUnique: jest.fn() },
+      review: {
+        findFirst: jest.fn(),
+        create: jest.fn(),
+        findMany: jest.fn(),
+      },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReviewsService,
         {
           provide: PrismaService,
-          useValue: {},
+          useValue: prismaService,
         },
       ],
     }).compile();
@@ -21,5 +33,32 @@ describe('ReviewsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('findByService', () => {
+    it('should return list of reviews for a given service', async () => {
+      const mockReviews = [{ id: 'r1', rating: 5, comment: 'Great job!' }];
+      prismaService.review.findMany.mockResolvedValue(mockReviews);
+
+      const result = await service.findByService('service-1');
+      expect(result).toEqual(mockReviews);
+      expect(prismaService.review.findMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('getProviderStats', () => {
+    it('should compute average rating and count accurately', async () => {
+      prismaService.review.findMany.mockResolvedValue([{ rating: 5 }, { rating: 3 }]);
+
+      const result = await service.getProviderStats('provider-1');
+      expect(result).toEqual({ average: 4, count: 2 });
+    });
+
+    it('should return zero average when provider has no reviews', async () => {
+      prismaService.review.findMany.mockResolvedValue([]);
+
+      const result = await service.getProviderStats('provider-1');
+      expect(result).toEqual({ average: 0, count: 0 });
+    });
   });
 });

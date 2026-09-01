@@ -89,4 +89,35 @@ export class ProvidersService {
 
     return profile;
   }
+
+  async findAll(query?: { search?: string; isVerified?: boolean }) {
+    const where: any = {};
+    if (query?.isVerified !== undefined) {
+      where.isVerified = query.isVerified;
+    }
+    if (query?.search) {
+      where.OR = [
+        { businessName: { contains: query.search, mode: 'insensitive' } },
+        { description: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+
+    return this.prisma.providerProfile.findMany({
+      where,
+      include: { services: true },
+    });
+  }
+
+  async findOne(id: string) {
+    const profile = await this.prisma.providerProfile.findUnique({
+      where: { id },
+      include: { services: true },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Provider not found');
+    }
+
+    return profile;
+  }
 }

@@ -1,4 +1,4 @@
-import { IsOptional, IsUUID, IsNumberString } from 'class-validator';
+import { IsOptional, IsUUID, IsNumberString, IsString } from 'class-validator';
 
 export class ServiceQueryDto {
   @IsUUID()
@@ -16,4 +16,8 @@ export class ServiceQueryDto {
   @IsNumberString()
   @IsOptional()
   maxPrice?: string;
+
+  @IsString()
+  @IsOptional()
+  search?: string;
 }
