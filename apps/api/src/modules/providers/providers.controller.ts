@@ -29,6 +29,12 @@ export class ProvidersController {
     return this.providersService.getProfile(user.id);
   }
 
+  @Get('dashboard-stats')
+  @ApiOperation({ summary: 'Get provider analytics and revenue dashboard metrics' })
+  async getDashboardStats(@CurrentUser() user: any) {
+    return this.providersService.getProviderDashboardStats(user.id);
+  }
+
   @Post('profile')
   @ApiOperation({ summary: 'Create provider profile' })
   async createProfile(
