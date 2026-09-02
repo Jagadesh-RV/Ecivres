@@ -13,6 +13,12 @@ import { Roles } from '../../common/decorators/roles.decorator';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @Get('dashboard-stats')
+  @ApiOperation({ summary: 'Get platform analytics overview metrics (Admin only)' })
+  async getDashboardStats() {
+    return this.adminService.getAdminDashboardStats();
+  }
+
   @Get('users')
   @ApiOperation({ summary: 'Get all users with profiles (Admin only)' })
   async getUsers() {
@@ -22,6 +28,18 @@ export class AdminController {
   @Patch('providers/:id/verify')
   @ApiOperation({ summary: 'Verify a provider profile (Admin only)' })
   async verifyProvider(@Param('id') providerProfileId: string) {
-    return this.adminService.verifyProvider(providerProfileId);
+    return this.adminService.approveProvider(providerProfileId);
+  }
+
+  @Patch('providers/:id/approve')
+  @ApiOperation({ summary: 'Approve provider verification request (Admin only)' })
+  async approveProvider(@Param('id') providerProfileId: string) {
+    return this.adminService.approveProvider(providerProfileId);
+  }
+
+  @Patch('providers/:id/reject')
+  @ApiOperation({ summary: 'Reject provider verification request (Admin only)' })
+  async rejectProvider(@Param('id') providerProfileId: string) {
+    return this.adminService.rejectProvider(providerProfileId);
   }
 }
