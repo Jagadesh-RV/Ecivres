@@ -28,4 +28,43 @@ describe('AdminService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('getAdminDashboardStats', () => {
+    it('should calculate platform metrics and revenue volume', async () => {
+      const mockPrisma = (service as any).prisma;
+      mockPrisma.user.count = jest.fn().mockResolvedValue(150);
+      mockPrisma.customerProfile.count = jest.fn().mockResolvedValue(120);
+      mockPrisma.providerProfile.count = jest.fn().mockResolvedValue(30);
+      mockPrisma.booking = {
+        count: jest.fn().mockResolvedValue(80),
+        findMany: jest.fn().mockResolvedValue([
+          { id: 'b-1', service: { price: 100 } },
+          { id: 'b-2', service: { price: 250 } },
+        ]),
+      };
+      mockPrisma.providerProfile.findMany = jest.fn().mockResolvedValue([]);
+
+      const result = await service.getAdminDashboardStats();
+
+      expect(result.totalUsersCount).toEqual(150);
+      expect(result.totalCustomersCount).toEqual(120);
+      expect(result.platformGrossVolume).toEqual(350);
+    });
+  });
+
+  describe('provider verification', () => {
+    it('should approve provider profile', async () => {
+      const mockPrisma = (service as any).prisma;
+      mockPrisma.providerProfile.findUnique = jest.fn().mockResolvedValue({ id: 'p-1' });
+      mockPrisma.providerProfile.update = jest.fn().mockResolvedValue({ id: 'p-1', isVerified: true });
+
+      const result = await service.approveProvider('p-1');
+
+      expect(result.isVerified).toBe(true);
+      expect(mockPrisma.providerProfile.update).toHaveBeenCalledWith({
+        where: { id: 'p-1' },
+        data: { isVerified: true },
+      });
+    });
+  });
 });
