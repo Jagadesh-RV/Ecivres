@@ -120,4 +120,53 @@ export class ProvidersService {
 
     return profile;
   }
+
+  async getProviderDashboardStats(userId: string) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    const [activeServicesCount, totalBookingsCount, pendingBookingsCount, recentBookings] =
+      await Promise.all([
+        this.prisma.service.count({ where: { providerId: provider.id } }),
+        this.prisma.booking.count({
+          where: { service: { providerId: provider.id } },
+        }),
+        this.prisma.booking.count({
+          where: { service: { providerId: provider.id }, status: 'PENDING' },
+        }),
+        this.prisma.booking.findMany({
+          where: { service: { providerId: provider.id } },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            service: true,
+            customer: { include: { user: { select: { email: true } } } },
+          },
+        }),
+      ]);
+
+    const completedBookings = await this.prisma.booking.findMany({
+      where: { service: { providerId: provider.id }, status: 'COMPLETED' },
+      include: { service: true },
+    });
+
+    const totalEarnings = completedBookings.reduce(
+      (sum, b) => sum + (b.service?.price || 0),
+      0,
+    );
+
+    return {
+      provider,
+      activeServicesCount,
+      totalBookingsCount,
+      pendingBookingsCount,
+      totalEarnings,
+      recentBookings,
+    };
+  }
 }
