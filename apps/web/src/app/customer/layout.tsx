@@ -9,11 +9,11 @@ import { client } from "../../lib/axios";
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, isAuthenticated, hasHydrated } = useAuthStore();
+  const { user, isAuthenticated, isLoading } = useAuthStore();
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
   useEffect(() => {
-    if (hasHydrated) {
+    if (!isLoading) {
       if (!isAuthenticated) {
         router.push("/login");
         return;
@@ -25,9 +25,9 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         .then((res) => setUnreadCount(res.data?.count || 0))
         .catch(() => setUnreadCount(0));
     }
-  }, [hasHydrated, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router]);
 
-  if (!hasHydrated) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-indigo-600"></div>
