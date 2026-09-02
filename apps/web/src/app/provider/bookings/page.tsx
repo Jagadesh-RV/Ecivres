@@ -1,73 +1,54 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { bookingsApi } from "@/lib/api/bookings";
-import { ProviderBookingRow } from "@/components/bookings/ProviderBookingRow";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { client } from "../../../lib/axios";
+import { ProviderBookingsTable, ProviderBookingItem } from "../../../components/provider/ProviderBookingsTable";
 
 export default function ProviderBookingsPage() {
-  const queryClient = useQueryClient();
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [bookings, setBookings] = useState<ProviderBookingItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: bookings, isLoading } = useQuery({
-    queryKey: ["provider-bookings"],
-    queryFn: bookingsApi.getProviderBookings,
-  });
-
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" }) =>
-      bookingsApi.updateBookingStatus(id, status),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["provider-bookings"] });
-      toast.success(`Booking ${variables.status.toLowerCase()} successfully.`);
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to update booking status.");
-    },
-    onSettled: () => {
-      setUpdatingId(null);
-    },
-  });
-
-  const handleUpdateStatus = (id: string, status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED") => {
-    setUpdatingId(id);
-    updateStatusMutation.mutate({ id, status });
+  const fetchBookings = async () => {
+    try {
+      setIsLoading(true);
+      const res = await client.get("/bookings/provider");
+      setBookings(res.data || []);
+    } catch (err) {
+      console.error("Failed to load provider bookings", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      await client.patch(`/bookings/${id}/status`, { status });
+      fetchBookings();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Incoming Bookings</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage service requests from your customers.
-        </p>
+        <h2 className="text-xl font-bold text-gray-900">Client Bookings Management</h2>
+        <p className="text-xs text-gray-500 mt-1">Review incoming booking requests, confirm schedules, and complete jobs.</p>
       </div>
 
-      <div className="space-y-4">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-          </>
-        ) : bookings?.length === 0 ? (
-          <div className="text-center py-20 bg-muted/30 rounded-2xl border border-dashed">
-            <h3 className="text-xl font-semibold mb-2">No bookings yet</h3>
-            <p className="text-muted-foreground">When customers book your services, they will appear here.</p>
-          </div>
-        ) : (
-          bookings?.map((booking: any) => (
-            <ProviderBookingRow
-              key={booking.id}
-              booking={booking}
-              onUpdateStatus={handleUpdateStatus}
-              isUpdating={updatingId === booking.id}
-            />
-          ))
-        )}
-      </div>
+      <ProviderBookingsTable bookings={bookings} onUpdateStatus={handleUpdateStatus} />
     </div>
   );
 }

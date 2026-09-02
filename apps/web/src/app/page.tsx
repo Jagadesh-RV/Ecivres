@@ -15,15 +15,20 @@ export default function LandingPage() {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             EcivreS connects you with top-rated professionals for all your needs. Book trusted services instantly, with transparent pricing.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link href="/register">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <Link href="/customer">
               <Button size="lg" className="w-full sm:w-auto text-lg px-8">
-                Find a Service <Search className="ml-2 h-5 w-5" />
+                Customer Portal <Search className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/register?role=provider">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8">
-                Become a Provider
+            <Link href="/provider">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 border-indigo-600 text-indigo-600 hover:bg-indigo-50">
+                Provider Portal <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg px-8">
+                Get Started
               </Button>
             </Link>
           </div>

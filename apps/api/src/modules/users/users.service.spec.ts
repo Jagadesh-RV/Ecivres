@@ -97,4 +97,37 @@ describe('UsersService', () => {
       await expect(service.changePassword('user-1', 'wrongpass', 'newpass123')).rejects.toThrow(BadRequestException);
     });
   });
+  describe('getCustomerDashboardStats', () => {
+    it('should calculate and return customer analytics overview', async () => {
+      prismaService.customerProfile.findUnique.mockResolvedValue({ id: 'cp-1', userId: 'user-1' });
+      prismaService.booking = {
+        count: jest.fn().mockImplementation(({ where }) => {
+          if (where.status?.in) return Promise.resolve(2);
+          if (where.status === 'COMPLETED') return Promise.resolve(5);
+          return Promise.resolve(7);
+        }),
+        findMany: jest.fn().mockResolvedValue([
+          { id: 'b-1', service: { price: 100 } },
+          { id: 'b-2', service: { price: 150 } },
+        ]),
+      };
+      prismaService.notification = {
+        count: jest.fn().mockResolvedValue(3),
+      };
+
+      const result = await service.getCustomerDashboardStats('user-1');
+
+      expect(result.totalBookings).toEqual(7);
+      expect(result.activeBookings).toEqual(2);
+      expect(result.completedBookings).toEqual(5);
+      expect(result.unreadNotifications).toEqual(3);
+      expect(result.totalSpent).toEqual(250);
+    });
+
+    it('should throw NotFoundException if customer profile does not exist', async () => {
+      prismaService.customerProfile.findUnique.mockResolvedValue(null);
+
+      await expect(service.getCustomerDashboardStats('user-1')).rejects.toThrow(NotFoundException);
+    });
+  });
 });

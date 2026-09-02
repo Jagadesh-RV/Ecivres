@@ -38,7 +38,9 @@ export default function RegisterPage() {
       
       router.push("/profile-setup");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      const msg = err.response?.data?.message;
+      const errorMessage = Array.isArray(msg) ? msg.join(", ") : (typeof msg === "string" ? msg : "Registration failed. Please try again.");
+      setError(errorMessage);
     }
   };
 

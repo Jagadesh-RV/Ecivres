@@ -67,4 +67,32 @@ describe('ProvidersService', () => {
       await expect(service.findOne('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('getProviderDashboardStats', () => {
+    it('should calculate provider earnings and booking statistics', async () => {
+      prismaService.providerProfile.findUnique.mockResolvedValue(mockProvider);
+      prismaService.service = {
+        count: jest.fn().mockResolvedValue(4),
+      };
+      prismaService.booking = {
+        count: jest.fn().mockResolvedValue(10),
+        findMany: jest.fn().mockResolvedValue([
+          { id: 'b-1', service: { price: 200 } },
+          { id: 'b-2', service: { price: 350 } },
+        ]),
+      };
+
+      const result = await service.getProviderDashboardStats('user-1');
+
+      expect(result.activeServicesCount).toEqual(4);
+      expect(result.totalBookingsCount).toEqual(10);
+      expect(result.totalEarnings).toEqual(550);
+    });
+
+    it('should throw NotFoundException when provider profile does not exist', async () => {
+      prismaService.providerProfile.findUnique.mockResolvedValue(null);
+
+      await expect(service.getProviderDashboardStats('user-1')).rejects.toThrow(NotFoundException);
+    });
+  });
 });
