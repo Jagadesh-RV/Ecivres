@@ -49,6 +49,33 @@ async function main() {
     },
   });
 
+  const customerDashboardPermission = await prisma.permission.upsert({
+    where: { name: 'read:customer-dashboard' },
+    update: {},
+    create: {
+      name: 'read:customer-dashboard',
+      description: 'Access customer analytics and dashboard',
+    },
+  });
+
+  const createBookingPermission = await prisma.permission.upsert({
+    where: { name: 'create:customer-booking' },
+    update: {},
+    create: {
+      name: 'create:customer-booking',
+      description: 'Create new service bookings',
+    },
+  });
+
+  const cancelBookingPermission = await prisma.permission.upsert({
+    where: { name: 'cancel:customer-booking' },
+    update: {},
+    create: {
+      name: 'cancel:customer-booking',
+      description: 'Cancel customer bookings',
+    },
+  });
+
   // Link Permissions to Roles
   await prisma.rolePermission.upsert({
     where: {
@@ -77,6 +104,28 @@ async function main() {
       permissionId: manageServicesPermission.id,
     },
   });
+
+  const customerPermissions = [
+    customerDashboardPermission,
+    createBookingPermission,
+    cancelBookingPermission,
+  ];
+
+  for (const perm of customerPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: customerRole.id,
+          permissionId: perm.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: customerRole.id,
+        permissionId: perm.id,
+      },
+    });
+  }
 
   // Create an Admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
