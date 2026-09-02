@@ -12,10 +12,13 @@ describe('AdminService', () => {
         {
           provide: PrismaService,
           useValue: {
-            user: { findMany: jest.fn().mockResolvedValue([]) },
+            user: { findMany: jest.fn().mockResolvedValue([]), count: jest.fn() },
+            customerProfile: { count: jest.fn() },
             providerProfile: {
               findUnique: jest.fn().mockResolvedValue({ id: '1' }),
               update: jest.fn().mockResolvedValue({ id: '1' }),
+              count: jest.fn(),
+              findMany: jest.fn().mockResolvedValue([]),
             },
           },
         },
