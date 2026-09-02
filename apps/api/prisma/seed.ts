@@ -91,19 +91,45 @@ async function main() {
     },
   });
 
-  await prisma.rolePermission.upsert({
-    where: {
-      roleId_permissionId: {
-        roleId: providerRole.id,
-        permissionId: manageServicesPermission.id,
-      },
-    },
+  const providerDashboardPermission = await prisma.permission.upsert({
+    where: { name: 'read:provider-dashboard' },
     update: {},
     create: {
-      roleId: providerRole.id,
-      permissionId: manageServicesPermission.id,
+      name: 'read:provider-dashboard',
+      description: 'Access provider business analytics dashboard',
     },
   });
+
+  const providerEarningsPermission = await prisma.permission.upsert({
+    where: { name: 'read:provider-earnings' },
+    update: {},
+    create: {
+      name: 'read:provider-earnings',
+      description: 'View provider earnings and payout statements',
+    },
+  });
+
+  const providerPermissions = [
+    manageServicesPermission,
+    providerDashboardPermission,
+    providerEarningsPermission,
+  ];
+
+  for (const perm of providerPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: providerRole.id,
+          permissionId: perm.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: providerRole.id,
+        permissionId: perm.id,
+      },
+    });
+  }
 
   const customerPermissions = [
     customerDashboardPermission,
