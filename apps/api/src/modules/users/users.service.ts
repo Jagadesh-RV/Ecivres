@@ -183,4 +183,50 @@ export class UsersService {
       return profile;
     });
   }
+
+  async getCustomerDashboardStats(userId: string) {
+    const customer = await this.prisma.customerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!customer) {
+      throw new NotFoundException('Customer profile not found');
+    }
+
+    const [totalBookings, activeBookings, completedBookings, unreadNotifications, recentBookings] =
+      await Promise.all([
+        this.prisma.booking.count({ where: { customerId: customer.id } }),
+        this.prisma.booking.count({
+          where: {
+            customerId: customer.id,
+            status: { in: ['PENDING', 'CONFIRMED'] },
+          },
+        }),
+        this.prisma.booking.count({
+          where: { customerId: customer.id, status: 'COMPLETED' },
+        }),
+        this.prisma.notification.count({
+          where: { userId, isRead: false },
+        }),
+        this.prisma.booking.findMany({
+          where: { customerId: customer.id },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            service: { select: { id: true, name: true, price: true } },
+          },
+        }),
+      ]);
+
+    const totalSpent = recentBookings.reduce((sum, b) => sum + (b.service?.price || 0), 0);
+
+    return {
+      totalBookings,
+      activeBookings,
+      completedBookings,
+      unreadNotifications,
+      totalSpent,
+      recentBookings,
+    };
+  }
 }

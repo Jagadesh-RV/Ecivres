@@ -20,6 +20,12 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('customer/dashboard-stats')
+  async getCustomerDashboardStats(@CurrentUser() user: any) {
+    return this.usersService.getCustomerDashboardStats(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('change-password')
   async changePassword(
     @CurrentUser() user: any,

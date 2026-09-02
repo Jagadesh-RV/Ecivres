@@ -1,162 +1,121 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { client } from "@/lib/axios";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Clock, DollarSign, User } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { bookingsApi } from "@/lib/api/bookings";
-import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ReviewList } from "@/components/reviews/ReviewList";
+import React, { useEffect, useState, use } from "react";
+import { useRouter } from "next/navigation";
+import { client } from "../../../../lib/axios";
+import { Button } from "../../../../components/ui/button";
+import { RatingStars } from "../../../../components/ui/RatingStars";
 
-export default function ServiceDetailsPage() {
-  const params = useParams();
+export default function ServiceDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
-  const id = params.id as string;
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [isBookingLoading, setIsBookingLoading] = useState(false);
 
-  const { data: service, isLoading } = useQuery({
-    queryKey: ["service", id],
-    queryFn: async () => {
-      const { data } = await client.get(`/services/${id}`);
-      return data;
-    },
-  });
+  const [service, setService] = useState<any>(null);
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isBooking, setIsBooking] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    client
+      .get(`/services/${resolvedParams.id}`)
+      .then((res) => setService(res.data))
+      .catch((err) => console.error("Failed to load service", err))
+      .finally(() => setIsLoading(false));
+  }, [resolvedParams.id]);
+
+  const handleBook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!scheduledAt) {
+      setError("Please select a date and time for the appointment");
+      return;
+    }
+
+    setIsBooking(true);
+    setError("");
+    try {
+      await client.post("/bookings", {
+        serviceId: resolvedParams.id,
+        scheduledAt: new Date(scheduledAt).toISOString(),
+      });
+      alert("Booking confirmed successfully!");
+      router.push("/customer/bookings");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to book service");
+    } finally {
+      setIsBooking(false);
+    }
+  };
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto space-y-8">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-3/4" />
-          <Skeleton className="h-6 w-1/2" />
-        </div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (!service) {
     return (
-      <div className="text-center py-24">
-        <h2 className="text-2xl font-bold">Service not found</h2>
-        <Button onClick={() => router.back()} variant="outline" className="mt-4">Go Back</Button>
+      <div className="p-8 text-center text-gray-500 text-sm">
+        Service listing not found.
       </div>
     );
   }
 
-  const handleBookService = async () => {
-    try {
-      setIsBookingLoading(true);
-      
-      // We set scheduledAt to tomorrow at 10 AM by default for this MVP
-      const date = new Date();
-      date.setDate(date.getDate() + 1);
-      date.setHours(10, 0, 0, 0);
-
-      await bookingsApi.createBooking({
-        serviceId: id,
-        scheduledAt: date.toISOString(),
-      });
-      
-      toast.success("Booking requested successfully!");
-      setIsBookingOpen(false);
-      router.push("/customer/bookings");
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to book service");
-    } finally {
-      setIsBookingLoading(false);
-    }
-  };
-
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <Button variant="ghost" onClick={() => router.back()} className="-ml-4 mb-4">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back
-      </Button>
-      
-      <div className="bg-card border rounded-3xl overflow-hidden shadow-sm">
-        <div className="h-48 bg-muted/50 flex items-center justify-center">
-          <span className="text-muted-foreground">Image Placeholder</span>
-        </div>
-        <div className="p-8 md:p-12 space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
           <div>
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              {service.category?.name || "Uncategorized"}
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight">{service.name}</h1>
-          </div>
-
-          <div className="flex flex-wrap gap-6 py-6 border-y text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">${service.price}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">{service.duration} mins</span>
-            </div>
-            <Link href={`/customer/provider/${service.providerId}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-              <User className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">View Provider</span>
-            </Link>
-          </div>
-
-          <div>
-            <h3 className="text-xl font-semibold mb-4">About this service</h3>
-            <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {service.description}
+            <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+              {service.category?.name || "Professional Service"}
+            </span>
+            <h1 className="text-2xl font-bold text-gray-900 mt-3">{service.name}</h1>
+            <p className="text-xs text-gray-500 mt-1">
+              Offered by <span className="font-bold text-gray-800">{service.provider?.businessName || "Verified Provider"}</span>
             </p>
           </div>
-
-          <div className="pt-4 flex gap-4">
-            <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
-              <DialogTrigger render={<Button size="lg" className="w-full md:w-auto px-12" />}>
-                Book Now
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Book Service</DialogTitle>
-                  <DialogDescription>
-                    Request an appointment for {service.name} with {service.provider?.businessName}.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="py-6 space-y-4">
-                  <div className="bg-muted p-4 rounded-lg">
-                    <p className="font-medium text-sm text-muted-foreground mb-1">Appointment Time</p>
-                    <p>Tomorrow at 10:00 AM</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Note: A full calendar and time picker will be available in the next release. For now, this will request an appointment for tomorrow at 10:00 AM.
-                  </p>
-                </div>
-                <div className="flex justify-end gap-3">
-                  <Button variant="outline" onClick={() => setIsBookingOpen(false)}>Cancel</Button>
-                  <Button onClick={handleBookService} disabled={isBookingLoading}>
-                    {isBookingLoading ? "Confirming..." : "Confirm Booking"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+          <div className="text-left md:text-right">
+            <span className="text-3xl font-extrabold text-gray-900">${service.price?.toFixed(2)}</span>
+            <p className="text-xs text-gray-400 mt-0.5">{service.duration} mins duration</p>
           </div>
         </div>
-      </div>
-      
-      {/* Reviews Section */}
-      <div className="mt-16">
-        <ReviewList serviceId={id} />
+
+        <div className="py-6 border-b border-gray-100 space-y-4">
+          <h3 className="text-sm font-bold text-gray-900">Service Description</h3>
+          <p className="text-xs text-gray-600 leading-relaxed">{service.description}</p>
+          <div className="flex items-center space-x-2 pt-2">
+            <RatingStars rating={4.9} />
+            <span className="text-xs text-gray-500 font-medium">(24 verified customer reviews)</span>
+          </div>
+        </div>
+
+        {/* Booking Form */}
+        <form onSubmit={handleBook} className="pt-6 space-y-4">
+          <h3 className="text-base font-bold text-gray-900">Schedule Appointment</h3>
+
+          {error && (
+            <div className="p-3 text-xs text-red-700 bg-red-50 rounded-lg border border-red-200">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-1.5 max-w-sm">
+            <label className="text-xs font-semibold text-gray-700">Select Date & Time</label>
+            <input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              className="w-full px-3.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <Button type="submit" disabled={isBooking} className="w-full sm:w-auto px-8">
+            {isBooking ? "Confirming Booking..." : "Confirm Reservation"}
+          </Button>
+        </form>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBookingDto } from './dto/booking.dto';
@@ -172,7 +173,14 @@ export class BookingsService {
   }
 
   async cancelBooking(bookingId: string, userId: string, reason?: string) {
-    const booking = await this.findOne(bookingId);
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { customer: true, service: true },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
 
     if (booking.customerId !== userId) {
       throw new ForbiddenException('You can only cancel your own bookings');

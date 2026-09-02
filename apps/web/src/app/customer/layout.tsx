@@ -1,50 +1,47 @@
 "use client";
 
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../stores/auth-store";
+import { CustomerSidebar } from "../../components/customer/CustomerSidebar";
+import { CustomerHeader } from "../../components/customer/CustomerHeader";
+import { client } from "../../lib/axios";
 
-export default function CustomerLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
+export default function CustomerLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
-  const links = [
-    { href: "/customer", label: "Dashboard" },
-    { href: "/customer/categories", label: "Categories" },
-    { href: "/customer/services", label: "Services" },
-    { href: "/customer/bookings", label: "My Bookings" },
-  ];
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push("/login");
+        return;
+      }
+
+      // Fetch unread notifications count
+      client
+        .get("/notifications/unread-count")
+        .then((res) => setUnreadCount(res.data?.count || 0))
+        .catch(() => setUnreadCount(0));
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-      <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-        <aside className="w-full md:w-64 shrink-0">
-          <nav className="flex flex-col gap-2">
-            {links.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    isActive 
-                      ? "bg-primary text-primary-foreground font-medium" 
-                      : "hover:bg-muted"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </aside>
-        <main className="flex-1 min-w-0">
-          {children}
-        </main>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <CustomerHeader />
+      <div className="flex flex-1">
+        <CustomerSidebar unreadCount={unreadCount} />
+        <main className="flex-1 p-6 max-w-7xl mx-auto w-full">{children}</main>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }
