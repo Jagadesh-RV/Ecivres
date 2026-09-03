@@ -27,6 +27,8 @@ export const ProviderSidebar: React.FC<ProviderSidebarProps> = ({ pendingBooking
       badge: pendingBookingsCount > 0 ? pendingBookingsCount : undefined,
     },
     { label: "My Services", href: "/provider/services", icon: "🛠️" },
+    { label: "Revenue & Payouts", href: "/provider/earnings", icon: "💵" },
+    { label: "Client Reviews", href: "/provider/reviews", icon: "⭐" },
     { label: "Add New Service", href: "/provider/services/create", icon: "➕" },
   ];
 
