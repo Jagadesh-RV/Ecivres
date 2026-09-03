@@ -155,7 +155,7 @@ export class PaymentsService {
         booking: {
           include: {
             service: true,
-            customer: { include: { user: { select: { email: true } } } },
+            customer: { select: { id: true, email: true, customerProfile: true } },
           },
         },
       },
@@ -184,7 +184,7 @@ export class PaymentsService {
         booking: {
           include: {
             service: { include: { provider: true } },
-            customer: { include: { user: { select: { email: true } } } },
+            customer: { select: { id: true, email: true, customerProfile: true } },
           },
         },
       },
