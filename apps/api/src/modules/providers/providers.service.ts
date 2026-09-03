@@ -145,7 +145,7 @@ export class ProvidersService {
           orderBy: { createdAt: 'desc' },
           include: {
             service: true,
-            customer: { include: { user: { select: { email: true } } } },
+            customer: { select: { id: true, email: true, customerProfile: true } },
           },
         }),
       ]);

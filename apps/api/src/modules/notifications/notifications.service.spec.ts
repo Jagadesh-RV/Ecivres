@@ -22,4 +22,20 @@ describe('NotificationsService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('getUnreadCount', () => {
+    it('should return unread count for user', async () => {
+      const mockPrisma = (service as any).prisma;
+      mockPrisma.notification = {
+        count: jest.fn().mockResolvedValue(5),
+      };
+
+      const result = await service.getUnreadCount('user-1');
+
+      expect(result.unreadCount).toEqual(5);
+      expect(mockPrisma.notification.count).toHaveBeenCalledWith({
+        where: { userId: 'user-1', isRead: false },
+      });
+    });
+  });
 });

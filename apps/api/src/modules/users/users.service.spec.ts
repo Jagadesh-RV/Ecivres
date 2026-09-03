@@ -130,4 +130,26 @@ describe('UsersService', () => {
       await expect(service.getCustomerDashboardStats('user-1')).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('updateCustomerProfile', () => {
+    it('should update customer profile fields', async () => {
+      prismaService.customerProfile.findUnique.mockResolvedValue({ id: 'cp-1', userId: 'user-1' });
+      prismaService.customerProfile.update = jest.fn().mockResolvedValue({
+        id: 'cp-1',
+        userId: 'user-1',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        phone: '1234567890',
+      });
+
+      const result = await service.updateCustomerProfile('user-1', {
+        firstName: 'Jane',
+        lastName: 'Smith',
+        phone: '1234567890',
+      });
+
+      expect(result.firstName).toEqual('Jane');
+      expect(result.lastName).toEqual('Smith');
+    });
+  });
 });

@@ -26,6 +26,12 @@ export class ReviewsController {
     return this.reviewsService.findByService(serviceId);
   }
 
+  @Get('provider/:providerId')
+  @ApiOperation({ summary: 'Get all reviews for a specific provider' })
+  findByProvider(@Param('providerId') providerId: string) {
+    return this.reviewsService.findByProvider(providerId);
+  }
+
   @Get('provider/:providerId/stats')
   @ApiOperation({ summary: 'Get review stats for a provider' })
   getProviderStats(@Param('providerId') providerId: string) {

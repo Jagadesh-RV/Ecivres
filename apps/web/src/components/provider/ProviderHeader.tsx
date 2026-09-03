@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useAuthStore } from "../../stores/auth-store";
+import { NotificationBellDropdown } from "../notifications/NotificationBellDropdown";
 
 interface ProviderHeaderProps {
   businessName?: string;
@@ -21,6 +22,8 @@ export const ProviderHeader: React.FC<ProviderHeaderProps> = ({ businessName }) 
       </div>
 
       <div className="flex items-center space-x-4">
+        <NotificationBellDropdown />
+
         <Link
           href="/provider/services/create"
           className="inline-flex items-center px-3.5 py-1.5 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"

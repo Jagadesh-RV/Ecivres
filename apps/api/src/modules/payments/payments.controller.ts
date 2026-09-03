@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -25,6 +26,18 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Create a Stripe Payment Intent for booking' })
   async createIntent(@Param('bookingId') bookingId: string) {
     return this.paymentsService.createPaymentIntent(bookingId);
+  }
+
+  @Get('provider/earnings')
+  @ApiOperation({ summary: 'Get provider net earnings and payout history' })
+  async getEarnings(@CurrentUser() user: any) {
+    return this.paymentsService.getProviderEarningsSummary(user.id);
+  }
+
+  @Get('admin/transactions')
+  @ApiOperation({ summary: 'Get all platform payments and fee ledger (Admin only)' })
+  async getAdminTransactions() {
+    return this.paymentsService.getAdminTransactions();
   }
 
   @Get(':bookingId')

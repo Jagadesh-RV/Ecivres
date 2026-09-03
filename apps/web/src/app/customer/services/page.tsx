@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { client } from "../../../lib/axios";
 import { RatingStars } from "../../../components/ui/RatingStars";
+import { FavoriteButton } from "../../../components/ui/FavoriteButton";
+import { ServiceFilterBar } from "../../../components/services/ServiceFilterBar";
 
 export interface ServiceItem {
   id: string;
@@ -19,14 +21,21 @@ export interface ServiceItem {
 export default function CustomerServicesPage() {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [search, setSearch] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchServices = async () => {
     try {
       setIsLoading(true);
-      const res = await client.get("/services", {
-        params: search ? { search } : {},
-      });
+      const params: any = {};
+      if (search) params.search = search;
+      if (minPrice) params.minPrice = minPrice;
+      if (maxPrice) params.maxPrice = maxPrice;
+      if (sortBy) params.sortBy = sortBy;
+
+      const res = await client.get("/services", { params });
       setServices(res.data || []);
     } catch (err) {
       console.error("Failed to load services", err);
@@ -37,25 +46,33 @@ export default function CustomerServicesPage() {
 
   useEffect(() => {
     fetchServices();
-  }, [search]);
+  }, [search, minPrice, maxPrice, sortBy]);
+
+  const handleReset = () => {
+    setSearch("");
+    setMinPrice("");
+    setMaxPrice("");
+    setSortBy("newest");
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Services Marketplace</h2>
-          <p className="text-xs text-gray-500 mt-1">Search and book verified professionals for your home & business.</p>
-        </div>
-        <div className="w-full sm:w-72">
-          <input
-            type="text"
-            placeholder="Search by keyword..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
+      <div>
+        <h2 className="text-xl font-bold text-gray-900">Services Marketplace</h2>
+        <p className="text-xs text-gray-500 mt-1">Search and book verified professionals for your home & business.</p>
       </div>
+
+      <ServiceFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        minPrice={minPrice}
+        onMinPriceChange={setMinPrice}
+        maxPrice={maxPrice}
+        onMaxPriceChange={setMaxPrice}
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+        onResetFilters={handleReset}
+      />
 
       {isLoading ? (
         <div className="flex min-h-[300px] items-center justify-center">
@@ -63,7 +80,7 @@ export default function CustomerServicesPage() {
         </div>
       ) : services.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500 text-sm">
-          No services match your search query. Try searching for a different keyword!
+          No services match your filters. Try adjusting price range or keyword!
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -73,9 +90,21 @@ export default function CustomerServicesPage() {
               className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
             >
               <div>
-                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
-                  {item.provider?.businessName || "Verified Provider"}
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+                    {item.provider?.businessName || "Verified Provider"}
+                  </span>
+                  <FavoriteButton
+                    serviceId={item.id}
+                    onToggle={(isFav) =>
+                      alert(
+                        isFav
+                          ? `Saved "${item.name}" to your Favorites!`
+                          : `Removed "${item.name}" from Favorites.`
+                      )
+                    }
+                  />
+                </div>
 
                 <h3 className="text-base font-bold text-gray-900 mt-3">{item.name}</h3>
                 <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</p>

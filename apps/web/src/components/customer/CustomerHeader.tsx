@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useAuthStore } from "../../stores/auth-store";
+import { NotificationBellDropdown } from "../notifications/NotificationBellDropdown";
 
 interface CustomerHeaderProps {
   title?: string;
@@ -23,6 +24,8 @@ export const CustomerHeader: React.FC<CustomerHeaderProps> = ({ title = "Dashboa
       </div>
 
       <div className="flex items-center space-x-4">
+        <NotificationBellDropdown />
+
         <Link
           href="/services"
           className="inline-flex items-center px-3.5 py-1.5 border border-transparent text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
