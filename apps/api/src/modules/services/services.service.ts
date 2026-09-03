@@ -26,7 +26,7 @@ export class ServicesService {
   }
 
   async findAll(query: ServiceQueryDto = {}) {
-    const { categoryId, providerId, minPrice, maxPrice, search } = query;
+    const { categoryId, providerId, minPrice, maxPrice, search, sortBy } = query;
     
     const where: any = {};
     if (categoryId) where.categoryId = categoryId;
@@ -45,12 +45,17 @@ export class ServicesService {
       ];
     }
 
+    let orderBy: any = { createdAt: 'desc' };
+    if (sortBy === 'price_asc') orderBy = { price: 'asc' };
+    if (sortBy === 'price_desc') orderBy = { price: 'desc' };
+
     return this.prisma.service.findMany({
       where,
+      orderBy,
       include: {
         category: true,
         provider: {
-          include: { user: { select: { email: true } } }
+          select: { id: true, businessName: true, phone: true, isVerified: true, user: { select: { email: true } } }
         }
       }
     });
