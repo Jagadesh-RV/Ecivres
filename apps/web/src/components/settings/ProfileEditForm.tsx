@@ -16,7 +16,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   initialLastName = "",
   initialPhone = "",
 }) => {
-  const { fetchCurrentUser } = useAuthStore();
+  const { restoreSession } = useAuthStore();
   const [firstName, setFirstName] = useState(initialFirstName);
   const [lastName, setLastName] = useState(initialLastName);
   const [phone, setPhone] = useState(initialPhone);
@@ -34,7 +34,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
         lastName,
         phone,
       });
-      await fetchCurrentUser();
+      await restoreSession();
       setMessage({ text: "Profile details updated successfully!", type: "success" });
     } catch (err: any) {
       setMessage({
