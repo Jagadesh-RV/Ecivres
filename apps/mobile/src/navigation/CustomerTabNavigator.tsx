@@ -4,6 +4,7 @@ import { Text } from 'react-native';
 
 import { CustomerHomeScreen } from '../screens/customer/CustomerHomeScreen';
 import { CustomerBookingsScreen } from '../screens/customer/CustomerBookingsScreen';
+import { CustomerFavoritesScreen } from '../screens/customer/CustomerFavoritesScreen';
 import { NotificationsScreen } from '../screens/notifications/NotificationsScreen';
 import { CustomerSettingsScreen } from '../screens/customer/CustomerSettingsScreen';
 import { colors } from '../theme';
@@ -28,6 +29,7 @@ export const CustomerTabNavigator = () => {
         tabBarIcon: ({ color }) => {
           let icon = '🏠';
           if (route.name === 'Bookings') icon = '📅';
+          if (route.name === 'Favorites') icon = '❤️';
           if (route.name === 'Notifications') icon = '🔔';
           if (route.name === 'Settings') icon = '⚙️';
           return <Text style={{ fontSize: 20 }}>{icon}</Text>;
@@ -36,6 +38,7 @@ export const CustomerTabNavigator = () => {
     >
       <Tab.Screen name="Home" component={CustomerHomeScreen} options={{ title: 'Overview' }} />
       <Tab.Screen name="Bookings" component={CustomerBookingsScreen} options={{ title: 'My Bookings' }} />
+      <Tab.Screen name="Favorites" component={CustomerFavoritesScreen} options={{ title: 'Saved' }} />
       <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Alerts' }} />
       <Tab.Screen name="Settings" component={CustomerSettingsScreen} options={{ title: 'Profile' }} />
     </Tab.Navigator>
