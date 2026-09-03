@@ -65,6 +65,21 @@ export class ReviewsService {
     });
   }
 
+  async findByProvider(providerId: string) {
+    return this.prisma.review.findMany({
+      where: { booking: { service: { providerId } } },
+      include: {
+        author: {
+          select: { email: true },
+        },
+        booking: {
+          include: { service: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async getProviderStats(providerId: string) {
     const reviews = await this.prisma.review.findMany({
       where: { booking: { service: { providerId } } },
