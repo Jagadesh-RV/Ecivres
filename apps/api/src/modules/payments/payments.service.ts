@@ -136,4 +136,59 @@ export class PaymentsService {
 
     return payment;
   }
+
+  async getProviderEarningsSummary(userId: string) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        booking: { service: { providerId: provider.id } },
+        status: 'SUCCESS',
+      },
+      include: {
+        booking: {
+          include: {
+            service: true,
+            customer: { include: { user: { select: { email: true } } } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const grossRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
+    const platformFeeRate = 0.1; // 10% platform commission
+    const totalPlatformFees = grossRevenue * platformFeeRate;
+    const netEarnings = grossRevenue - totalPlatformFees;
+
+    return {
+      provider,
+      grossRevenue,
+      platformFeeRate,
+      totalPlatformFees,
+      netEarnings,
+      completedTransactionsCount: payments.length,
+      recentPayments: payments,
+    };
+  }
+
+  async getAdminTransactions() {
+    return this.prisma.payment.findMany({
+      include: {
+        booking: {
+          include: {
+            service: { include: { provider: true } },
+            customer: { include: { user: { select: { email: true } } } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }
