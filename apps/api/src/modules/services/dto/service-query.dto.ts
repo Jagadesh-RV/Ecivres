@@ -20,4 +20,8 @@ export class ServiceQueryDto {
   @IsString()
   @IsOptional()
   search?: string;
+
+  @IsString()
+  @IsOptional()
+  sortBy?: string;
 }
