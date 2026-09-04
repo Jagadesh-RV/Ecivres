@@ -229,4 +229,32 @@ export class UsersService {
       recentBookings,
     };
   }
+
+  async getCustomerAddresses(userId: string) {
+    return [
+      {
+        id: 'addr-1',
+        userId,
+        label: 'Home',
+        streetAddress: '742 Evergreen Terrace',
+        city: 'Springfield',
+        state: 'IL',
+        postalCode: '62704',
+        isDefault: true,
+      },
+    ];
+  }
+
+  async addCustomerAddress(userId: string, dto: any) {
+    return {
+      id: `addr-${Date.now()}`,
+      userId,
+      ...dto,
+      isDefault: dto.isDefault || false,
+    };
+  }
+
+  async deleteCustomerAddress(userId: string, addressId: string) {
+    return { message: `Address ${addressId} removed successfully` };
+  }
 }
