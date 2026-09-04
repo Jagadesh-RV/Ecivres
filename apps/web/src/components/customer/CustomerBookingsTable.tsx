@@ -20,7 +20,7 @@ export interface BookingItem {
 interface CustomerBookingsTableProps {
   bookings: BookingItem[];
   onRescheduleBooking?: (booking: BookingItem) => void;
-  onCancelBooking?: (booking: BookingItem) => void;
+  onCancelBooking?: (booking: any) => void;
 }
 
 export const CustomerBookingsTable: React.FC<CustomerBookingsTableProps> = ({
