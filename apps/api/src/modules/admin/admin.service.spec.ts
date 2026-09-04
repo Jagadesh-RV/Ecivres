@@ -70,4 +70,23 @@ describe('AdminService', () => {
       });
     });
   });
+
+  describe('Platform Audit & Revenue Breakdown', () => {
+    it('should return system audit trail records', async () => {
+      const logs = await service.getPlatformAuditLogs();
+      expect(logs).toHaveLength(3);
+      expect(logs[0].action).toBeDefined();
+    });
+
+    it('should return platform revenue breakdown calculation', async () => {
+      jest.spyOn(service, 'getAdminDashboardStats').mockResolvedValue({
+        platformGrossVolume: 1000,
+      } as any);
+
+      const breakdown = await service.getRevenueBreakdown();
+      expect(breakdown.grossVolume).toBe(1000);
+      expect(breakdown.platformCommission).toBe(100);
+      expect(breakdown.providerPayouts).toBe(900);
+    });
+  });
 });
