@@ -70,4 +70,22 @@ export class UsersController {
   ) {
     return this.usersService.createProviderProfile(user.id, body);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('addresses')
+  async getAddresses(@CurrentUser() user: any) {
+    return this.usersService.getCustomerAddresses(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('addresses')
+  async addAddress(@CurrentUser() user: any, @Body() body: any) {
+    return this.usersService.addCustomerAddress(user.id, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('addresses/:id/delete')
+  async deleteAddress(@CurrentUser() user: any, @Param('id') addressId: string) {
+    return this.usersService.deleteCustomerAddress(user.id, addressId);
+  }
 }
