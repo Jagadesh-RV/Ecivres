@@ -61,4 +61,21 @@ describe('ReviewsService', () => {
       expect(result).toEqual({ average: 0, count: 0 });
     });
   });
+
+  describe('Review Moderation', () => {
+    it('should flag a review for moderation', async () => {
+      prismaService.review.findUnique = jest.fn().mockResolvedValue({ id: 'r100' });
+      const result = await service.flagReview('r100', 'Spam content');
+      expect(result.message).toContain('flagged for admin moderation');
+    });
+
+    it('should moderate (approve) a flagged review', async () => {
+      prismaService.review.findUnique = jest.fn().mockResolvedValue({ id: 'r101' });
+      await service.flagReview('r101', 'Inappropriate content');
+
+      const result = await service.moderateReview('r101', 'APPROVE', 'Verified clean content');
+      expect(result.action).toEqual('APPROVE');
+      expect(result.status).toEqual('APPROVED');
+    });
+  });
 });

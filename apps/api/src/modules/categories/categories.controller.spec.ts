@@ -43,4 +43,21 @@ describe('CategoriesController', () => {
     expect(result).toEqual([{ id: '1', name: 'Cleaning' }]);
     expect(service.findAll).toHaveBeenCalled();
   });
+
+  it('should call create and return created category', async () => {
+    const dto = { name: 'Plumbing', description: 'Plumbing category' };
+    (service as any).create = jest.fn().mockResolvedValue({ id: '2', ...dto });
+
+    const result = await controller.create(dto);
+    expect(result).toEqual({ id: '2', ...dto });
+    expect(service.create).toHaveBeenCalledWith(dto);
+  });
+
+  it('should call findOne and return category by ID', async () => {
+    (service as any).findOne = jest.fn().mockResolvedValue({ id: '1', name: 'Cleaning' });
+
+    const result = await controller.findOne('1');
+    expect(result).toEqual({ id: '1', name: 'Cleaning' });
+    expect(service.findOne).toHaveBeenCalledWith('1');
+  });
 });

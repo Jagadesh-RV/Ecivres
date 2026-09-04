@@ -94,4 +94,63 @@ export class ReviewsService {
       count: reviews.length,
     };
   }
+
+  private flaggedReviews: Record<string, { reason: string; status: 'PENDING' | 'APPROVED' | 'REJECTED'; note?: string }> = {
+    'rev-sample-1': { reason: 'Inappropriate language in feedback', status: 'PENDING' },
+  };
+
+  async flagReview(reviewId: string, reason: string) {
+    const review = await this.prisma.review.findUnique({ where: { id: reviewId } });
+    if (!review) {
+      throw new NotFoundException(`Review with ID '${reviewId}' not found`);
+    }
+
+    this.flaggedReviews[reviewId] = {
+      reason,
+      status: 'PENDING',
+    };
+
+    return { message: 'Review successfully flagged for admin moderation', reviewId };
+  }
+
+  async getFlaggedReviews() {
+    const flaggedIds = Object.keys(this.flaggedReviews).filter(
+      (id) => this.flaggedReviews[id].status === 'PENDING',
+    );
+
+    const reviews = await this.prisma.review.findMany({
+      where: { id: { in: flaggedIds } },
+      include: {
+        author: { select: { email: true } },
+        booking: { include: { service: true } },
+      },
+    });
+
+    return reviews.map((r) => ({
+      ...r,
+      flagInfo: this.flaggedReviews[r.id],
+    }));
+  }
+
+  async moderateReview(reviewId: string, action: 'APPROVE' | 'REJECT', note?: string) {
+    const flagRecord = this.flaggedReviews[reviewId];
+    if (!flagRecord) {
+      throw new NotFoundException(`No pending moderation record for review '${reviewId}'`);
+    }
+
+    flagRecord.status = action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
+    flagRecord.note = note;
+
+    if (action === 'REJECT') {
+      // Remove or hide review if rejected
+      await this.prisma.review.delete({ where: { id: reviewId } }).catch(() => null);
+    }
+
+    return {
+      reviewId,
+      action,
+      status: flagRecord.status,
+      note,
+    };
+  }
 }

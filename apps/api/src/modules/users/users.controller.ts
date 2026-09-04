@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UsersService } from './users.service';
@@ -69,5 +69,23 @@ export class UsersController {
     },
   ) {
     return this.usersService.createProviderProfile(user.id, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('addresses')
+  async getAddresses(@CurrentUser() user: any) {
+    return this.usersService.getCustomerAddresses(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('addresses')
+  async addAddress(@CurrentUser() user: any, @Body() body: any) {
+    return this.usersService.addCustomerAddress(user.id, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('addresses/:id')
+  async deleteAddress(@CurrentUser() user: any, @Param('id') addressId: string) {
+    return this.usersService.deleteCustomerAddress(user.id, addressId);
   }
 }

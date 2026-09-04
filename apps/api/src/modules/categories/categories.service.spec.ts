@@ -47,7 +47,7 @@ describe('CategoriesService', () => {
 
   describe('create', () => {
     it('should create and return new category', async () => {
-      const dto = { name: 'Plumbing', description: 'Plumbing services' };
+      const dto = { name: 'Plumbing', description: 'Plumbing services', icon: '🚰' };
       (prisma.category as any).create = jest.fn().mockResolvedValue({ id: '2', ...dto });
 
       const result = await service.create(dto);

@@ -42,4 +42,16 @@ export class AdminController {
   async rejectProvider(@Param('id') providerProfileId: string) {
     return this.adminService.rejectProvider(providerProfileId);
   }
+
+  @Get('audit-logs')
+  @ApiOperation({ summary: 'Get system audit trail logs (Admin only)' })
+  async getAuditLogs() {
+    return this.adminService.getPlatformAuditLogs();
+  }
+
+  @Get('revenue-breakdown')
+  @ApiOperation({ summary: 'Get detailed revenue breakdown and fee metrics (Admin only)' })
+  async getRevenueBreakdown() {
+    return this.adminService.getRevenueBreakdown();
+  }
 }

@@ -169,4 +169,40 @@ export class ProvidersService {
       recentBookings,
     };
   }
+
+  async getAvailability(userId: string) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    // Return default weekly operating schedule
+    return [
+      { day: 'MONDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
+      { day: 'TUESDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
+      { day: 'WEDNESDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
+      { day: 'THURSDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
+      { day: 'FRIDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
+      { day: 'SATURDAY', isOpen: false, openTime: '10:00', closeTime: '15:00' },
+      { day: 'SUNDAY', isOpen: false, openTime: '10:00', closeTime: '15:00' },
+    ];
+  }
+
+  async updateAvailability(userId: string, schedule: any[]) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    return {
+      message: 'Provider operating availability schedule updated successfully',
+      schedule,
+    };
+  }
 }

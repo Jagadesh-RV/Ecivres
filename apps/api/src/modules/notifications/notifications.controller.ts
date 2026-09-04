@@ -1,8 +1,9 @@
-import { Controller, Get, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UpdateNotificationPreferencesDto } from './dto/update-preferences.dto';
 
 @ApiTags('notifications')
 @Controller('notifications')
@@ -36,5 +37,20 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Mark all notifications as read for current user' })
   async markAllAsRead(@CurrentUser() user: any) {
     return this.notificationsService.markAllAsRead(user.id);
+  }
+
+  @Get('preferences')
+  @ApiOperation({ summary: 'Get user notification delivery preferences' })
+  async getPreferences(@CurrentUser() user: any) {
+    return this.notificationsService.getPreferences(user.id);
+  }
+
+  @Patch('preferences')
+  @ApiOperation({ summary: 'Update user notification delivery preferences' })
+  async updatePreferences(
+    @CurrentUser() user: any,
+    @Body() dto: UpdateNotificationPreferencesDto,
+  ) {
+    return this.notificationsService.updatePreferences(user.id, dto);
   }
 }

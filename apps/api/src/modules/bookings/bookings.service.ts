@@ -208,4 +208,48 @@ export class BookingsService {
 
     return updated;
   }
+
+  async rescheduleBooking(bookingId: string, userId: string, newScheduledAt: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { service: { include: { provider: true } } },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.customerId !== userId && booking.service.provider.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to reschedule this booking');
+    }
+
+    if (booking.status === 'COMPLETED' || booking.status === 'CANCELLED') {
+      throw new BadRequestException(`Cannot reschedule a booking that is already ${booking.status.toLowerCase()}`);
+    }
+
+    const updated = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        scheduledAt: new Date(newScheduledAt),
+        status: 'CONFIRMED',
+      },
+      include: {
+        service: { include: { provider: true } },
+        payment: true,
+      },
+    });
+
+    try {
+      const recipientId = booking.customerId === userId ? updated.service.provider.userId : updated.customerId;
+      await this.notificationsService.create(
+        recipientId,
+        'Booking Rescheduled',
+        `Booking for "${updated.service.name}" was rescheduled to ${new Date(newScheduledAt).toLocaleString()}`,
+      );
+    } catch (err) {
+      console.error('Failed to send reschedule notification', err);
+    }
+
+    return updated;
+  }
 }

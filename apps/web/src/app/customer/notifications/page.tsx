@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../../../lib/axios";
 import { CustomerNotificationsList, NotificationItem } from "../../../components/customer/CustomerNotificationsList";
+import { NotificationPreferencesCard } from "../../../components/notifications/NotificationPreferencesCard";
 
 export default function CustomerNotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -59,11 +60,18 @@ export default function CustomerNotificationsPage() {
         <p className="text-xs text-gray-500 mt-1">Stay updated with status changes, booking updates, and announcements.</p>
       </div>
 
-      <CustomerNotificationsList
-        notifications={notifications}
-        onMarkAsRead={handleMarkAsRead}
-        onMarkAllAsRead={handleMarkAllAsRead}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <CustomerNotificationsList
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+          />
+        </div>
+        <div>
+          <NotificationPreferencesCard />
+        </div>
+      </div>
     </div>
   );
 }

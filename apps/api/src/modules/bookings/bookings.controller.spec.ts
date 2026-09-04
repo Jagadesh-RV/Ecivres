@@ -49,4 +49,11 @@ describe('BookingsController', () => {
     await controller.findAll({ id: 'user1' });
     expect(service.findAllForCustomer).toHaveBeenCalled();
   });
+
+  it('should reschedule a booking', async () => {
+    (service as any).rescheduleBooking = jest.fn().mockResolvedValue({ id: 'b-100', scheduledAt: '2026-12-01T10:00:00Z' });
+    const result = await controller.reschedule({ id: 'user1' }, 'b-100', { scheduledAt: '2026-12-01T10:00:00Z' });
+    expect(result.id).toEqual('b-100');
+    expect(service.rescheduleBooking).toHaveBeenCalledWith('b-100', 'user1', '2026-12-01T10:00:00Z');
+  });
 });
