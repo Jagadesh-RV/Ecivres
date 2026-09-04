@@ -54,4 +54,28 @@ export class NotificationsService {
     });
     return { unreadCount: count };
   }
+
+  private userPreferences: Record<string, any> = {};
+
+  async getPreferences(userId: string) {
+    if (!this.userPreferences[userId]) {
+      this.userPreferences[userId] = {
+        emailAlerts: true,
+        pushAlerts: true,
+        smsAlerts: false,
+        marketingEmails: true,
+      };
+    }
+    return this.userPreferences[userId];
+  }
+
+  async updatePreferences(userId: string, dto: any) {
+    const current = await this.getPreferences(userId);
+    const updated = {
+      ...current,
+      ...dto,
+    };
+    this.userPreferences[userId] = updated;
+    return updated;
+  }
 }
