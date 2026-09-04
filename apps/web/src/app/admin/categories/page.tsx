@@ -3,10 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../../../lib/axios";
 import { CategoryManagementGrid, CategoryItem } from "../../../components/admin/CategoryManagementGrid";
+import { CreateCategoryModal } from "../../../components/admin/CreateCategoryModal";
+import { Button } from "../../../components/ui/button";
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -53,15 +56,26 @@ export default function AdminCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">Category Catalog Management</h2>
-        <p className="text-xs text-gray-500 mt-1">Publish new marketplace categories or modify existing listings.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Category Catalog Management</h2>
+          <p className="text-xs text-gray-500 mt-1">Publish new marketplace categories or modify existing listings.</p>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)} size="sm">
+          + Add New Category
+        </Button>
       </div>
 
       <CategoryManagementGrid
         categories={categories}
         onCreateCategory={handleCreateCategory}
         onDeleteCategory={handleDeleteCategory}
+      />
+
+      <CreateCategoryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchCategories}
       />
     </div>
   );
