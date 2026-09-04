@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UsersService } from './users.service';
@@ -84,7 +84,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('addresses/:id/delete')
+  @Delete('addresses/:id')
   async deleteAddress(@CurrentUser() user: any, @Param('id') addressId: string) {
     return this.usersService.deleteCustomerAddress(user.id, addressId);
   }
