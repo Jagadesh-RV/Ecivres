@@ -3,10 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../../../lib/axios";
 import { ProviderServicesTable, ProviderServiceItem } from "../../../components/provider/ProviderServicesTable";
+import { EditServiceModal } from "../../../components/services/EditServiceModal";
+import { DeleteServiceModal } from "../../../components/services/DeleteServiceModal";
 
 export default function ProviderServicesPage() {
   const [services, setServices] = useState<ProviderServiceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [editingService, setEditingService] = useState<ProviderServiceItem | null>(null);
+  const [deletingService, setDeletingService] = useState<{ id: string; name: string } | null>(null);
 
   const fetchServices = async () => {
     try {
@@ -24,14 +29,8 @@ export default function ProviderServicesPage() {
     fetchServices();
   }, []);
 
-  const handleDeleteService = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this service listing?")) return;
-    try {
-      await client.delete(`/services/${id}`);
-      fetchServices();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to delete service");
-    }
+  const handleStartDelete = (id: string, name: string) => {
+    setDeletingService({ id, name });
   };
 
   if (isLoading) {
@@ -49,7 +48,30 @@ export default function ProviderServicesPage() {
         <p className="text-xs text-gray-500 mt-1">Manage your active service catalog, pricing, and duration.</p>
       </div>
 
-      <ProviderServicesTable services={services} onDeleteService={handleDeleteService} />
+      <ProviderServicesTable
+        services={services}
+        onEditService={(svc) => setEditingService(svc)}
+        onDeleteService={handleStartDelete}
+      />
+
+      {editingService && (
+        <EditServiceModal
+          service={editingService}
+          isOpen={!!editingService}
+          onClose={() => setEditingService(null)}
+          onSuccess={fetchServices}
+        />
+      )}
+
+      {deletingService && (
+        <DeleteServiceModal
+          serviceId={deletingService.id}
+          serviceName={deletingService.name}
+          isOpen={!!deletingService}
+          onClose={() => setDeletingService(null)}
+          onSuccess={fetchServices}
+        />
+      )}
     </div>
   );
 }
