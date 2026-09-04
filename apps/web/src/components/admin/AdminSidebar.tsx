@@ -28,6 +28,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ pendingApplicationsC
       badge: pendingApplicationsCount > 0 ? pendingApplicationsCount : undefined,
     },
     { label: "Category Management", href: "/admin/categories", icon: "🏷️" },
+    { label: "Promotions & Coupons", href: "/admin/coupons", icon: "🎟️" },
     { label: "Revenue & Analytics", href: "/admin/analytics", icon: "💵" },
     { label: "Transaction Ledger", href: "/admin/transactions", icon: "🧾" },
   ];
