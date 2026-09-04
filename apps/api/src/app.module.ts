@@ -16,6 +16,7 @@ import { ServicesModule } from './modules/services/services.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
+import { PayoutsModule } from './modules/payouts/payouts.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 
@@ -44,6 +45,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     NotificationsModule,
     AdminModule,
     CouponsModule,
+    PayoutsModule,
     PrismaModule,
   ],
   controllers: [AppController],
