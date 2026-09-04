@@ -32,6 +32,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ pendingApplicationsC
     { label: "Review Moderation", href: "/admin/reviews", icon: "🛡️" },
     { label: "Revenue & Analytics", href: "/admin/analytics", icon: "💵" },
     { label: "Transaction Ledger", href: "/admin/transactions", icon: "🧾" },
+    { label: "Security Audit Logs", href: "/admin/audit", icon: "📜" },
   ];
 
   return (
