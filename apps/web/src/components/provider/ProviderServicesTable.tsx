@@ -16,11 +16,13 @@ export interface ProviderServiceItem {
 
 interface ProviderServicesTableProps {
   services: ProviderServiceItem[];
-  onDeleteService?: (id: string) => void;
+  onEditService?: (service: ProviderServiceItem) => void;
+  onDeleteService?: (id: string, name: string) => void;
 }
 
 export const ProviderServicesTable: React.FC<ProviderServicesTableProps> = ({
   services,
+  onEditService,
   onDeleteService,
 }) => {
   return (
@@ -71,15 +73,24 @@ export const ProviderServicesTable: React.FC<ProviderServicesTableProps> = ({
                   <td className="px-6 py-4 text-gray-600">{s.duration} mins</td>
                   <td className="px-6 py-4 font-bold text-gray-900">${s.price.toFixed(2)}</td>
                   <td className="px-6 py-4 text-right space-x-3">
-                    <Link
-                      href={`/provider/services/${s.id}/edit`}
-                      className="text-xs font-semibold text-indigo-600 hover:underline"
-                    >
-                      Edit
-                    </Link>
+                    {onEditService ? (
+                      <button
+                        onClick={() => onEditService(s)}
+                        className="text-xs font-semibold text-indigo-600 hover:underline"
+                      >
+                        Edit
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/provider/services/${s.id}/edit`}
+                        className="text-xs font-semibold text-indigo-600 hover:underline"
+                      >
+                        Edit
+                      </Link>
+                    )}
                     {onDeleteService && (
                       <button
-                        onClick={() => onDeleteService(s.id)}
+                        onClick={() => onDeleteService(s.id, s.name)}
                         className="text-xs font-semibold text-red-600 hover:underline"
                       >
                         Delete
