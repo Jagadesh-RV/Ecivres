@@ -3,21 +3,29 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../../../lib/axios";
 import { ProviderServicesTable, ProviderServiceItem } from "../../../components/provider/ProviderServicesTable";
+import { CreateServiceModal } from "../../../components/provider/CreateServiceModal";
 import { EditServiceModal } from "../../../components/services/EditServiceModal";
 import { DeleteServiceModal } from "../../../components/services/DeleteServiceModal";
+import { Button } from "../../../components/ui/button";
 
 export default function ProviderServicesPage() {
   const [services, setServices] = useState<ProviderServiceItem[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ProviderServiceItem | null>(null);
   const [deletingService, setDeletingService] = useState<{ id: string; name: string } | null>(null);
 
-  const fetchServices = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await client.get("/services");
-      setServices(res.data || []);
+      const [svcRes, catRes] = await Promise.all([
+        client.get("/services"),
+        client.get("/categories"),
+      ]);
+      setServices(svcRes.data || []);
+      setCategories(catRes.data || []);
     } catch (err) {
       console.error("Failed to load provider services", err);
     } finally {
@@ -26,7 +34,7 @@ export default function ProviderServicesPage() {
   };
 
   useEffect(() => {
-    fetchServices();
+    fetchData();
   }, []);
 
   const handleStartDelete = (id: string, name: string) => {
@@ -43,9 +51,14 @@ export default function ProviderServicesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">My Service Offerings</h2>
-        <p className="text-xs text-gray-500 mt-1">Manage your active service catalog, pricing, and duration.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">My Service Offerings</h2>
+          <p className="text-xs text-gray-500 mt-1">Manage your active service catalog, pricing, and duration.</p>
+        </div>
+        <Button onClick={() => setIsCreateModalOpen(true)} size="sm">
+          + Add New Service
+        </Button>
       </div>
 
       <ProviderServicesTable
@@ -54,12 +67,19 @@ export default function ProviderServicesPage() {
         onDeleteService={handleStartDelete}
       />
 
+      <CreateServiceModal
+        isOpen={isCreateModalOpen}
+        categories={categories}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={fetchData}
+      />
+
       {editingService && (
         <EditServiceModal
           service={editingService}
           isOpen={!!editingService}
           onClose={() => setEditingService(null)}
-          onSuccess={fetchServices}
+          onSuccess={fetchData}
         />
       )}
 
@@ -69,7 +89,7 @@ export default function ProviderServicesPage() {
           serviceName={deletingService.name}
           isOpen={!!deletingService}
           onClose={() => setDeletingService(null)}
-          onSuccess={fetchServices}
+          onSuccess={fetchData}
         />
       )}
     </div>
