@@ -95,4 +95,27 @@ describe('ProvidersService', () => {
       await expect(service.getProviderDashboardStats('user-1')).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('getAvailability', () => {
+    it('should return weekly operating schedule', async () => {
+      prismaService.providerProfile.findUnique.mockResolvedValue(mockProvider);
+
+      const result = await service.getAvailability('user-1');
+
+      expect(result).toHaveLength(7);
+      expect(result[0].day).toEqual('MONDAY');
+    });
+  });
+
+  describe('updateAvailability', () => {
+    it('should update operating availability schedule', async () => {
+      prismaService.providerProfile.findUnique.mockResolvedValue(mockProvider);
+
+      const schedule = [{ day: 'MONDAY', isOpen: true, openTime: '08:00', closeTime: '18:00' }];
+      const result = await service.updateAvailability('user-1', schedule);
+
+      expect(result.message).toContain('updated successfully');
+      expect(result.schedule).toEqual(schedule);
+    });
+  });
 });
