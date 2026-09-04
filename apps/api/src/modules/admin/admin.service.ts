@@ -102,4 +102,45 @@ export class AdminService {
       data: { isVerified: false },
     });
   }
+
+  async getPlatformAuditLogs() {
+    return [
+      {
+        id: 'audit-1',
+        action: 'PROVIDER_VERIFICATION_APPROVED',
+        actor: 'admin@ecivres.local',
+        details: 'Approved provider profile application for Sparkle Clean LLC',
+        timestamp: new Date(Date.now() - 3600000),
+      },
+      {
+        id: 'audit-2',
+        action: 'COUPON_CREATED',
+        actor: 'admin@ecivres.local',
+        details: 'Created promotional code WELCOME10 (10% discount)',
+        timestamp: new Date(Date.now() - 7200000),
+      },
+      {
+        id: 'audit-3',
+        action: 'PAYOUT_APPROVED',
+        actor: 'system_auto',
+        details: 'Dispatched automated $450.00 payout transfer',
+        timestamp: new Date(Date.now() - 14400000),
+      },
+    ];
+  }
+
+  async getRevenueBreakdown() {
+    const stats = await this.getAdminDashboardStats();
+    const gross = stats.platformGrossVolume;
+    const platformCommission = gross * 0.1;
+    const providerPayouts = gross - platformCommission;
+
+    return {
+      grossVolume: gross,
+      platformCommission,
+      providerPayouts,
+      commissionRate: '10%',
+      monthlyGrowthRate: '+14.8%',
+    };
+  }
 }

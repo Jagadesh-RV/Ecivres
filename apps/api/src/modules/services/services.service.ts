@@ -99,4 +99,14 @@ export class ServicesService {
       where: { id },
     });
   }
+
+  async searchServices(dto: any) {
+    return this.findAll({
+      search: dto.query,
+      categoryId: dto.categoryId,
+      minPrice: dto.minPrice ? String(dto.minPrice) : undefined,
+      maxPrice: dto.maxPrice ? String(dto.maxPrice) : undefined,
+      sortBy: dto.sortBy,
+    });
+  }
 }

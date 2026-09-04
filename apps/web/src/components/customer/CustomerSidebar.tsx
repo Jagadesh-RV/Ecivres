@@ -28,6 +28,8 @@ export const CustomerSidebar: React.FC<CustomerSidebarProps> = ({ unreadCount = 
       badge: unreadCount > 0 ? unreadCount : undefined,
     },
     { label: "Saved Favorites", href: "/customer/favorites", icon: "❤️" },
+    { label: "Saved Addresses", href: "/customer/addresses", icon: "📍" },
+    { label: "Payment Methods", href: "/customer/payment-methods", icon: "💳" },
     { label: "My Reviews", href: "/customer/reviews", icon: "⭐" },
     { label: "Account Settings", href: "/customer/settings", icon: "⚙️" },
   ];

@@ -152,4 +152,23 @@ describe('UsersService', () => {
       expect(result.lastName).toEqual('Smith');
     });
   });
+
+  describe('getCustomerAddresses', () => {
+    it('should return list of customer delivery addresses', async () => {
+      const result = await service.getCustomerAddresses('user-1');
+
+      expect(result).toHaveLength(1);
+      expect(result[0].label).toEqual('Home');
+    });
+  });
+
+  describe('addCustomerAddress', () => {
+    it('should add a new address entry', async () => {
+      const dto = { label: 'Office', streetAddress: '100 Tech Blvd', city: 'Austin', state: 'TX', postalCode: '78701' };
+      const result = await service.addCustomerAddress('user-1', dto);
+
+      expect(result.label).toEqual('Office');
+      expect(result.city).toEqual('Austin');
+    });
+  });
 });

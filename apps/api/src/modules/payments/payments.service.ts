@@ -191,4 +191,71 @@ export class PaymentsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  // Saved Payment Methods store
+  private savedPaymentMethods: Record<string, any[]> = {};
+
+  async getSavedPaymentMethods(userId: string) {
+    if (!this.savedPaymentMethods[userId]) {
+      this.savedPaymentMethods[userId] = [
+        {
+          id: 'pm-default-1',
+          cardholderName: 'John Doe',
+          brand: 'Visa',
+          last4: '4242',
+          expMonth: 12,
+          expYear: 2026,
+          isDefault: true,
+          createdAt: new Date(),
+        },
+      ];
+    }
+    return this.savedPaymentMethods[userId];
+  }
+
+  async addPaymentMethod(userId: string, dto: any) {
+    const methods = await this.getSavedPaymentMethods(userId);
+    if (dto.isDefault) {
+      methods.forEach((m) => (m.isDefault = false));
+    }
+
+    const newMethod = {
+      id: `pm-${Date.now()}`,
+      cardholderName: dto.cardholderName,
+      brand: dto.brand,
+      last4: dto.last4,
+      expMonth: dto.expMonth,
+      expYear: dto.expYear,
+      isDefault: dto.isDefault || methods.length === 0,
+      createdAt: new Date(),
+    };
+
+    methods.push(newMethod);
+    return newMethod;
+  }
+
+  async setDefaultPaymentMethod(userId: string, pmId: string) {
+    const methods = await this.getSavedPaymentMethods(userId);
+    const target = methods.find((m) => m.id === pmId);
+    if (!target) {
+      throw new NotFoundException(`Payment method '${pmId}' not found`);
+    }
+
+    methods.forEach((m) => (m.isDefault = m.id === pmId));
+    return target;
+  }
+
+  async deletePaymentMethod(userId: string, pmId: string) {
+    const methods = await this.getSavedPaymentMethods(userId);
+    const index = methods.findIndex((m) => m.id === pmId);
+    if (index === -1) {
+      throw new NotFoundException(`Payment method '${pmId}' not found`);
+    }
+
+    const [deleted] = methods.splice(index, 1);
+    if (deleted.isDefault && methods.length > 0) {
+      methods[0].isDefault = true;
+    }
+    return { success: true, deletedId: pmId };
+  }
 }

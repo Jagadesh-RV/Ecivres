@@ -60,4 +60,14 @@ export class BookingsController {
   ) {
     return this.bookingsService.cancelBooking(bookingId, user.id, cancelBookingDto?.reason);
   }
+
+  @Patch(':id/reschedule')
+  @ApiOperation({ summary: 'Reschedule a booking to a new scheduled date/time' })
+  async reschedule(
+    @CurrentUser() user: any,
+    @Param('id') bookingId: string,
+    @Body() body: { scheduledAt: string },
+  ) {
+    return this.bookingsService.rescheduleBooking(bookingId, user.id, body.scheduledAt);
+  }
 }

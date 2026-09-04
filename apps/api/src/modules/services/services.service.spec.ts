@@ -74,4 +74,21 @@ describe('ServicesService', () => {
       service.update('1', 'user2', { name: 'test2' }),
     ).rejects.toThrow(ForbiddenException);
   });
+
+  it('should update service successfully when owned by provider', async () => {
+    const result = await service.update('1', 'user1', { name: 'Updated Name', price: 99 });
+    expect(result).toBeDefined();
+    expect(prisma.service.update).toHaveBeenCalledWith({
+      where: { id: '1' },
+      data: { name: 'Updated Name', price: 99 },
+    });
+  });
+
+  it('should delete service successfully when owned by provider', async () => {
+    const result = await service.remove('1', 'user1');
+    expect(result).toBeDefined();
+    expect(prisma.service.delete).toHaveBeenCalledWith({
+      where: { id: '1' },
+    });
+  });
 });

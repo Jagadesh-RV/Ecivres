@@ -58,4 +58,19 @@ export class ProvidersController {
   async getPublicProfile(@Param('userId') userId: string) {
     return this.providersService.getPublicProfile(userId);
   }
+
+  @Get('availability')
+  @ApiOperation({ summary: 'Get provider weekly operating schedule' })
+  async getAvailability(@CurrentUser() user: any) {
+    return this.providersService.getAvailability(user.id);
+  }
+
+  @Patch('availability')
+  @ApiOperation({ summary: 'Update provider operating availability schedule' })
+  async updateAvailability(
+    @CurrentUser() user: any,
+    @Body() body: { schedule: any[] },
+  ) {
+    return this.providersService.updateAvailability(user.id, body.schedule);
+  }
 }

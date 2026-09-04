@@ -19,11 +19,13 @@ export interface BookingItem {
 
 interface CustomerBookingsTableProps {
   bookings: BookingItem[];
-  onCancelBooking?: (bookingId: string) => void;
+  onRescheduleBooking?: (booking: BookingItem) => void;
+  onCancelBooking?: (booking: any) => void;
 }
 
 export const CustomerBookingsTable: React.FC<CustomerBookingsTableProps> = ({
   bookings,
+  onRescheduleBooking,
   onCancelBooking,
 }) => {
   const [filter, setFilter] = useState<string>("ALL");
@@ -110,14 +112,26 @@ export const CustomerBookingsTable: React.FC<CustomerBookingsTableProps> = ({
                   <td className="px-6 py-4">
                     <Badge label={b.status} variant={getBadgeVariant(b.status)} />
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    {(b.status === "PENDING" || b.status === "CONFIRMED") && onCancelBooking && (
-                      <button
-                        onClick={() => onCancelBooking(b.id)}
-                        className="text-xs font-semibold text-red-600 hover:text-red-800 hover:underline"
-                      >
-                        Cancel
-                      </button>
+                  <td className="px-6 py-4 text-right space-x-3">
+                    {(b.status === "PENDING" || b.status === "CONFIRMED") && (
+                      <>
+                        {onRescheduleBooking && (
+                          <button
+                            onClick={() => onRescheduleBooking(b)}
+                            className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
+                          >
+                            Reschedule
+                          </button>
+                        )}
+                        {onCancelBooking && (
+                          <button
+                            onClick={() => onCancelBooking(b)}
+                            className="text-xs font-semibold text-red-600 hover:text-red-800 hover:underline"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>

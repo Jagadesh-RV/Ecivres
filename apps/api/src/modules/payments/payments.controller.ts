@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -44,5 +44,38 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Get payment status of a booking' })
   async getPayment(@Param('bookingId') bookingId: string) {
     return this.paymentsService.getPaymentByBooking(bookingId);
+  }
+
+  @Get('methods/all')
+  @ApiOperation({ summary: 'Get saved payment methods for authenticated user' })
+  async getSavedPaymentMethods(@CurrentUser() user: any) {
+    return this.paymentsService.getSavedPaymentMethods(user.id);
+  }
+
+  @Post('methods')
+  @ApiOperation({ summary: 'Add a new saved payment method' })
+  async addPaymentMethod(
+    @CurrentUser() user: any,
+    @Body() dto: any,
+  ) {
+    return this.paymentsService.addPaymentMethod(user.id, dto);
+  }
+
+  @Patch('methods/:id/default')
+  @ApiOperation({ summary: 'Set default payment method' })
+  async setDefaultPaymentMethod(
+    @CurrentUser() user: any,
+    @Param('id') pmId: string,
+  ) {
+    return this.paymentsService.setDefaultPaymentMethod(user.id, pmId);
+  }
+
+  @Delete('methods/:id')
+  @ApiOperation({ summary: 'Delete a saved payment method' })
+  async deletePaymentMethod(
+    @CurrentUser() user: any,
+    @Param('id') pmId: string,
+  ) {
+    return this.paymentsService.deletePaymentMethod(user.id, pmId);
   }
 }

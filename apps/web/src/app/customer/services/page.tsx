@@ -6,6 +6,7 @@ import { client } from "../../../lib/axios";
 import { RatingStars } from "../../../components/ui/RatingStars";
 import { FavoriteButton } from "../../../components/ui/FavoriteButton";
 import { ServiceFilterBar } from "../../../components/services/ServiceFilterBar";
+import { CategoryFilterPills } from "../../../components/catalog/CategoryFilterPills";
 
 export interface ServiceItem {
   id: string;
@@ -20,17 +21,29 @@ export interface ServiceItem {
 
 export default function CustomerServicesPage() {
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("all");
   const [search, setSearch] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchCategories = async () => {
+    try {
+      const res = await client.get("/categories");
+      setCategories(res.data || []);
+    } catch (err) {
+      console.error("Failed to load categories", err);
+    }
+  };
+
   const fetchServices = async () => {
     try {
       setIsLoading(true);
       const params: any = {};
       if (search) params.search = search;
+      if (selectedCategoryId !== "all") params.categoryId = selectedCategoryId;
       if (minPrice) params.minPrice = minPrice;
       if (maxPrice) params.maxPrice = maxPrice;
       if (sortBy) params.sortBy = sortBy;
@@ -45,11 +58,16 @@ export default function CustomerServicesPage() {
   };
 
   useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     fetchServices();
-  }, [search, minPrice, maxPrice, sortBy]);
+  }, [search, selectedCategoryId, minPrice, maxPrice, sortBy]);
 
   const handleReset = () => {
     setSearch("");
+    setSelectedCategoryId("all");
     setMinPrice("");
     setMaxPrice("");
     setSortBy("newest");
@@ -61,6 +79,12 @@ export default function CustomerServicesPage() {
         <h2 className="text-xl font-bold text-gray-900">Services Marketplace</h2>
         <p className="text-xs text-gray-500 mt-1">Search and book verified professionals for your home & business.</p>
       </div>
+
+      <CategoryFilterPills
+        categories={categories}
+        selectedCategoryId={selectedCategoryId}
+        onSelectCategory={setSelectedCategoryId}
+      />
 
       <ServiceFilterBar
         search={search}
@@ -80,7 +104,7 @@ export default function CustomerServicesPage() {
         </div>
       ) : services.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500 text-sm">
-          No services match your filters. Try adjusting price range or keyword!
+          No services match your filters. Try adjusting price range or category selection!
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

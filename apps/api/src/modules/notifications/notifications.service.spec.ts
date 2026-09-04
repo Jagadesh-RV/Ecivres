@@ -38,4 +38,24 @@ describe('NotificationsService', () => {
       });
     });
   });
+
+  describe('Notification Preferences', () => {
+    it('should return default notification preferences for user', async () => {
+      const prefs = await service.getPreferences('user-pref-1');
+      expect(prefs.emailAlerts).toBe(true);
+      expect(prefs.pushAlerts).toBe(true);
+      expect(prefs.smsAlerts).toBe(false);
+    });
+
+    it('should update user notification preferences', async () => {
+      const updated = await service.updatePreferences('user-pref-1', {
+        smsAlerts: true,
+        marketingEmails: false,
+      });
+
+      expect(updated.smsAlerts).toBe(true);
+      expect(updated.marketingEmails).toBe(false);
+      expect(updated.emailAlerts).toBe(true);
+    });
+  });
 });

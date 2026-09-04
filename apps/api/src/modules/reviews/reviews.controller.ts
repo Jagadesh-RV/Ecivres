@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Patch, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
+import { ModerateReviewDto } from './dto/moderate-review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -36,5 +37,32 @@ export class ReviewsController {
   @ApiOperation({ summary: 'Get review stats for a provider' })
   getProviderStats(@Param('providerId') providerId: string) {
     return this.reviewsService.getProviderStats(providerId);
+  }
+
+  @Post(':id/flag')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Flag a review for admin moderation' })
+  flagReview(@Param('id') reviewId: string, @Body('reason') reason: string) {
+    return this.reviewsService.flagReview(reviewId, reason || 'Flagged by user');
+  }
+
+  @Get('moderation/pending')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all flagged reviews pending admin moderation' })
+  getFlaggedReviews() {
+    return this.reviewsService.getFlaggedReviews();
+  }
+
+  @Patch(':id/moderate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Moderate (approve or reject) a flagged review' })
+  moderateReview(
+    @Param('id') reviewId: string,
+    @Body() dto: ModerateReviewDto,
+  ) {
+    return this.reviewsService.moderateReview(reviewId, dto.action, dto.moderationNote);
   }
 }
