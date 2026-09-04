@@ -3,10 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../../../lib/axios";
 import { CustomerBookingsTable, BookingItem } from "../../../components/customer/CustomerBookingsTable";
+import { RescheduleBookingModal } from "../../../components/bookings/RescheduleBookingModal";
+import { CancelBookingModal } from "../../../components/bookings/CancelBookingModal";
 
 export default function CustomerBookingsPage() {
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [reschedulingBooking, setReschedulingBooking] = useState<BookingItem | null>(null);
+  const [cancellingBooking, setCancellingBooking] = useState<BookingItem | null>(null);
 
   const fetchBookings = async () => {
     try {
@@ -24,18 +29,6 @@ export default function CustomerBookingsPage() {
     fetchBookings();
   }, []);
 
-  const handleCancelBooking = async (bookingId: string) => {
-    if (!confirm("Are you sure you want to cancel this booking?")) return;
-    try {
-      await client.post(`/bookings/${bookingId}/cancel`, {
-        reason: "Customer cancelled from bookings page",
-      });
-      fetchBookings();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to cancel booking");
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -51,7 +44,32 @@ export default function CustomerBookingsPage() {
         <p className="text-xs text-gray-500 mt-1">View, track, and manage all your scheduled service reservations.</p>
       </div>
 
-      <CustomerBookingsTable bookings={bookings} onCancelBooking={handleCancelBooking} />
+      <CustomerBookingsTable
+        bookings={bookings}
+        onRescheduleBooking={(b) => setReschedulingBooking(b)}
+        onCancelBooking={(b) => setCancellingBooking(b)}
+      />
+
+      {reschedulingBooking && (
+        <RescheduleBookingModal
+          bookingId={reschedulingBooking.id}
+          serviceName={reschedulingBooking.service?.name || "Service"}
+          currentDate={reschedulingBooking.scheduledAt}
+          isOpen={!!reschedulingBooking}
+          onClose={() => setReschedulingBooking(null)}
+          onSuccess={fetchBookings}
+        />
+      )}
+
+      {cancellingBooking && (
+        <CancelBookingModal
+          bookingId={cancellingBooking.id}
+          serviceName={cancellingBooking.service?.name || "Service"}
+          isOpen={!!cancellingBooking}
+          onClose={() => setCancellingBooking(null)}
+          onSuccess={fetchBookings}
+        />
+      )}
     </div>
   );
 }
