@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { client } from "../../../lib/axios";
 import { ProviderEarningsGrid, EarningsSummary } from "../../../components/payments/ProviderEarningsGrid";
 import { TransactionHistoryTable, TransactionRecord } from "../../../components/payments/TransactionHistoryTable";
+import { PayoutSummaryCards } from "../../../components/provider/PayoutSummaryCards";
+import { PayoutRequestModal } from "../../../components/provider/PayoutRequestModal";
 
 export default function ProviderEarningsPage() {
   const [summary, setSummary] = useState<EarningsSummary>({
@@ -13,15 +15,29 @@ export default function ProviderEarningsPage() {
     netEarnings: 0,
     completedTransactionsCount: 0,
   });
+  const [payoutSummary, setPayoutSummary] = useState<{
+    availableBalance: number;
+    pendingAmount: number;
+    paidOutAmount: number;
+  }>({
+    availableBalance: 0,
+    pendingAmount: 0,
+    paidOutAmount: 0,
+  });
   const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchEarnings = async () => {
+  const fetchEarningsAndPayouts = async () => {
     try {
       setIsLoading(true);
-      const res = await client.get("/payments/provider/earnings");
-      setSummary(res.data);
-      setTransactions(res.data.recentPayments || []);
+      const [earningsRes, payoutsRes] = await Promise.all([
+        client.get("/payments/provider/earnings"),
+        client.get("/payouts/summary"),
+      ]);
+      setSummary(earningsRes.data);
+      setTransactions(earningsRes.data.recentPayments || []);
+      setPayoutSummary(payoutsRes.data);
     } catch (err) {
       console.error("Failed to load provider earnings", err);
     } finally {
@@ -30,7 +46,7 @@ export default function ProviderEarningsPage() {
   };
 
   useEffect(() => {
-    fetchEarnings();
+    fetchEarningsAndPayouts();
   }, []);
 
   if (isLoading) {
@@ -48,17 +64,25 @@ export default function ProviderEarningsPage() {
           <h2 className="text-xl font-bold text-gray-900">Revenue & Instant Payouts</h2>
           <p className="text-xs text-gray-500 mt-1">Track net earnings, commission fees, and payout statements.</p>
         </div>
-        <button
-          onClick={() => alert("Payout request initiated! Funds transferred via Stripe Connected Account.")}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors shadow-sm"
-        >
-          💳 Request Instant Payout
-        </button>
       </div>
+
+      <PayoutSummaryCards
+        availableBalance={payoutSummary.availableBalance}
+        pendingAmount={payoutSummary.pendingAmount}
+        paidOutAmount={payoutSummary.paidOutAmount}
+        onRequestPayout={() => setIsModalOpen(true)}
+      />
 
       <ProviderEarningsGrid summary={summary} />
 
       <TransactionHistoryTable transactions={transactions} showProviderName={false} />
+
+      <PayoutRequestModal
+        isOpen={isModalOpen}
+        maxAmount={payoutSummary.availableBalance}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchEarningsAndPayouts}
+      />
     </div>
   );
 }
