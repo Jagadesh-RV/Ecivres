@@ -54,4 +54,45 @@ describe('PaymentsService', () => {
       expect(result.completedTransactionsCount).toEqual(2);
     });
   });
+
+  describe('Saved Payment Methods', () => {
+    it('should retrieve default saved payment method for user', async () => {
+      const methods = await service.getSavedPaymentMethods('user-100');
+      expect(methods).toHaveLength(1);
+      expect(methods[0].last4).toEqual('4242');
+      expect(methods[0].isDefault).toBe(true);
+    });
+
+    it('should add a new payment method and update default status if requested', async () => {
+      const added = await service.addPaymentMethod('user-100', {
+        cardholderName: 'Jane Smith',
+        brand: 'Mastercard',
+        last4: '8888',
+        expMonth: 10,
+        expYear: 2028,
+        isDefault: true,
+      });
+
+      expect(added.id).toBeDefined();
+      expect(added.brand).toEqual('Mastercard');
+
+      const methods = await service.getSavedPaymentMethods('user-100');
+      expect(methods).toHaveLength(2);
+      expect(methods.find((m) => m.id === added.id)?.isDefault).toBe(true);
+      expect(methods.find((m) => m.id === 'pm-default-1')?.isDefault).toBe(false);
+    });
+
+    it('should set default payment method by ID', async () => {
+      await service.setDefaultPaymentMethod('user-100', 'pm-default-1');
+      const methods = await service.getSavedPaymentMethods('user-100');
+      expect(methods.find((m) => m.id === 'pm-default-1')?.isDefault).toBe(true);
+    });
+
+    it('should delete a payment method', async () => {
+      const methods = await service.getSavedPaymentMethods('user-100');
+      const targetId = methods[0].id;
+      const result = await service.deletePaymentMethod('user-100', targetId);
+      expect(result.success).toBe(true);
+    });
+  });
 });
