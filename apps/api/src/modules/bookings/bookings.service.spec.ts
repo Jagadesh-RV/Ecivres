@@ -84,4 +84,17 @@ describe('BookingsService', () => {
       }),
     ).rejects.toThrow(BadRequestException);
   });
+
+  it('should accept booking request', async () => {
+    jest.spyOn(service, 'updateStatus').mockResolvedValue({ id: 'b1', status: 'CONFIRMED' } as any);
+    const result = await service.acceptBooking('b1', 'prov_user');
+    expect(result.status).toBe('CONFIRMED');
+    expect(service.updateStatus).toHaveBeenCalledWith('b1', 'prov_user', { status: 'CONFIRMED' });
+  });
+
+  it('should reject booking request', async () => {
+    jest.spyOn(service, 'updateStatus').mockResolvedValue({ id: 'b1', status: 'CANCELLED', customerId: 'c1', service: { name: 'Cleaning' } } as any);
+    const result = await service.rejectBooking('b1', 'prov_user', 'Fully booked');
+    expect(result.status).toBe('CANCELLED');
+  });
 });
