@@ -46,8 +46,8 @@ export class ServicesService {
     }
 
     let orderBy: any = { createdAt: 'desc' };
-    if (sortBy === 'price_asc') orderBy = { price: 'asc' };
-    if (sortBy === 'price_desc') orderBy = { price: 'desc' };
+    if (sortBy === 'price_asc' || sortBy === 'PRICE_ASC') orderBy = { price: 'asc' };
+    if (sortBy === 'price_desc' || sortBy === 'PRICE_DESC') orderBy = { price: 'desc' };
 
     return this.prisma.service.findMany({
       where,
