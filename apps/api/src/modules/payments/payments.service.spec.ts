@@ -94,5 +94,34 @@ describe('PaymentsService', () => {
       const result = await service.deletePaymentMethod('user-100', targetId);
       expect(result.success).toBe(true);
     });
+
+    it('should process mockSettlePayment successfully', async () => {
+      const mockPrisma = (service as any).prisma;
+      mockPrisma.payment = {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'pay-1',
+          bookingId: 'b-1',
+          amount: 150,
+          status: 'PENDING',
+          booking: { status: 'PENDING', service: { provider: { userId: 'prov-1' }, name: 'Roofing' } },
+        }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pay-1',
+          status: 'SUCCESS',
+          transactionId: 'MOCK-TXN-123',
+        }),
+      };
+      mockPrisma.booking = {
+        update: jest.fn().mockResolvedValue({ id: 'b-1', status: 'CONFIRMED' }),
+      };
+      (service as any).notificationsService = {
+        create: jest.fn().mockResolvedValue({}),
+      };
+
+      const res = await service.mockSettlePayment('b-1');
+      expect(res.status).toBe('SUCCESS');
+      expect(mockPrisma.payment.update).toHaveBeenCalled();
+    });
   });
 });
+
