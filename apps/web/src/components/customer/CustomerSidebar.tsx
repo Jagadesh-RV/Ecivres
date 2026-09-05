@@ -37,6 +37,7 @@ export const CustomerSidebar: React.FC<CustomerSidebarProps> = ({
     { label: "Saved Addresses", href: "/customer/addresses", icon: "📍" },
     { label: "Payment Methods", href: "/customer/payment-methods", icon: "💳" },
     { label: "My Reviews", href: "/customer/reviews", icon: "⭐" },
+    { label: "Help & Support", href: "/customer/support", icon: "🛟" },
     { label: "Account Settings", href: "/customer/settings", icon: "⚙️" },
   ];
 
