@@ -18,6 +18,7 @@ describe('BookingsController', () => {
           useValue: {
             create: jest.fn().mockResolvedValue({ id: '1' }),
             findAllForCustomer: jest.fn().mockResolvedValue([]),
+            updateStatus: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CONFIRMED' }),
             acceptBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CONFIRMED' }),
             rejectBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CANCELLED' }),
           },
@@ -53,6 +54,13 @@ describe('BookingsController', () => {
   it('should list bookings', async () => {
     await controller.findAll({ id: 'user1' });
     expect(service.findAllForCustomer).toHaveBeenCalled();
+  });
+
+  it('should transition booking status via transition endpoint', async () => {
+    (service.updateStatus as jest.Mock).mockResolvedValue({ id: 'b-100', status: 'IN_PROGRESS' });
+    const result = await controller.transitionStatus({ id: 'p-1' }, 'b-100', { targetStatus: 'IN_PROGRESS' });
+    expect(result.status).toBe('IN_PROGRESS');
+    expect(service.updateStatus).toHaveBeenCalledWith('b-100', 'p-1', { status: 'IN_PROGRESS' });
   });
 
   it('should accept a booking', async () => {
