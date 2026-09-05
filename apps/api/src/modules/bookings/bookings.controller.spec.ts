@@ -56,4 +56,10 @@ describe('BookingsController', () => {
     expect(result.id).toEqual('b-100');
     expect(service.rescheduleBooking).toHaveBeenCalledWith('b-100', 'user1', '2026-12-01T10:00:00Z');
   });
+
+  it('should return itemized invoice breakdown', async () => {
+    const res = await controller.getInvoice('b-100');
+    expect(res.bookingId).toBe('b-100');
+    expect(res.totalAmount).toBeGreaterThan(0);
+  });
 });

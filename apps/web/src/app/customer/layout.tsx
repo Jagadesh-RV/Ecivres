@@ -11,6 +11,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuthStore();
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -37,10 +38,16 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <CustomerHeader />
-      <div className="flex flex-1">
-        <CustomerSidebar unreadCount={unreadCount} />
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full">{children}</main>
+      <CustomerHeader onToggleMobileMenu={() => setMobileOpen(!mobileOpen)} />
+      <div className="flex flex-1 relative">
+        <CustomerSidebar
+          unreadCount={unreadCount}
+          mobileOpen={mobileOpen}
+          onCloseMobile={() => setMobileOpen(false)}
+        />
+        <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full min-w-0 overflow-x-hidden">
+          {children}
+        </main>
       </div>
     </div>
   );

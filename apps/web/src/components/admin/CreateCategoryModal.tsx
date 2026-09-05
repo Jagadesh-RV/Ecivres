@@ -44,8 +44,8 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-3 sm:p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <h3 className="text-base font-bold text-gray-900">Create Service Category</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">

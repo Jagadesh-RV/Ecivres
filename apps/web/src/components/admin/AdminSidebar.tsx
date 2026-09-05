@@ -13,9 +13,15 @@ export interface AdminNavItem {
 
 interface AdminSidebarProps {
   pendingApplicationsCount?: number;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
-export const AdminSidebar: React.FC<AdminSidebarProps> = ({ pendingApplicationsCount = 0 }) => {
+export const AdminSidebar: React.FC<AdminSidebarProps> = ({
+  pendingApplicationsCount = 0,
+  mobileOpen = false,
+  onCloseMobile,
+}) => {
   const pathname = usePathname();
 
   const navItems: AdminNavItem[] = [
@@ -30,18 +36,28 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ pendingApplicationsC
     { label: "Category Management", href: "/admin/categories", icon: "🏷️" },
     { label: "Promotions & Coupons", href: "/admin/coupons", icon: "🎟️" },
     { label: "Review Moderation", href: "/admin/reviews", icon: "🛡️" },
+    { label: "Disputes & Support", href: "/admin/disputes", icon: "⚖️" },
     { label: "Revenue & Analytics", href: "/admin/analytics", icon: "💵" },
     { label: "Transaction Ledger", href: "/admin/transactions", icon: "🧾" },
     { label: "Security Audit Logs", href: "/admin/audit", icon: "📜" },
+    { label: "Platform Settings", href: "/admin/settings", icon: "⚙️" },
   ];
 
-  return (
-    <aside className="w-64 bg-slate-950 text-white min-h-[calc(100vh-65px)] p-4 flex flex-col justify-between">
+  const sidebarContent = (
+    <div className="flex flex-col justify-between h-full p-4">
       <div className="space-y-6">
-        <div className="px-3 py-2 border-b border-slate-800">
+        <div className="px-3 py-2 flex items-center justify-between border-b border-slate-800">
           <h2 className="text-xs font-bold text-red-500 uppercase tracking-wider">
             System Control Panel
           </h2>
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="md:hidden text-slate-400 hover:text-white p-1"
+            >
+              ✕
+            </button>
+          )}
         </div>
         <nav className="space-y-1">
           {navItems.map((item) => {
@@ -50,9 +66,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ pendingApplicationsC
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                onClick={onCloseMobile}
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-red-600 text-white font-semibold shadow-sm"
+                    ? "bg-red-600 text-white font-semibold shadow-xs"
                     : "text-slate-300 hover:bg-slate-900 hover:text-white"
                 }`}
               >
@@ -71,10 +88,32 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ pendingApplicationsC
         </nav>
       </div>
 
-      <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
+      <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 mt-6">
         <p className="text-xs text-slate-300 font-semibold">Super Admin Mode</p>
         <p className="text-xs text-slate-500 mt-0.5">Platform Governance & Audit Active</p>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 bg-slate-950 text-white shrink-0 min-h-[calc(100vh-65px)]">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            onClick={onCloseMobile}
+          />
+          <aside className="relative z-10 w-72 max-w-[80vw] bg-slate-950 text-white h-full shadow-2xl flex flex-col">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+    </>
   );
 };
