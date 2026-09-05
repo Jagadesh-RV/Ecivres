@@ -185,6 +185,26 @@ export class BookingsService {
     return updatedBooking;
   }
 
+  async acceptBooking(bookingId: string, userId: string) {
+    return this.updateStatus(bookingId, userId, { status: 'CONFIRMED' as any });
+  }
+
+  async rejectBooking(bookingId: string, userId: string, reason?: string) {
+    const updated = await this.updateStatus(bookingId, userId, { status: 'CANCELLED' as any });
+    if (reason) {
+      try {
+        await this.notificationsService.create(
+          updated.customerId,
+          'Booking Declined',
+          `Your booking for "${updated.service.name}" was declined by provider: ${reason}`,
+        );
+      } catch (err) {
+        console.error('Failed to send rejection notification', err);
+      }
+    }
+    return updated;
+  }
+
   async cancelBooking(bookingId: string, userId: string, reason?: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
