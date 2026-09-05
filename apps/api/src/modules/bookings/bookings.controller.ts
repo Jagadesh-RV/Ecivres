@@ -31,6 +31,12 @@ export class BookingsController {
     return this.bookingsService.findAllForCustomer(user.id);
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Get single booking by ID' })
+  async findOne(@Param('id') bookingId: string) {
+    return this.bookingsService.findAllForCustomer(bookingId);
+  }
+
   @Get('provider')
   @UseGuards(RolesGuard)
   @Roles('PROVIDER')
