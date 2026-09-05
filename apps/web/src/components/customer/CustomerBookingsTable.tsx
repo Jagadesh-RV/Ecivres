@@ -133,6 +133,9 @@ export const CustomerBookingsTable: React.FC<CustomerBookingsTableProps> = ({
                         )}
                       </>
                     )}
+                    {b.status === "COMPLETED" && (
+                      <span className="text-xs font-semibold text-emerald-600">Invoice Paid</span>
+                    )}
                   </td>
                 </tr>
               ))}
