@@ -88,5 +88,21 @@ describe('AdminService', () => {
       expect(breakdown.platformCommission).toBe(100);
       expect(breakdown.providerPayouts).toBe(900);
     });
+
+    it('should compute complete marketplace monitoring metrics breakdown', async () => {
+      const mockPrisma = (service as any).prisma;
+      mockPrisma.booking = {
+        count: jest.fn().mockResolvedValue(10),
+      };
+      mockPrisma.service = { count: jest.fn().mockResolvedValue(5) };
+      mockPrisma.providerProfile.count = jest.fn().mockResolvedValue(3);
+      mockPrisma.customerProfile.count = jest.fn().mockResolvedValue(8);
+      jest.spyOn(service, 'getRevenueBreakdown').mockResolvedValue({ grossVolume: 1000 } as any);
+
+      const res = await service.getMarketplaceMonitoringMetrics();
+      expect(res.bookings.total).toBe(10);
+      expect(res.marketplace.totalServices).toBe(5);
+    });
   });
 });
+
