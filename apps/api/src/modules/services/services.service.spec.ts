@@ -91,4 +91,11 @@ describe('ServicesService', () => {
       where: { id: '1' },
     });
   });
+
+  it('should support price_asc sorting in findAll', async () => {
+    await service.findAll({ sortBy: 'price_asc' as any });
+    expect(prisma.service.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ orderBy: { price: 'asc' } }),
+    );
+  });
 });
