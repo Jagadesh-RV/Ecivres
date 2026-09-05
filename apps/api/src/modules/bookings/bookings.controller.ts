@@ -57,6 +57,22 @@ export class BookingsController {
     return this.bookingsService.updateStatus(bookingId, user.id, updateBookingStatusDto);
   }
 
+  @Patch(':id/accept')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Accept an incoming booking request (Provider only)' })
+  async acceptBooking(@CurrentUser() user: any, @Param('id') bookingId: string) {
+    return this.bookingsService.acceptBooking(bookingId, user.id);
+  }
+
+  @Patch(':id/reject')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Reject an incoming booking request (Provider only)' })
+  async rejectBooking(@CurrentUser() user: any, @Param('id') bookingId: string, @Body() body: { reason?: string }) {
+    return this.bookingsService.rejectBooking(bookingId, user.id, body?.reason);
+  }
+
   @Post(':id/cancel')
   @ApiOperation({ summary: 'Cancel a booking (Customer only)' })
   async cancel(
