@@ -138,6 +138,9 @@ export const ProviderBookingsTable: React.FC<ProviderBookingsTableProps> = ({
                         Mark Completed
                       </button>
                     )}
+                    {b.status === "COMPLETED" && (
+                      <span className="text-xs font-semibold text-emerald-600">Payout Credited</span>
+                    )}
                   </td>
                 </tr>
               ))}
