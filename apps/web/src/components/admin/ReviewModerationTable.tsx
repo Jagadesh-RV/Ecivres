@@ -24,7 +24,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-gray-600">
+        <table className="w-full text-left text-xs text-gray-600 min-w-[640px]">
           <thead className="bg-gray-50 border-b border-gray-200 uppercase tracking-wider text-[11px] font-bold text-gray-500">
             <tr>
               <th className="px-4 py-3">Service</th>

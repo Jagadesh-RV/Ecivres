@@ -47,7 +47,7 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm min-w-[640px]">
             <thead className="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase">
               <tr>
                 <th className="px-6 py-3 font-semibold">Transaction ID</th>

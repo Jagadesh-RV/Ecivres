@@ -11,9 +11,8 @@ export default function CustomerFavoritesPage() {
   const fetchFavorites = async () => {
     try {
       setIsLoading(true);
-      const res = await client.get("/services");
-      // Pick first 3 as sample saved favorites
-      setFavorites(res.data?.slice(0, 3) || []);
+      const res = await client.get("/favorites");
+      setFavorites(res.data || []);
     } catch (err) {
       console.error("Failed to load favorites", err);
     } finally {

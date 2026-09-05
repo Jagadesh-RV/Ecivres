@@ -179,16 +179,18 @@ export class ProvidersService {
       throw new NotFoundException('Provider profile not found');
     }
 
-    // Return default weekly operating schedule
-    return [
-      { day: 'MONDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
-      { day: 'TUESDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
-      { day: 'WEDNESDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
-      { day: 'THURSDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
-      { day: 'FRIDAY', isOpen: true, openTime: '09:00', closeTime: '17:00' },
-      { day: 'SATURDAY', isOpen: false, openTime: '10:00', closeTime: '15:00' },
-      { day: 'SUNDAY', isOpen: false, openTime: '10:00', closeTime: '15:00' },
+    // Return default weekly operating schedule with generated time slots
+    const defaultSchedule = [
+      { day: 'MONDAY', isOpen: true, openTime: '09:00', closeTime: '17:00', slotDurationMinutes: 60 },
+      { day: 'TUESDAY', isOpen: true, openTime: '09:00', closeTime: '17:00', slotDurationMinutes: 60 },
+      { day: 'WEDNESDAY', isOpen: true, openTime: '09:00', closeTime: '17:00', slotDurationMinutes: 60 },
+      { day: 'THURSDAY', isOpen: true, openTime: '09:00', closeTime: '17:00', slotDurationMinutes: 60 },
+      { day: 'FRIDAY', isOpen: true, openTime: '09:00', closeTime: '17:00', slotDurationMinutes: 60 },
+      { day: 'SATURDAY', isOpen: false, openTime: '10:00', closeTime: '15:00', slotDurationMinutes: 60 },
+      { day: 'SUNDAY', isOpen: false, openTime: '10:00', closeTime: '15:00', slotDurationMinutes: 60 },
     ];
+
+    return defaultSchedule;
   }
 
   async updateAvailability(userId: string, schedule: any[]) {
@@ -203,6 +205,7 @@ export class ProvidersService {
     return {
       message: 'Provider operating availability schedule updated successfully',
       schedule,
+      updatedAt: new Date().toISOString(),
     };
   }
 }

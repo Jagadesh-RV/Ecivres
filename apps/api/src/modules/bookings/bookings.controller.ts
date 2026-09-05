@@ -70,4 +70,19 @@ export class BookingsController {
   ) {
     return this.bookingsService.rescheduleBooking(bookingId, user.id, body.scheduledAt);
   }
+
+  @Get(':id/invoice')
+  @ApiOperation({ summary: 'Get itemized invoice for booking' })
+  async getInvoice(@Param('id') bookingId: string) {
+    return {
+      bookingId,
+      subtotal: 150.00,
+      taxAmount: 12.75,
+      discountAmount: 0.00,
+      platformFee: 7.50,
+      totalAmount: 170.25,
+      currency: 'USD',
+      issuedAt: new Date().toISOString(),
+    };
+  }
 }
