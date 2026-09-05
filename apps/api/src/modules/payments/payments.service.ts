@@ -180,12 +180,20 @@ export class PaymentsService {
     const totalPlatformFees = grossRevenue * platformFeeRate;
     const netEarnings = grossRevenue - totalPlatformFees;
 
+    const completedPayments = payments.filter((p) => p.booking?.status === 'COMPLETED');
+    const availableBalance = completedPayments.reduce((sum, p) => sum + p.amount * 0.9, 0);
+    const pendingPayments = payments.filter((p) => p.booking?.status !== 'COMPLETED');
+    const pendingBalance = pendingPayments.reduce((sum, p) => sum + p.amount * 0.9, 0);
+
     return {
       provider,
       grossRevenue,
       platformFeeRate,
       totalPlatformFees,
       netEarnings,
+      availableBalance,
+      pendingBalance,
+      lifetimeEarnings: netEarnings,
       completedTransactionsCount: payments.length,
       recentPayments: payments,
     };
