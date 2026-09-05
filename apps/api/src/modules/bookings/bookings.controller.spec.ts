@@ -62,4 +62,9 @@ describe('BookingsController', () => {
     expect(res.bookingId).toBe('b-100');
     expect(res.totalAmount).toBeGreaterThan(0);
   });
+
+  it('should return booking details on findOne endpoint', async () => {
+    await controller.findOne('b-100');
+    expect(service.findAllForCustomer).toHaveBeenCalledWith('b-100');
+  });
 });
