@@ -35,6 +35,19 @@ export class BookingsService {
       throw new NotFoundException('Service not found');
     }
 
+    const scheduledDate = new Date(createBookingDto.scheduledAt);
+    const existingConflict = await this.prisma.booking.findFirst({
+      where: {
+        serviceId: service.id,
+        scheduledAt: scheduledDate,
+        status: { in: ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] },
+      },
+    });
+
+    if (existingConflict) {
+      throw new BadRequestException('The selected time slot is already booked for this service');
+    }
+
     const newBooking = await this.prisma.booking.create({
       data: {
         customerId: customer.user.id, // Booking expects user ID based on schema `customer User @relation(...)` wait, schema says `customerId String`, `customer User`. So customerId is User ID.
