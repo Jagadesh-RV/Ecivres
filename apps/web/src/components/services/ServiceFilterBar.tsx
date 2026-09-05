@@ -73,6 +73,7 @@ export const ServiceFilterBar: React.FC<ServiceFilterBarProps> = ({
               <option value="newest">Newest First</option>
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
+              <option value="rating_desc">Top Rated</option>
             </select>
           </div>
 
