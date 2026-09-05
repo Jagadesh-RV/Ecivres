@@ -40,8 +40,12 @@ export default function ProviderAvailabilityPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Operating Schedule & Hours</h2>
-        <p className="text-xs text-gray-500 mt-1">Manage working days and open hours available for customer booking.</p>
+        <h2 className="text-xl font-bold text-gray-900">Operating Schedule & Time Slot Generator</h2>
+        <p className="text-xs text-gray-500 mt-1">Configure weekly working hours and auto-generate client booking slots.</p>
+      </div>
+
+      <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-xs text-indigo-800">
+        💡 <strong>Pro Tip:</strong> Setting precise operating hours automatically adjusts customer booking slots and prevents double-booking.
       </div>
 
       <AvailabilityPicker initialSchedule={schedule} onSave={handleSaveSchedule} />
