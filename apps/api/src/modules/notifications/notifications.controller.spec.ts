@@ -16,6 +16,7 @@ describe('NotificationsController', () => {
           useValue: {
             findAllForUser: jest.fn().mockResolvedValue([]),
             markAsRead: jest.fn().mockResolvedValue({ id: '1' }),
+            sendMarketplaceEventNotification: jest.fn().mockResolvedValue({ id: 'n1', title: 'Booking Created' }),
           },
         },
         {
@@ -34,4 +35,13 @@ describe('NotificationsController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('should call sendMarketplaceEventNotification on triggerEvent endpoint', async () => {
+    const res = await controller.triggerEvent(
+      { id: 'u1' },
+      { eventType: 'BOOKING_CREATED', serviceName: 'Plumbing' },
+    );
+    expect(res.title).toBe('Booking Created');
+  });
 });
+
