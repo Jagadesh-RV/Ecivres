@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PlatformSettingsController } from './settings.controller';
 import { PlatformSettingsService } from './settings.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 describe('PlatformSettingsController', () => {
   let controller: PlatformSettingsController;
@@ -14,7 +16,12 @@ describe('PlatformSettingsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PlatformSettingsController],
       providers: [{ provide: PlatformSettingsService, useValue: mockSettingsService }],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<PlatformSettingsController>(PlatformSettingsController);
     jest.clearAllMocks();
