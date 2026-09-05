@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../../../lib/axios";
 import { ProviderBookingsTable, ProviderBookingItem } from "../../../components/provider/ProviderBookingsTable";
+import { ProviderRescheduleModal } from "../../../components/provider/ProviderRescheduleModal";
 
 export default function ProviderBookingsPage() {
   const [bookings, setBookings] = useState<ProviderBookingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [rescheduleBooking, setRescheduleBooking] = useState<ProviderBookingItem | null>(null);
 
   const fetchBookings = async () => {
     try {
@@ -33,6 +35,34 @@ export default function ProviderBookingsPage() {
     }
   };
 
+  const handleAccept = async (id: string) => {
+    try {
+      await client.patch(`/bookings/${id}/accept`);
+      fetchBookings();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to accept booking");
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    const reason = prompt("Enter reason for rejection (optional):");
+    try {
+      await client.patch(`/bookings/${id}/reject`, { reason });
+      fetchBookings();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to reject booking");
+    }
+  };
+
+  const handleRescheduleSubmit = async (id: string, scheduledAt: string) => {
+    try {
+      await client.patch(`/bookings/${id}/reschedule`, { scheduledAt });
+      fetchBookings();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to reschedule booking");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -48,7 +78,24 @@ export default function ProviderBookingsPage() {
         <p className="text-xs text-gray-500 mt-1">Review incoming booking requests, confirm schedules, and complete jobs.</p>
       </div>
 
-      <ProviderBookingsTable bookings={bookings} onUpdateStatus={handleUpdateStatus} />
+      <ProviderBookingsTable
+        bookings={bookings}
+        onUpdateStatus={handleUpdateStatus}
+        onAccept={handleAccept}
+        onReject={handleReject}
+        onReschedule={(b) => setRescheduleBooking(b)}
+      />
+
+      {rescheduleBooking && (
+        <ProviderRescheduleModal
+          isOpen={true}
+          bookingId={rescheduleBooking.id}
+          currentDate={rescheduleBooking.scheduledAt}
+          onClose={() => setRescheduleBooking(null)}
+          onReschedule={handleRescheduleSubmit}
+        />
+      )}
     </div>
   );
 }
+
