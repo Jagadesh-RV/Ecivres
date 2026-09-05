@@ -15,6 +15,7 @@ describe('AdminController', () => {
           useValue: {
             findAllUsers: jest.fn().mockResolvedValue([]),
             verifyProvider: jest.fn().mockResolvedValue({ id: '1' }),
+            getMarketplaceMonitoringMetrics: jest.fn().mockResolvedValue({ bookings: { total: 10 } }),
           },
         },
         {
@@ -30,4 +31,10 @@ describe('AdminController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('should call getMarketplaceMonitoringMetrics on getMarketplaceMetrics endpoint', async () => {
+    const res = await controller.getMarketplaceMetrics();
+    expect(res.bookings.total).toBe(10);
+  });
 });
+
