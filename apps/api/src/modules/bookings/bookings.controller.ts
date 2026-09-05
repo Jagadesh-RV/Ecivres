@@ -57,6 +57,18 @@ export class BookingsController {
     return this.bookingsService.updateStatus(bookingId, user.id, updateBookingStatusDto);
   }
 
+  @Patch(':id/transition')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Perform booking status transition (Provider only)' })
+  async transitionStatus(
+    @CurrentUser() user: any,
+    @Param('id') bookingId: string,
+    @Body() body: { targetStatus: any },
+  ) {
+    return this.bookingsService.updateStatus(bookingId, user.id, { status: body.targetStatus });
+  }
+
   @Patch(':id/accept')
   @UseGuards(RolesGuard)
   @Roles('PROVIDER')
