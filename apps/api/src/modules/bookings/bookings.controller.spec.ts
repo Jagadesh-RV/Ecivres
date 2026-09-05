@@ -21,6 +21,7 @@ describe('BookingsController', () => {
             updateStatus: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CONFIRMED' }),
             acceptBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CONFIRMED' }),
             rejectBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CANCELLED' }),
+            completeBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'COMPLETED' }),
           },
         },
         {
@@ -73,6 +74,12 @@ describe('BookingsController', () => {
     const result = await controller.rejectBooking({ id: 'p-1' }, 'b-100', { reason: 'Busy' });
     expect(result.status).toBe('CANCELLED');
     expect(service.rejectBooking).toHaveBeenCalledWith('b-100', 'p-1', 'Busy');
+  });
+
+  it('should mark booking completed', async () => {
+    const result = await controller.completeBooking({ id: 'p-1' }, 'b-100', { notes: 'Finished' });
+    expect(result.status).toBe('COMPLETED');
+    expect(service.completeBooking).toHaveBeenCalledWith('b-100', 'p-1', 'Finished');
   });
 
   it('should reschedule a booking', async () => {
