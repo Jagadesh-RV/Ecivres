@@ -85,7 +85,7 @@ export const LiveNotificationCenter: React.FC = () => {
 
       {notifications.length === 0 ? (
         <div className="p-8 text-center text-xs text-gray-500">
-          No notifications yet. You'll receive live updates for booking events here.
+          No notifications yet. You&apos;ll receive live updates for booking events here.
         </div>
       ) : (
         <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">

@@ -36,8 +36,9 @@ export const ReviewCompletionModal: React.FC<ReviewCompletionModalProps> = ({
       });
       if (onSubmitted) onSubmitted();
       onClose();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to submit review");
+    } catch (err) {
+      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to submit review";
+      alert(errorMsg);
     } finally {
       setSubmitting(false);
     }
