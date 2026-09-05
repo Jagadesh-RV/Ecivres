@@ -54,7 +54,7 @@ export const CustomerBookingsTable: React.FC<CustomerBookingsTableProps> = ({
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h3 className="text-base font-bold text-gray-900">Service Bookings History</h3>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center flex-wrap gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {["ALL", "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"].map((st) => (
             <button
               key={st}
@@ -77,27 +77,27 @@ export const CustomerBookingsTable: React.FC<CustomerBookingsTableProps> = ({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm min-w-[640px]">
             <thead className="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase">
               <tr>
-                <th className="px-6 py-3 font-semibold">Service</th>
-                <th className="px-6 py-3 font-semibold">Provider</th>
-                <th className="px-6 py-3 font-semibold">Scheduled Date</th>
-                <th className="px-6 py-3 font-semibold">Price</th>
-                <th className="px-6 py-3 font-semibold">Status</th>
-                <th className="px-6 py-3 font-semibold text-right">Actions</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold">Service</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold">Provider</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold">Scheduled Date</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold">Price</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold">Status</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredBookings.map((b) => (
                 <tr key={b.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-gray-900">
+                  <td className="px-4 sm:px-6 py-4 font-semibold text-gray-900">
                     {b.service?.name || "Service"}
                   </td>
-                  <td className="px-6 py-4 text-gray-600">
+                  <td className="px-4 sm:px-6 py-4 text-gray-600">
                     {b.service?.provider?.businessName || "Service Provider"}
                   </td>
-                  <td className="px-6 py-4 text-gray-600">
+                  <td className="px-4 sm:px-6 py-4 text-gray-600">
                     {new Date(b.scheduledAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -106,13 +106,13 @@ export const CustomerBookingsTable: React.FC<CustomerBookingsTableProps> = ({
                       minute: "2-digit",
                     })}
                   </td>
-                  <td className="px-6 py-4 font-semibold text-gray-900">
+                  <td className="px-4 sm:px-6 py-4 font-semibold text-gray-900">
                     ${b.service?.price?.toFixed(2) || "0.00"}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4">
                     <Badge label={b.status} variant={getBadgeVariant(b.status)} />
                   </td>
-                  <td className="px-6 py-4 text-right space-x-3">
+                  <td className="px-4 sm:px-6 py-4 text-right space-x-3">
                     {(b.status === "PENDING" || b.status === "CONFIRMED") && (
                       <>
                         {onRescheduleBooking && (
