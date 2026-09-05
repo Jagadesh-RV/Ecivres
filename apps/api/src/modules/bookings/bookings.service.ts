@@ -303,4 +303,61 @@ export class BookingsService {
 
     return updated;
   }
+
+  async completeBooking(bookingId: string, userId: string, notes?: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        service: { include: { provider: true } },
+        payment: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.customerId !== userId && booking.service.provider.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to mark this booking as completed');
+    }
+
+    if (booking.status === 'COMPLETED') {
+      return booking;
+    }
+
+    if (booking.status === 'CANCELLED') {
+      throw new BadRequestException('Cannot complete a cancelled booking');
+    }
+
+    const updated = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: 'COMPLETED',
+        payment: booking.payment
+          ? {
+              update: {
+                status: 'COMPLETED',
+              },
+            }
+          : undefined,
+      },
+      include: {
+        service: { include: { provider: true } },
+        payment: true,
+      },
+    });
+
+    try {
+      await this.notificationsService.create(
+        updated.customerId,
+        'Service Completed',
+        `Your service "${updated.service.name}" has been marked as completed.${notes ? ' Note: ' + notes : ''}`,
+      );
+    } catch (err) {
+      console.error('Failed to send completion notification', err);
+    }
+
+    return updated;
+  }
 }
+
