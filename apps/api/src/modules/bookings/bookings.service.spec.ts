@@ -67,10 +67,21 @@ describe('BookingsService', () => {
   });
 
   it('should create booking', async () => {
+    (prisma.booking as any).findFirst = jest.fn().mockResolvedValue(null);
     await service.create('user1', {
       serviceId: 'srv1',
       scheduledAt: '2026-10-10T10:00:00Z',
     });
     expect(prisma.booking.create).toHaveBeenCalled();
+  });
+
+  it('should throw BadRequestException when time slot has booking conflict', async () => {
+    (prisma.booking as any).findFirst = jest.fn().mockResolvedValue({ id: 'existing_b' });
+    await expect(
+      service.create('user1', {
+        serviceId: 'srv1',
+        scheduledAt: '2026-10-10T10:00:00Z',
+      }),
+    ).rejects.toThrow(BadRequestException);
   });
 });
