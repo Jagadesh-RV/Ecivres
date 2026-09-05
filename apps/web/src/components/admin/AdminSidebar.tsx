@@ -40,6 +40,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { label: "Revenue & Analytics", href: "/admin/analytics", icon: "💵" },
     { label: "Transaction Ledger", href: "/admin/transactions", icon: "🧾" },
     { label: "Security Audit Logs", href: "/admin/audit", icon: "📜" },
+    { label: "Platform Settings", href: "/admin/settings", icon: "⚙️" },
   ];
 
   const sidebarContent = (
