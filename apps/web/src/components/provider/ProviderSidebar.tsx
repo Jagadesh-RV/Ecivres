@@ -36,6 +36,7 @@ export const ProviderSidebar: React.FC<ProviderSidebarProps> = ({
     { label: "Operating Hours", href: "/provider/availability", icon: "🕒" },
     { label: "Revenue & Payouts", href: "/provider/earnings", icon: "💵" },
     { label: "Client Reviews", href: "/provider/reviews", icon: "⭐" },
+    { label: "Partner Support", href: "/provider/support", icon: "🛟" },
     { label: "Add New Service", href: "/provider/services/create", icon: "➕" },
   ];
 
