@@ -85,6 +85,16 @@ export class BookingsController {
     return this.bookingsService.rejectBooking(bookingId, user.id, body?.reason);
   }
 
+  @Patch(':id/complete')
+  @ApiOperation({ summary: 'Mark a booking service as completed' })
+  async completeBooking(
+    @CurrentUser() user: any,
+    @Param('id') bookingId: string,
+    @Body() body: { notes?: string },
+  ) {
+    return this.bookingsService.completeBooking(bookingId, user.id, body?.notes);
+  }
+
   @Post(':id/cancel')
   @ApiOperation({ summary: 'Cancel a booking (Customer only)' })
   async cancel(
