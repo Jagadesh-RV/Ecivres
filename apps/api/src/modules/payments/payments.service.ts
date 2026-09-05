@@ -125,6 +125,19 @@ export class PaymentsService {
     return updatedPayment;
   }
 
+  async mockSettlePayment(bookingId: string) {
+    let payment = await this.prisma.payment.findUnique({
+      where: { bookingId },
+    });
+
+    if (!payment) {
+      payment = await this.createPayment(bookingId);
+    }
+
+    const mockTxnId = `MOCK-SETTLE-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    return this.processPayment(bookingId, mockTxnId);
+  }
+
   async getPaymentByBooking(bookingId: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { bookingId },
