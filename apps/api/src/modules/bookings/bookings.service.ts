@@ -157,6 +157,24 @@ export class BookingsService {
       throw new BadRequestException('You do not have permission to update this booking');
     }
 
+    const validTransitions: Record<string, string[]> = {
+      PENDING: ['CONFIRMED', 'CANCELLED'],
+      CONFIRMED: ['IN_PROGRESS', 'CANCELLED'],
+      IN_PROGRESS: ['COMPLETED', 'CANCELLED'],
+      COMPLETED: [],
+      CANCELLED: [],
+    };
+
+    const currentStatus = booking.status as string;
+    const targetStatus = updateDto.status as string;
+
+    if (currentStatus !== targetStatus) {
+      const allowed = validTransitions[currentStatus] || [];
+      if (!allowed.includes(targetStatus)) {
+        throw new BadRequestException(`Invalid booking status transition from ${currentStatus} to ${targetStatus}`);
+      }
+    }
+
     const updatedBooking = await this.prisma.booking.update({
       where: { id: bookingId },
       data: { status: updateDto.status },
