@@ -126,5 +126,27 @@ describe('BookingsService', () => {
     const result = await service.updateStatus('b1', 'user_p1', { status: 'CONFIRMED' as any });
     expect(result.status).toBe('CONFIRMED');
   });
+
+  it('should complete booking and update payment status', async () => {
+    (prisma.booking as any).findUnique = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'CONFIRMED',
+      customerId: 'c1',
+      service: { provider: { userId: 'p1' }, name: 'Plumbing' },
+      payment: { id: 'pay1', status: 'PENDING' },
+    });
+    (prisma.booking as any).update = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'COMPLETED',
+      customerId: 'c1',
+      service: { name: 'Plumbing' },
+      payment: { id: 'pay1', status: 'COMPLETED' },
+    });
+
+    const result = await service.completeBooking('b1', 'p1', 'Job well done');
+    expect(result.status).toBe('COMPLETED');
+    expect(result.payment.status).toBe('COMPLETED');
+  });
 });
+
 
