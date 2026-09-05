@@ -57,8 +57,8 @@ export const EditServiceModal: React.FC<EditServiceModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-3 sm:p-4">
+      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <h3 className="text-base font-bold text-gray-900">Edit Service Details</h3>
           <button
