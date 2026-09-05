@@ -97,13 +97,14 @@ describe('ProvidersService', () => {
   });
 
   describe('getAvailability', () => {
-    it('should return weekly operating schedule', async () => {
+    it('should return weekly operating schedule with slot duration', async () => {
       prismaService.providerProfile.findUnique.mockResolvedValue(mockProvider);
 
       const result = await service.getAvailability('user-1');
 
       expect(result).toHaveLength(7);
       expect(result[0].day).toEqual('MONDAY');
+      expect(result[0].slotDurationMinutes).toEqual(60);
     });
   });
 
