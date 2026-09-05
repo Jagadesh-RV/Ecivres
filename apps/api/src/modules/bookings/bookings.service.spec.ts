@@ -92,9 +92,39 @@ describe('BookingsService', () => {
     expect(service.updateStatus).toHaveBeenCalledWith('b1', 'prov_user', { status: 'CONFIRMED' });
   });
 
-  it('should reject booking request', async () => {
-    jest.spyOn(service, 'updateStatus').mockResolvedValue({ id: 'b1', status: 'CANCELLED', customerId: 'c1', service: { name: 'Cleaning' } } as any);
-    const result = await service.rejectBooking('b1', 'prov_user', 'Fully booked');
-    expect(result.status).toBe('CANCELLED');
+  it('should reject invalid booking status transitions in updateStatus', async () => {
+    (prisma as any).providerProfile = {
+      findUnique: jest.fn().mockResolvedValue({ id: 'p1' }),
+    };
+    (prisma.booking as any).findUnique = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'PENDING',
+      service: { providerId: 'p1' },
+    });
+
+    await expect(
+      service.updateStatus('b1', 'user_p1', { status: 'COMPLETED' as any }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('should allow valid booking status transitions in updateStatus', async () => {
+    (prisma as any).providerProfile = {
+      findUnique: jest.fn().mockResolvedValue({ id: 'p1' }),
+    };
+    (prisma.booking as any).findUnique = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'PENDING',
+      service: { providerId: 'p1', name: 'Test' },
+    });
+    (prisma.booking as any).update = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'CONFIRMED',
+      customerId: 'c1',
+      service: { name: 'Test' },
+    });
+
+    const result = await service.updateStatus('b1', 'user_p1', { status: 'CONFIRMED' as any });
+    expect(result.status).toBe('CONFIRMED');
   });
 });
+
