@@ -22,6 +22,12 @@ export class PaymentsController {
     return this.paymentsService.processPayment(bookingId, txId);
   }
 
+  @Post('mock-settle/:bookingId')
+  @ApiOperation({ summary: 'Mock successful payment settlement for booking' })
+  async mockSettle(@Param('bookingId') bookingId: string) {
+    return this.paymentsService.mockSettlePayment(bookingId);
+  }
+
   @Post(':bookingId/intent')
   @ApiOperation({ summary: 'Create a Stripe Payment Intent for booking' })
   async createIntent(@Param('bookingId') bookingId: string) {
