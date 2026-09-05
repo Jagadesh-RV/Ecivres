@@ -18,6 +18,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { PayoutsModule } from './modules/payouts/payouts.module';
 import { SupportTicketsModule } from './modules/tickets/tickets.module';
+import { PlatformSettingsModule } from './modules/settings/settings.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 
@@ -48,6 +49,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     CouponsModule,
     PayoutsModule,
     SupportTicketsModule,
+    PlatformSettingsModule,
     PrismaModule,
   ],
   controllers: [AppController],
