@@ -41,8 +41,8 @@ describe('PaymentsService', () => {
       };
       mockPrisma.payment = {
         findMany: jest.fn().mockResolvedValue([
-          { id: 'pay-1', amount: 500, status: 'SUCCESS' },
-          { id: 'pay-2', amount: 300, status: 'SUCCESS' },
+          { id: 'pay-1', amount: 500, status: 'SUCCESS', booking: { status: 'COMPLETED' } },
+          { id: 'pay-2', amount: 300, status: 'SUCCESS', booking: { status: 'CONFIRMED' } },
         ]),
       };
 
@@ -51,6 +51,8 @@ describe('PaymentsService', () => {
       expect(result.grossRevenue).toEqual(800);
       expect(result.totalPlatformFees).toEqual(80);
       expect(result.netEarnings).toEqual(720);
+      expect(result.availableBalance).toEqual(450); // 500 * 0.9
+      expect(result.pendingBalance).toEqual(270); // 300 * 0.9
       expect(result.completedTransactionsCount).toEqual(2);
     });
   });
@@ -94,5 +96,34 @@ describe('PaymentsService', () => {
       const result = await service.deletePaymentMethod('user-100', targetId);
       expect(result.success).toBe(true);
     });
+
+    it('should process mockSettlePayment successfully', async () => {
+      const mockPrisma = (service as any).prisma;
+      mockPrisma.payment = {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'pay-1',
+          bookingId: 'b-1',
+          amount: 150,
+          status: 'PENDING',
+          booking: { status: 'PENDING', service: { provider: { userId: 'prov-1' }, name: 'Roofing' } },
+        }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pay-1',
+          status: 'SUCCESS',
+          transactionId: 'MOCK-TXN-123',
+        }),
+      };
+      mockPrisma.booking = {
+        update: jest.fn().mockResolvedValue({ id: 'b-1', status: 'CONFIRMED' }),
+      };
+      (service as any).notificationsService = {
+        create: jest.fn().mockResolvedValue({}),
+      };
+
+      const res = await service.mockSettlePayment('b-1');
+      expect(res.status).toBe('SUCCESS');
+      expect(mockPrisma.payment.update).toHaveBeenCalled();
+    });
   });
 });
+

@@ -26,6 +26,11 @@ export class ServicesController {
     return this.servicesService.findAll(query);
   }
 
+  @Get('search')
+  search(@Query() query: any) {
+    return this.servicesService.searchServices(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.servicesService.findOne(id);

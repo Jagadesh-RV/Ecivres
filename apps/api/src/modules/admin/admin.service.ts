@@ -143,4 +143,51 @@ export class AdminService {
       monthlyGrowthRate: '+14.8%',
     };
   }
+
+  async getMarketplaceMonitoringMetrics() {
+    const [
+      totalBookings,
+      pendingCount,
+      confirmedCount,
+      inProgressCount,
+      completedCount,
+      cancelledCount,
+      totalServices,
+      totalProviders,
+      totalCustomers,
+    ] = await Promise.all([
+      this.prisma.booking.count(),
+      this.prisma.booking.count({ where: { status: 'PENDING' } }),
+      this.prisma.booking.count({ where: { status: 'CONFIRMED' } }),
+      this.prisma.booking.count({ where: { status: 'IN_PROGRESS' } }),
+      this.prisma.booking.count({ where: { status: 'COMPLETED' } }),
+      this.prisma.booking.count({ where: { status: 'CANCELLED' } }),
+      this.prisma.service.count(),
+      this.prisma.providerProfile.count(),
+      this.prisma.customerProfile.count(),
+    ]);
+
+    const revenue = await this.getRevenueBreakdown();
+
+    return {
+      bookings: {
+        total: totalBookings,
+        byStatus: {
+          PENDING: pendingCount,
+          CONFIRMED: confirmedCount,
+          IN_PROGRESS: inProgressCount,
+          COMPLETED: completedCount,
+          CANCELLED: cancelledCount,
+        },
+        completionRate: totalBookings > 0 ? Number(((completedCount / totalBookings) * 100).toFixed(1)) : 0,
+      },
+      marketplace: {
+        totalServices,
+        totalProviders,
+        totalCustomers,
+      },
+      revenue,
+    };
+  }
 }
+

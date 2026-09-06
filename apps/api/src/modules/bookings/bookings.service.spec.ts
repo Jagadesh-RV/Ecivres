@@ -67,10 +67,86 @@ describe('BookingsService', () => {
   });
 
   it('should create booking', async () => {
+    (prisma.booking as any).findFirst = jest.fn().mockResolvedValue(null);
     await service.create('user1', {
       serviceId: 'srv1',
       scheduledAt: '2026-10-10T10:00:00Z',
     });
     expect(prisma.booking.create).toHaveBeenCalled();
   });
+
+  it('should throw BadRequestException when time slot has booking conflict', async () => {
+    (prisma.booking as any).findFirst = jest.fn().mockResolvedValue({ id: 'existing_b' });
+    await expect(
+      service.create('user1', {
+        serviceId: 'srv1',
+        scheduledAt: '2026-10-10T10:00:00Z',
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('should accept booking request', async () => {
+    jest.spyOn(service, 'updateStatus').mockResolvedValue({ id: 'b1', status: 'CONFIRMED' } as any);
+    const result = await service.acceptBooking('b1', 'prov_user');
+    expect(result.status).toBe('CONFIRMED');
+    expect(service.updateStatus).toHaveBeenCalledWith('b1', 'prov_user', { status: 'CONFIRMED' });
+  });
+
+  it('should reject invalid booking status transitions in updateStatus', async () => {
+    (prisma as any).providerProfile = {
+      findUnique: jest.fn().mockResolvedValue({ id: 'p1' }),
+    };
+    (prisma.booking as any).findUnique = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'PENDING',
+      service: { providerId: 'p1' },
+    });
+
+    await expect(
+      service.updateStatus('b1', 'user_p1', { status: 'COMPLETED' as any }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('should allow valid booking status transitions in updateStatus', async () => {
+    (prisma as any).providerProfile = {
+      findUnique: jest.fn().mockResolvedValue({ id: 'p1' }),
+    };
+    (prisma.booking as any).findUnique = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'PENDING',
+      service: { providerId: 'p1', name: 'Test' },
+    });
+    (prisma.booking as any).update = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'CONFIRMED',
+      customerId: 'c1',
+      service: { name: 'Test' },
+    });
+
+    const result = await service.updateStatus('b1', 'user_p1', { status: 'CONFIRMED' as any });
+    expect(result.status).toBe('CONFIRMED');
+  });
+
+  it('should complete booking and update payment status', async () => {
+    (prisma.booking as any).findUnique = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'CONFIRMED',
+      customerId: 'c1',
+      service: { provider: { userId: 'p1' }, name: 'Plumbing' },
+      payment: { id: 'pay1', status: 'PENDING' },
+    });
+    (prisma.booking as any).update = jest.fn().mockResolvedValue({
+      id: 'b1',
+      status: 'COMPLETED',
+      customerId: 'c1',
+      service: { name: 'Plumbing' },
+      payment: { id: 'pay1', status: 'COMPLETED' },
+    });
+
+    const result = await service.completeBooking('b1', 'p1', 'Job well done');
+    expect(result.status).toBe('COMPLETED');
+    expect(result.payment.status).toBe('COMPLETED');
+  });
 });
+
+

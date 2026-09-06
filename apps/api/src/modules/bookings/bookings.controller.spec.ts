@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookingsController } from './bookings.controller';
 import { BookingsService } from './bookings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import { PrismaService } from '../../prisma/prisma.service';
 
 describe('BookingsController', () => {
@@ -17,6 +18,10 @@ describe('BookingsController', () => {
           useValue: {
             create: jest.fn().mockResolvedValue({ id: '1' }),
             findAllForCustomer: jest.fn().mockResolvedValue([]),
+            updateStatus: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CONFIRMED' }),
+            acceptBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CONFIRMED' }),
+            rejectBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'CANCELLED' }),
+            completeBooking: jest.fn().mockResolvedValue({ id: 'b-100', status: 'COMPLETED' }),
           },
         },
         {
@@ -26,6 +31,8 @@ describe('BookingsController', () => {
       ],
     })
       .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
       .useValue({ canActivate: () => true })
       .compile();
 
@@ -50,6 +57,31 @@ describe('BookingsController', () => {
     expect(service.findAllForCustomer).toHaveBeenCalled();
   });
 
+  it('should transition booking status via transition endpoint', async () => {
+    (service.updateStatus as jest.Mock).mockResolvedValue({ id: 'b-100', status: 'IN_PROGRESS' });
+    const result = await controller.transitionStatus({ id: 'p-1' }, 'b-100', { targetStatus: 'IN_PROGRESS' });
+    expect(result.status).toBe('IN_PROGRESS');
+    expect(service.updateStatus).toHaveBeenCalledWith('b-100', 'p-1', { status: 'IN_PROGRESS' });
+  });
+
+  it('should accept a booking', async () => {
+    const result = await controller.acceptBooking({ id: 'p-1' }, 'b-100');
+    expect(result.status).toBe('CONFIRMED');
+    expect(service.acceptBooking).toHaveBeenCalledWith('b-100', 'p-1');
+  });
+
+  it('should reject a booking', async () => {
+    const result = await controller.rejectBooking({ id: 'p-1' }, 'b-100', { reason: 'Busy' });
+    expect(result.status).toBe('CANCELLED');
+    expect(service.rejectBooking).toHaveBeenCalledWith('b-100', 'p-1', 'Busy');
+  });
+
+  it('should mark booking completed', async () => {
+    const result = await controller.completeBooking({ id: 'p-1' }, 'b-100', { notes: 'Finished' });
+    expect(result.status).toBe('COMPLETED');
+    expect(service.completeBooking).toHaveBeenCalledWith('b-100', 'p-1', 'Finished');
+  });
+
   it('should reschedule a booking', async () => {
     (service as any).rescheduleBooking = jest.fn().mockResolvedValue({ id: 'b-100', scheduledAt: '2026-12-01T10:00:00Z' });
     const result = await controller.reschedule({ id: 'user1' }, 'b-100', { scheduledAt: '2026-12-01T10:00:00Z' });
@@ -62,4 +94,10 @@ describe('BookingsController', () => {
     expect(res.bookingId).toBe('b-100');
     expect(res.totalAmount).toBeGreaterThan(0);
   });
+
+  it('should return booking details on findOne endpoint', async () => {
+    await controller.findOne('b-100');
+    expect(service.findAllForCustomer).toHaveBeenCalledWith('b-100');
+  });
 });
+

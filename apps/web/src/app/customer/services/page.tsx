@@ -80,11 +80,13 @@ export default function CustomerServicesPage() {
         <p className="text-xs text-gray-500 mt-1">Search and book verified professionals for your home & business.</p>
       </div>
 
-      <CategoryFilterPills
-        categories={categories}
-        selectedCategoryId={selectedCategoryId}
-        onSelectCategory={setSelectedCategoryId}
-      />
+      <div className="flex items-center justify-between gap-4">
+        <CategoryFilterPills
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          onSelectCategory={setSelectedCategoryId}
+        />
+      </div>
 
       <ServiceFilterBar
         search={search}
@@ -99,8 +101,16 @@ export default function CustomerServicesPage() {
       />
 
       {isLoading ? (
-        <div className="flex min-h-[300px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-indigo-600"></div>
+        <div className="py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-10 bg-gray-200 rounded w-full"></div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : services.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500 text-sm">

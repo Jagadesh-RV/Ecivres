@@ -101,12 +101,53 @@ export class ServicesService {
   }
 
   async searchServices(dto: any) {
-    return this.findAll({
-      search: dto.query,
-      categoryId: dto.categoryId,
-      minPrice: dto.minPrice ? String(dto.minPrice) : undefined,
-      maxPrice: dto.maxPrice ? String(dto.maxPrice) : undefined,
-      sortBy: dto.sortBy,
-    });
+    const page = dto.page || 1;
+    const limit = dto.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (dto.categoryId) where.categoryId = dto.categoryId;
+    if (dto.providerId) where.providerId = dto.providerId;
+
+    if (dto.minPrice !== undefined || dto.maxPrice !== undefined) {
+      where.price = {};
+      if (dto.minPrice !== undefined) where.price.gte = Number(dto.minPrice);
+      if (dto.maxPrice !== undefined) where.price.lte = Number(dto.maxPrice);
+    }
+
+    if (dto.query) {
+      where.OR = [
+        { name: { contains: dto.query, mode: 'insensitive' } },
+        { description: { contains: dto.query, mode: 'insensitive' } },
+      ];
+    }
+
+    let orderBy: any = { createdAt: 'desc' };
+    if (dto.sortBy === 'price_asc' || dto.sortBy === 'PRICE_ASC') orderBy = { price: 'asc' };
+    if (dto.sortBy === 'price_desc' || dto.sortBy === 'PRICE_DESC') orderBy = { price: 'desc' };
+
+    const [items, totalItems] = await Promise.all([
+      this.prisma.service.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+        include: {
+          category: true,
+          provider: {
+            select: { id: true, businessName: true, phone: true, isVerified: true, user: { select: { email: true } } }
+          }
+        }
+      }),
+      this.prisma.service.count({ where }),
+    ]);
+
+    return {
+      items,
+      totalItems,
+      page,
+      limit,
+      totalPages: Math.ceil(totalItems / limit) || 1,
+    };
   }
 }

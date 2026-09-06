@@ -21,6 +21,14 @@ export class ReviewsController {
     return this.reviewsService.create(req.user.id, createDto);
   }
 
+  @Get('eligibility/:bookingId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check if user is eligible to review a booking' })
+  checkEligibility(@Request() req: any, @Param('bookingId') bookingId: string) {
+    return this.reviewsService.checkReviewEligibility(bookingId, req.user.id);
+  }
+
   @Get('service/:serviceId')
   @ApiOperation({ summary: 'Get all reviews for a specific service' })
   findByService(@Param('serviceId') serviceId: string) {
