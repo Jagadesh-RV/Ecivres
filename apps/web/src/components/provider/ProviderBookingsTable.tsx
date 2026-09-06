@@ -23,11 +23,17 @@ export interface ProviderBookingItem {
 interface ProviderBookingsTableProps {
   bookings: ProviderBookingItem[];
   onUpdateStatus?: (id: string, status: string) => void;
+  onAccept?: (id: string) => void;
+  onReject?: (id: string) => void;
+  onReschedule?: (booking: ProviderBookingItem) => void;
 }
 
 export const ProviderBookingsTable: React.FC<ProviderBookingsTableProps> = ({
   bookings,
   onUpdateStatus,
+  onAccept,
+  onReject,
+  onReschedule,
 }) => {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
@@ -114,26 +120,34 @@ export const ProviderBookingsTable: React.FC<ProviderBookingsTableProps> = ({
                     <Badge label={b.status} variant={getBadgeVariant(b.status)} />
                   </td>
                   <td className="px-4 sm:px-6 py-4 text-right space-x-2">
-                    {b.status === "PENDING" && onUpdateStatus && (
+                    {b.status === "PENDING" && (
                       <>
                         <button
-                          onClick={() => onUpdateStatus(b.id, "CONFIRMED")}
-                          className="px-2.5 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition-colors"
+                          onClick={() => (onAccept ? onAccept(b.id) : onUpdateStatus?.(b.id, "CONFIRMED"))}
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors"
                         >
-                          Confirm
+                          Accept
                         </button>
                         <button
-                          onClick={() => onUpdateStatus(b.id, "CANCELLED")}
-                          className="px-2.5 py-1 text-xs font-semibold text-red-600 hover:underline"
+                          onClick={() => (onReject ? onReject(b.id) : onUpdateStatus?.(b.id, "CANCELLED"))}
+                          className="px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200"
                         >
                           Reject
                         </button>
                       </>
                     )}
+                    {(b.status === "PENDING" || b.status === "CONFIRMED") && onReschedule && (
+                      <button
+                        onClick={() => onReschedule(b)}
+                        className="px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                      >
+                        Reschedule
+                      </button>
+                    )}
                     {b.status === "CONFIRMED" && onUpdateStatus && (
                       <button
                         onClick={() => onUpdateStatus(b.id, "COMPLETED")}
-                        className="px-2.5 py-1 text-xs font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700 transition-colors"
+                        className="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
                       >
                         Mark Completed
                       </button>
@@ -151,3 +165,4 @@ export const ProviderBookingsTable: React.FC<ProviderBookingsTableProps> = ({
     </div>
   );
 };
+

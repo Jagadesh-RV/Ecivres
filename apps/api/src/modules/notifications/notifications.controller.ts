@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -53,4 +53,18 @@ export class NotificationsController {
   ) {
     return this.notificationsService.updatePreferences(user.id, dto);
   }
+
+  @Post('trigger-event')
+  @ApiOperation({ summary: 'Automate marketplace event notification creation' })
+  async triggerEvent(
+    @CurrentUser() user: any,
+    @Body() body: { eventType: any; serviceName?: string; extra?: string },
+  ) {
+    return this.notificationsService.sendMarketplaceEventNotification(
+      user.id,
+      body.eventType,
+      { serviceName: body.serviceName, extra: body.extra },
+    );
+  }
 }
+

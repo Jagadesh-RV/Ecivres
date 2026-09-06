@@ -98,4 +98,15 @@ describe('ServicesService', () => {
       expect.objectContaining({ orderBy: { price: 'asc' } }),
     );
   });
+
+  it('should return paginated searchServices result with page metadata', async () => {
+    (prisma.service as any).count = jest.fn().mockResolvedValue(15);
+    (prisma.service as any).findMany = jest.fn().mockResolvedValue([{ id: 's1' }, { id: 's2' }]);
+
+    const res = await service.searchServices({ query: 'clean', page: 1, limit: 10 });
+    expect(res.totalItems).toBe(15);
+    expect(res.totalPages).toBe(2);
+    expect(res.page).toBe(1);
+    expect(res.items.length).toBe(2);
+  });
 });

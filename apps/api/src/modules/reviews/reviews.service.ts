@@ -53,6 +53,34 @@ export class ReviewsService {
     });
   }
 
+  async checkReviewEligibility(bookingId: string, userId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        review: true,
+        service: true,
+      },
+    });
+
+    if (!booking) {
+      return { eligible: false, reason: 'Booking not found' };
+    }
+
+    if (booking.customerId !== userId) {
+      return { eligible: false, reason: 'Booking does not belong to user' };
+    }
+
+    if (booking.status !== 'COMPLETED') {
+      return { eligible: false, reason: 'Booking service is not completed yet' };
+    }
+
+    if (booking.review) {
+      return { eligible: false, reason: 'Review has already been submitted for this booking' };
+    }
+
+    return { eligible: true, booking };
+  }
+
   async findByService(serviceId: string) {
     return this.prisma.review.findMany({
       where: { booking: { serviceId } },

@@ -16,6 +16,7 @@ describe('PaymentsController', () => {
           useValue: {
             processPayment: jest.fn().mockResolvedValue({ id: '1' }),
             getPaymentByBooking: jest.fn().mockResolvedValue({ id: '1' }),
+            mockSettlePayment: jest.fn().mockResolvedValue({ status: 'SUCCESS', transactionId: 'MOCK-1' }),
           },
         },
         {
@@ -34,4 +35,10 @@ describe('PaymentsController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('should call mockSettlePayment on mockSettle endpoint', async () => {
+    const res = await controller.mockSettle('b-100');
+    expect(res.status).toBe('SUCCESS');
+  });
 });
+

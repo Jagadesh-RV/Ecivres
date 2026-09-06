@@ -52,4 +52,11 @@ describe('ServicesController', () => {
     );
     expect(service.create).toHaveBeenCalled();
   });
+
+  it('should call searchServices on search endpoint', async () => {
+    (service as any).searchServices = jest.fn().mockResolvedValue({ items: [], totalItems: 0 });
+    const res = await controller.search({ query: 'plumbing' });
+    expect(service.searchServices).toHaveBeenCalledWith({ query: 'plumbing' });
+    expect(res).toEqual({ items: [], totalItems: 0 });
+  });
 });

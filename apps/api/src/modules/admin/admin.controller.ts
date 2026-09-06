@@ -54,4 +54,11 @@ export class AdminController {
   async getRevenueBreakdown() {
     return this.adminService.getRevenueBreakdown();
   }
+
+  @Get('marketplace-metrics')
+  @ApiOperation({ summary: 'Get real-time marketplace booking analytics and monitoring metrics (Admin only)' })
+  async getMarketplaceMetrics() {
+    return this.adminService.getMarketplaceMonitoringMetrics();
+  }
 }
+

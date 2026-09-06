@@ -31,6 +31,12 @@ export class BookingsController {
     return this.bookingsService.findAllForCustomer(user.id);
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Get single booking by ID' })
+  async findOne(@Param('id') bookingId: string) {
+    return this.bookingsService.findAllForCustomer(bookingId);
+  }
+
   @Get('provider')
   @UseGuards(RolesGuard)
   @Roles('PROVIDER')
@@ -49,6 +55,44 @@ export class BookingsController {
     @Body() updateBookingStatusDto: UpdateBookingStatusDto,
   ) {
     return this.bookingsService.updateStatus(bookingId, user.id, updateBookingStatusDto);
+  }
+
+  @Patch(':id/transition')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Perform booking status transition (Provider only)' })
+  async transitionStatus(
+    @CurrentUser() user: any,
+    @Param('id') bookingId: string,
+    @Body() body: { targetStatus: any },
+  ) {
+    return this.bookingsService.updateStatus(bookingId, user.id, { status: body.targetStatus });
+  }
+
+  @Patch(':id/accept')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Accept an incoming booking request (Provider only)' })
+  async acceptBooking(@CurrentUser() user: any, @Param('id') bookingId: string) {
+    return this.bookingsService.acceptBooking(bookingId, user.id);
+  }
+
+  @Patch(':id/reject')
+  @UseGuards(RolesGuard)
+  @Roles('PROVIDER')
+  @ApiOperation({ summary: 'Reject an incoming booking request (Provider only)' })
+  async rejectBooking(@CurrentUser() user: any, @Param('id') bookingId: string, @Body() body: { reason?: string }) {
+    return this.bookingsService.rejectBooking(bookingId, user.id, body?.reason);
+  }
+
+  @Patch(':id/complete')
+  @ApiOperation({ summary: 'Mark a booking service as completed' })
+  async completeBooking(
+    @CurrentUser() user: any,
+    @Param('id') bookingId: string,
+    @Body() body: { notes?: string },
+  ) {
+    return this.bookingsService.completeBooking(bookingId, user.id, body?.notes);
   }
 
   @Post(':id/cancel')

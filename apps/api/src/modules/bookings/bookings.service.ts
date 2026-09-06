@@ -35,6 +35,19 @@ export class BookingsService {
       throw new NotFoundException('Service not found');
     }
 
+    const scheduledDate = new Date(createBookingDto.scheduledAt);
+    const existingConflict = await this.prisma.booking.findFirst({
+      where: {
+        serviceId: service.id,
+        scheduledAt: scheduledDate,
+        status: { in: ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] },
+      },
+    });
+
+    if (existingConflict) {
+      throw new BadRequestException('The selected time slot is already booked for this service');
+    }
+
     const newBooking = await this.prisma.booking.create({
       data: {
         customerId: customer.user.id, // Booking expects user ID based on schema `customer User @relation(...)` wait, schema says `customerId String`, `customer User`. So customerId is User ID.
@@ -144,6 +157,24 @@ export class BookingsService {
       throw new BadRequestException('You do not have permission to update this booking');
     }
 
+    const validTransitions: Record<string, string[]> = {
+      PENDING: ['CONFIRMED', 'CANCELLED'],
+      CONFIRMED: ['IN_PROGRESS', 'CANCELLED'],
+      IN_PROGRESS: ['COMPLETED', 'CANCELLED'],
+      COMPLETED: [],
+      CANCELLED: [],
+    };
+
+    const currentStatus = booking.status as string;
+    const targetStatus = updateDto.status as string;
+
+    if (currentStatus !== targetStatus) {
+      const allowed = validTransitions[currentStatus] || [];
+      if (!allowed.includes(targetStatus)) {
+        throw new BadRequestException(`Invalid booking status transition from ${currentStatus} to ${targetStatus}`);
+      }
+    }
+
     const updatedBooking = await this.prisma.booking.update({
       where: { id: bookingId },
       data: { status: updateDto.status },
@@ -170,6 +201,26 @@ export class BookingsService {
     }
 
     return updatedBooking;
+  }
+
+  async acceptBooking(bookingId: string, userId: string) {
+    return this.updateStatus(bookingId, userId, { status: 'CONFIRMED' as any });
+  }
+
+  async rejectBooking(bookingId: string, userId: string, reason?: string) {
+    const updated = await this.updateStatus(bookingId, userId, { status: 'CANCELLED' as any });
+    if (reason) {
+      try {
+        await this.notificationsService.create(
+          updated.customerId,
+          'Booking Declined',
+          `Your booking for "${updated.service.name}" was declined by provider: ${reason}`,
+        );
+      } catch (err) {
+        console.error('Failed to send rejection notification', err);
+      }
+    }
+    return updated;
   }
 
   async cancelBooking(bookingId: string, userId: string, reason?: string) {
@@ -252,4 +303,61 @@ export class BookingsService {
 
     return updated;
   }
+
+  async completeBooking(bookingId: string, userId: string, notes?: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        service: { include: { provider: true } },
+        payment: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.customerId !== userId && booking.service.provider.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to mark this booking as completed');
+    }
+
+    if (booking.status === 'COMPLETED') {
+      return booking;
+    }
+
+    if (booking.status === 'CANCELLED') {
+      throw new BadRequestException('Cannot complete a cancelled booking');
+    }
+
+    const updated = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: 'COMPLETED',
+        payment: booking.payment
+          ? {
+              update: {
+                status: 'COMPLETED',
+              },
+            }
+          : undefined,
+      },
+      include: {
+        service: { include: { provider: true } },
+        payment: true,
+      },
+    });
+
+    try {
+      await this.notificationsService.create(
+        updated.customerId,
+        'Service Completed',
+        `Your service "${updated.service.name}" has been marked as completed.${notes ? ' Note: ' + notes : ''}`,
+      );
+    } catch (err) {
+      console.error('Failed to send completion notification', err);
+    }
+
+    return updated;
+  }
 }
+

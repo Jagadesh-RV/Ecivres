@@ -57,5 +57,20 @@ describe('NotificationsService', () => {
       expect(updated.marketingEmails).toBe(false);
       expect(updated.emailAlerts).toBe(true);
     });
+
+    it('should create event notification on sendMarketplaceEventNotification', async () => {
+      const mockPrisma = (service as any).prisma;
+      mockPrisma.notification = {
+        create: jest.fn().mockResolvedValue({ id: 'n-1', title: 'Booking Created' }),
+      };
+
+      const res = await service.sendMarketplaceEventNotification('user-1', 'BOOKING_CREATED', {
+        serviceName: 'House Cleaning',
+      });
+
+      expect(res.title).toBe('Booking Created');
+      expect(mockPrisma.notification.create).toHaveBeenCalled();
+    });
   });
 });
+

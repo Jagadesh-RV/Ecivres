@@ -125,6 +125,19 @@ export class PaymentsService {
     return updatedPayment;
   }
 
+  async mockSettlePayment(bookingId: string) {
+    let payment = await this.prisma.payment.findUnique({
+      where: { bookingId },
+    });
+
+    if (!payment) {
+      payment = await this.createPayment(bookingId);
+    }
+
+    const mockTxnId = `MOCK-SETTLE-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    return this.processPayment(bookingId, mockTxnId);
+  }
+
   async getPaymentByBooking(bookingId: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { bookingId },
@@ -167,12 +180,20 @@ export class PaymentsService {
     const totalPlatformFees = grossRevenue * platformFeeRate;
     const netEarnings = grossRevenue - totalPlatformFees;
 
+    const completedPayments = payments.filter((p) => p.booking?.status === 'COMPLETED');
+    const availableBalance = completedPayments.reduce((sum, p) => sum + p.amount * 0.9, 0);
+    const pendingPayments = payments.filter((p) => p.booking?.status !== 'COMPLETED');
+    const pendingBalance = pendingPayments.reduce((sum, p) => sum + p.amount * 0.9, 0);
+
     return {
       provider,
       grossRevenue,
       platformFeeRate,
       totalPlatformFees,
       netEarnings,
+      availableBalance,
+      pendingBalance,
+      lifetimeEarnings: netEarnings,
       completedTransactionsCount: payments.length,
       recentPayments: payments,
     };

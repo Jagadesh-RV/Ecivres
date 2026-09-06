@@ -78,4 +78,32 @@ describe('ReviewsService', () => {
       expect(result.status).toEqual('APPROVED');
     });
   });
+
+  describe('checkReviewEligibility', () => {
+    it('should return eligible: true when booking is completed and not reviewed yet', async () => {
+      prismaService.booking.findUnique = jest.fn().mockResolvedValue({
+        id: 'b100',
+        customerId: 'user1',
+        status: 'COMPLETED',
+        review: null,
+      });
+
+      const res = await service.checkReviewEligibility('b100', 'user1');
+      expect(res.eligible).toBe(true);
+    });
+
+    it('should return eligible: false when booking is not completed', async () => {
+      prismaService.booking.findUnique = jest.fn().mockResolvedValue({
+        id: 'b100',
+        customerId: 'user1',
+        status: 'PENDING',
+        review: null,
+      });
+
+      const res = await service.checkReviewEligibility('b100', 'user1');
+      expect(res.eligible).toBe(false);
+      expect(res.reason).toContain('not completed');
+    });
+  });
 });
+

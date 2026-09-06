@@ -17,6 +17,7 @@ describe('ReviewsController', () => {
             create: jest.fn().mockResolvedValue({ id: '1' }),
             findAllForService: jest.fn().mockResolvedValue([]),
             getProviderStats: jest.fn().mockResolvedValue({ averageRating: 0, totalReviews: 0 }),
+            checkReviewEligibility: jest.fn().mockResolvedValue({ eligible: true }),
           },
         },
         {
@@ -35,4 +36,10 @@ describe('ReviewsController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('should call checkReviewEligibility on checkEligibility endpoint', async () => {
+    const res = await controller.checkEligibility({ user: { id: 'u1' } }, 'b100');
+    expect(res.eligible).toBe(true);
+  });
 });
+
