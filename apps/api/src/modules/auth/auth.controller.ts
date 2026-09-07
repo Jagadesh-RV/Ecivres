@@ -43,6 +43,13 @@ export class AuthController {
     return this.authService.logout(refreshToken);
   }
 
+  @Post('revoke-all')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async revokeAllSessions(@CurrentUser() user: any) {
+    return this.authService.revokeAllTokensForUser(user.id);
+  }
+
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {

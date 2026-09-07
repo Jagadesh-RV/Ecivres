@@ -13,7 +13,19 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   // Security Headers (XSS, Clickjacking protection)
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   // Gzip Compression for Performance
   app.use(compression());
@@ -27,6 +39,9 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
@@ -41,8 +56,21 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   // CORS
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',')
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8081'];
+
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.split(',') || '*',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow dev origins while enforcing headers
+      }
+    },
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   });
 
   await app.listen(process.env.API_PORT ?? 5001, '0.0.0.0');

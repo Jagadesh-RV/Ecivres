@@ -14,10 +14,13 @@ import { UsersModule } from '../users/users.module';
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_ACCESS_SECRET') || 'fallback_secret_for_development',
-        signOptions: { expiresIn: '1d' },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_ACCESS_SECRET') || process.env.JWT_ACCESS_SECRET || 'ecivres_production_secure_jwt_secret_key_2026_x99';
+        return {
+          secret,
+          signOptions: { expiresIn: '15m' },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

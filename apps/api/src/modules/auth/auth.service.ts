@@ -21,9 +21,15 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
+  public hashToken(rawToken: string): string {
+    const secret = this.configService.get<string>('JWT_ACCESS_SECRET') || process.env.JWT_ACCESS_SECRET || 'ecivres_token_salt_key_2026';
+    return crypto.createHmac('sha256', secret).update(rawToken).digest('hex');
+  }
+
   private async generateRefreshToken(userId: string): Promise<string> {
     const refreshToken = crypto.randomBytes(64).toString('hex');
-    const tokenHash = await bcrypt.hash(refreshToken, 10);
+    const bcryptHash = await bcrypt.hash(refreshToken, 10);
+    const tokenHash = `HMAC:${this.hashToken(refreshToken)}:${bcryptHash.substring(0, 15)}`;
 
     // Expires in 7 days
     const expiresAt = new Date();
@@ -95,49 +101,73 @@ export class AuthService {
     };
   }
 
+  private processingRefreshTokens = new Set<string>();
+
   async refresh(refreshTokenStr: string) {
     if (!refreshTokenStr) {
       throw new UnauthorizedException('Refresh token is required');
     }
 
-    // Find all unexpired tokens (in a real scenario, we might clean up expired ones)
-    const activeTokens = await this.prisma.refreshToken.findMany({
-      where: {
-        expiresAt: { gt: new Date() },
-      },
-      include: { user: true },
-    });
+    const computedHmac = `HMAC:${this.hashToken(refreshTokenStr)}`;
+    if (this.processingRefreshTokens.has(computedHmac)) {
+      throw new ConflictException('Refresh token request already in progress');
+    }
 
-    let matchedToken = null;
-    for (const tokenRecord of activeTokens) {
-      const isMatch = await bcrypt.compare(
-        refreshTokenStr,
-        tokenRecord.tokenHash,
-      );
-      if (isMatch) {
-        matchedToken = tokenRecord;
-        break;
+    this.processingRefreshTokens.add(computedHmac);
+
+    try {
+      // Find all unexpired tokens
+      const activeTokens = await this.prisma.refreshToken.findMany({
+        where: {
+          expiresAt: { gt: new Date() },
+        },
+        include: { user: true },
+      });
+
+      let matchedToken = null;
+
+      for (const tokenRecord of activeTokens) {
+        let isMatch = false;
+        if (tokenRecord.tokenHash.startsWith('HMAC:')) {
+          isMatch = tokenRecord.tokenHash.startsWith(computedHmac);
+        } else {
+          isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
+        }
+
+        if (isMatch) {
+          matchedToken = tokenRecord;
+          break;
+        }
       }
-    }
 
-    if (!matchedToken) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
+      if (!matchedToken) {
+        throw new UnauthorizedException('Invalid or revoked refresh token');
+      }
 
-    // Delete the old token (Token rotation)
-    await this.prisma.refreshToken.delete({
-      where: { id: matchedToken.id },
+      // Delete the old token (Token rotation)
+      await this.prisma.refreshToken.delete({
+        where: { id: matchedToken.id },
+      });
+
+      const user = matchedToken.user;
+      const payload = { email: user.email, sub: user.id };
+      const access_token = this.jwtService.sign(payload);
+      const refresh_token = await this.generateRefreshToken(user.id);
+
+      return {
+        access_token,
+        refresh_token,
+      };
+    } finally {
+      this.processingRefreshTokens.delete(computedHmac);
+    }
+  }
+
+  async revokeAllTokensForUser(userId: string) {
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId },
     });
-
-    const user = matchedToken.user;
-    const payload = { email: user.email, sub: user.id };
-    const access_token = this.jwtService.sign(payload);
-    const refresh_token = await this.generateRefreshToken(user.id);
-
-    return {
-      access_token,
-      refresh_token,
-    };
+    return { success: true, message: 'All active user sessions revoked' };
   }
 
   async logout(refreshTokenStr: string) {
@@ -151,11 +181,16 @@ export class AuthService {
       },
     });
 
+    const computedHmac = `HMAC:${this.hashToken(refreshTokenStr)}`;
+
     for (const tokenRecord of activeTokens) {
-      const isMatch = await bcrypt.compare(
-        refreshTokenStr,
-        tokenRecord.tokenHash,
-      );
+      let isMatch = false;
+      if (tokenRecord.tokenHash.startsWith('HMAC:')) {
+        isMatch = tokenRecord.tokenHash.startsWith(computedHmac);
+      } else {
+        isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
+      }
+
       if (isMatch) {
         await this.prisma.refreshToken.delete({
           where: { id: tokenRecord.id },

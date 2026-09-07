@@ -87,6 +87,37 @@ export class BookingsService {
     return newBooking;
   }
 
+  async findOne(bookingId: string, userId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        review: true,
+        payment: true,
+        customer: {
+          include: {
+            customerProfile: true,
+          },
+        },
+        service: {
+          include: {
+            provider: true,
+            category: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.customerId !== userId && booking.service.provider.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to view this booking');
+    }
+
+    return booking;
+  }
+
   async findAllForCustomer(userId: string) {
     return this.prisma.booking.findMany({
       where: { customerId: userId },
