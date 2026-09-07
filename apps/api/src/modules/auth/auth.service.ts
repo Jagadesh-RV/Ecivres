@@ -21,9 +21,15 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
+  public hashToken(rawToken: string): string {
+    const secret = this.configService.get<string>('JWT_ACCESS_SECRET') || process.env.JWT_ACCESS_SECRET || 'ecivres_token_salt_key_2026';
+    return crypto.createHmac('sha256', secret).update(rawToken).digest('hex');
+  }
+
   private async generateRefreshToken(userId: string): Promise<string> {
     const refreshToken = crypto.randomBytes(64).toString('hex');
-    const tokenHash = await bcrypt.hash(refreshToken, 10);
+    const bcryptHash = await bcrypt.hash(refreshToken, 10);
+    const tokenHash = `HMAC:${this.hashToken(refreshToken)}:${bcryptHash.substring(0, 15)}`;
 
     // Expires in 7 days
     const expiresAt = new Date();
@@ -109,11 +115,16 @@ export class AuthService {
     });
 
     let matchedToken = null;
+    const computedHmac = `HMAC:${this.hashToken(refreshTokenStr)}`;
+
     for (const tokenRecord of activeTokens) {
-      const isMatch = await bcrypt.compare(
-        refreshTokenStr,
-        tokenRecord.tokenHash,
-      );
+      let isMatch = false;
+      if (tokenRecord.tokenHash.startsWith('HMAC:')) {
+        isMatch = tokenRecord.tokenHash.startsWith(computedHmac);
+      } else {
+        isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
+      }
+
       if (isMatch) {
         matchedToken = tokenRecord;
         break;
@@ -151,11 +162,16 @@ export class AuthService {
       },
     });
 
+    const computedHmac = `HMAC:${this.hashToken(refreshTokenStr)}`;
+
     for (const tokenRecord of activeTokens) {
-      const isMatch = await bcrypt.compare(
-        refreshTokenStr,
-        tokenRecord.tokenHash,
-      );
+      let isMatch = false;
+      if (tokenRecord.tokenHash.startsWith('HMAC:')) {
+        isMatch = tokenRecord.tokenHash.startsWith(computedHmac);
+      } else {
+        isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
+      }
+
       if (isMatch) {
         await this.prisma.refreshToken.delete({
           where: { id: tokenRecord.id },
