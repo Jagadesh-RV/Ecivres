@@ -132,7 +132,7 @@ export class AuthService {
     }
 
     if (!matchedToken) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Invalid or revoked refresh token');
     }
 
     // Delete the old token (Token rotation)
@@ -149,6 +149,13 @@ export class AuthService {
       access_token,
       refresh_token,
     };
+  }
+
+  async revokeAllTokensForUser(userId: string) {
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+    return { success: true, message: 'All active user sessions revoked' };
   }
 
   async logout(refreshTokenStr: string) {
