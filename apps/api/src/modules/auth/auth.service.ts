@@ -101,54 +101,66 @@ export class AuthService {
     };
   }
 
+  private processingRefreshTokens = new Set<string>();
+
   async refresh(refreshTokenStr: string) {
     if (!refreshTokenStr) {
       throw new UnauthorizedException('Refresh token is required');
     }
 
-    // Find all unexpired tokens (in a real scenario, we might clean up expired ones)
-    const activeTokens = await this.prisma.refreshToken.findMany({
-      where: {
-        expiresAt: { gt: new Date() },
-      },
-      include: { user: true },
-    });
-
-    let matchedToken = null;
     const computedHmac = `HMAC:${this.hashToken(refreshTokenStr)}`;
-
-    for (const tokenRecord of activeTokens) {
-      let isMatch = false;
-      if (tokenRecord.tokenHash.startsWith('HMAC:')) {
-        isMatch = tokenRecord.tokenHash.startsWith(computedHmac);
-      } else {
-        isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
-      }
-
-      if (isMatch) {
-        matchedToken = tokenRecord;
-        break;
-      }
+    if (this.processingRefreshTokens.has(computedHmac)) {
+      throw new ConflictException('Refresh token request already in progress');
     }
 
-    if (!matchedToken) {
-      throw new UnauthorizedException('Invalid or revoked refresh token');
+    this.processingRefreshTokens.add(computedHmac);
+
+    try {
+      // Find all unexpired tokens
+      const activeTokens = await this.prisma.refreshToken.findMany({
+        where: {
+          expiresAt: { gt: new Date() },
+        },
+        include: { user: true },
+      });
+
+      let matchedToken = null;
+
+      for (const tokenRecord of activeTokens) {
+        let isMatch = false;
+        if (tokenRecord.tokenHash.startsWith('HMAC:')) {
+          isMatch = tokenRecord.tokenHash.startsWith(computedHmac);
+        } else {
+          isMatch = await bcrypt.compare(refreshTokenStr, tokenRecord.tokenHash);
+        }
+
+        if (isMatch) {
+          matchedToken = tokenRecord;
+          break;
+        }
+      }
+
+      if (!matchedToken) {
+        throw new UnauthorizedException('Invalid or revoked refresh token');
+      }
+
+      // Delete the old token (Token rotation)
+      await this.prisma.refreshToken.delete({
+        where: { id: matchedToken.id },
+      });
+
+      const user = matchedToken.user;
+      const payload = { email: user.email, sub: user.id };
+      const access_token = this.jwtService.sign(payload);
+      const refresh_token = await this.generateRefreshToken(user.id);
+
+      return {
+        access_token,
+        refresh_token,
+      };
+    } finally {
+      this.processingRefreshTokens.delete(computedHmac);
     }
-
-    // Delete the old token (Token rotation)
-    await this.prisma.refreshToken.delete({
-      where: { id: matchedToken.id },
-    });
-
-    const user = matchedToken.user;
-    const payload = { email: user.email, sub: user.id };
-    const access_token = this.jwtService.sign(payload);
-    const refresh_token = await this.generateRefreshToken(user.id);
-
-    return {
-      access_token,
-      refresh_token,
-    };
   }
 
   async revokeAllTokensForUser(userId: string) {
