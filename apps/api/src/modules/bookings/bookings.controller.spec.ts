@@ -96,8 +96,9 @@ describe('BookingsController', () => {
   });
 
   it('should return booking details on findOne endpoint', async () => {
-    await controller.findOne('b-100');
-    expect(service.findAllForCustomer).toHaveBeenCalledWith('b-100');
+    (service as any).findOne = jest.fn().mockResolvedValue({ id: 'b-100' });
+    await controller.findOne({ id: 'user1' }, 'b-100');
+    expect(service.findOne).toHaveBeenCalledWith('b-100', 'user1');
   });
 });
 
