@@ -33,8 +33,8 @@ export class BookingsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get single booking by ID' })
-  async findOne(@Param('id') bookingId: string) {
-    return this.bookingsService.findAllForCustomer(bookingId);
+  async findOne(@CurrentUser() user: any, @Param('id') bookingId: string) {
+    return this.bookingsService.findOne(bookingId, user.id);
   }
 
   @Get('provider')

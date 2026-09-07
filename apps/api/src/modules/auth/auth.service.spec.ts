@@ -117,4 +117,43 @@ describe('AuthService', () => {
       expect(result).toHaveProperty('refresh_token');
     });
   });
+
+  describe('refresh token security', () => {
+    it('should throw UnauthorizedException on invalid or non-existent refresh token', async () => {
+      jest.spyOn(prisma.refreshToken, 'findMany').mockResolvedValue([]);
+
+      await expect(service.refresh('invalid-token')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should rotate valid refresh token and issue new token pair', async () => {
+      const secret = 'secret';
+      jest.spyOn(configService, 'get').mockReturnValue(secret);
+      const computedHmac = `HMAC:${crypto.createHmac('sha256', secret).update('valid-token').digest('hex')}`;
+
+      const mockSavedToken = {
+        id: 'rt-1',
+        tokenHash: computedHmac,
+        userId: 'u-1',
+        expiresAt: new Date(Date.now() + 86400000),
+        user: { id: 'u-1', email: 'user@test.com' },
+      };
+      jest.spyOn(prisma.refreshToken, 'findMany').mockResolvedValue([mockSavedToken] as any);
+      jest.spyOn(usersService, 'findOneById').mockResolvedValue({ id: 'u-1', email: 'user@test.com' } as any);
+      jest.spyOn(prisma.refreshToken, 'delete').mockResolvedValue({} as any);
+      jest.spyOn(prisma.refreshToken, 'create').mockResolvedValue({} as any);
+
+      const result = await service.refresh('valid-token');
+      expect(result).toHaveProperty('access_token');
+      expect(result).toHaveProperty('refresh_token');
+      expect(prisma.refreshToken.delete).toHaveBeenCalledWith({ where: { id: 'rt-1' } });
+    });
+
+    it('should revoke all user refresh tokens on session invalidation', async () => {
+      (prisma.refreshToken as any).deleteMany = jest.fn().mockResolvedValue({ count: 3 });
+
+      const result = await service.revokeAllTokensForUser('u-1');
+      expect(result).toEqual({ success: true, message: 'All active user sessions revoked' });
+      expect((prisma.refreshToken as any).deleteMany).toHaveBeenCalledWith({ where: { userId: 'u-1' } });
+    });
+  });
 });
