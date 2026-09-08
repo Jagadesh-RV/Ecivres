@@ -76,7 +76,66 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // Broadcasters for Service modules to emit events
+  emitBookingCreated(booking: any) {
+    if (!this.server || !booking?.id) return;
+    this.server.to(`booking_${booking.id}`).emit('booking.created', booking);
+    if (booking?.customerId) {
+      this.server.to(`user_${booking.customerId}`).emit('booking.created', booking);
+    }
+    if (booking?.service?.provider?.userId) {
+      this.server.to(`user_${booking.service.provider.userId}`).emit('booking.created', booking);
+    }
+  }
+
+  emitBookingAccepted(booking: any) {
+    if (!this.server || !booking?.id) return;
+    this.server.to(`booking_${booking.id}`).emit('booking.accepted', booking);
+    if (booking?.customerId) {
+      this.server.to(`user_${booking.customerId}`).emit('booking.accepted', booking);
+    }
+  }
+
+  emitBookingRejected(booking: any) {
+    if (!this.server || !booking?.id) return;
+    this.server.to(`booking_${booking.id}`).emit('booking.rejected', booking);
+    if (booking?.customerId) {
+      this.server.to(`user_${booking.customerId}`).emit('booking.rejected', booking);
+    }
+  }
+
+  emitBookingStarted(booking: any) {
+    if (!this.server || !booking?.id) return;
+    this.server.to(`booking_${booking.id}`).emit('booking.started', booking);
+    if (booking?.customerId) {
+      this.server.to(`user_${booking.customerId}`).emit('booking.started', booking);
+    }
+  }
+
+  emitBookingCompleted(booking: any) {
+    if (!this.server || !booking?.id) return;
+    this.server.to(`booking_${booking.id}`).emit('booking.completed', booking);
+    if (booking?.customerId) {
+      this.server.to(`user_${booking.customerId}`).emit('booking.completed', booking);
+    }
+  }
+
+  emitNotificationCreated(userId: string, notification: any) {
+    if (!this.server || !userId) return;
+    this.server.to(`user_${userId}`).emit('notification.created', notification);
+  }
+
+  emitProviderOnline(providerId: string) {
+    if (!this.server || !providerId) return;
+    this.server.emit('provider.online', { providerId, timestamp: new Date().toISOString() });
+  }
+
+  emitProviderOffline(providerId: string) {
+    if (!this.server || !providerId) return;
+    this.server.emit('provider.offline', { providerId, timestamp: new Date().toISOString() });
+  }
+
   emitBookingUpdate(bookingId: string, booking: any) {
+    if (!this.server || !bookingId) return;
     this.server.to(`booking_${bookingId}`).emit('bookingUpdated', booking);
     if (booking?.customerId) {
       this.server.to(`user_${booking.customerId}`).emit('bookingUpdated', booking);
@@ -87,10 +146,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   emitNotification(userId: string, notification: any) {
+    if (!this.server || !userId) return;
     this.server.to(`user_${userId}`).emit('notificationReceived', notification);
   }
 
   emitProviderAvailability(providerId: string, isAvailable: boolean) {
+    if (!this.server || !providerId) return;
     this.server.emit('providerStatusChanged', { providerId, isAvailable });
   }
 }
