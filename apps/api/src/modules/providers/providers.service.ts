@@ -4,6 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EventsGateway } from '../events/events.gateway';
 import {
   CreateProviderProfileDto,
   UpdateProviderProfileDto,
@@ -11,7 +12,10 @@ import {
 
 @Injectable()
 export class ProvidersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventsGateway: EventsGateway,
+  ) {}
 
   async getProfile(userId: string) {
     const profile = await this.prisma.providerProfile.findUnique({
@@ -205,6 +209,33 @@ export class ProvidersService {
     return {
       message: 'Provider operating availability schedule updated successfully',
       schedule,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  async updatePresenceStatus(userId: string, isOnline: boolean) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    try {
+      if (isOnline) {
+        this.eventsGateway.emitProviderOnline(provider.id);
+      } else {
+        this.eventsGateway.emitProviderOffline(provider.id);
+      }
+      this.eventsGateway.emitProviderAvailability(provider.id, isOnline);
+    } catch (err) {
+      console.error('Failed to emit provider status change event', err);
+    }
+
+    return {
+      providerId: provider.id,
+      isOnline,
       updatedAt: new Date().toISOString(),
     };
   }
