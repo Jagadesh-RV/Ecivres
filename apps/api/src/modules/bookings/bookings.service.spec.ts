@@ -3,6 +3,7 @@ import { BookingsService } from './bookings.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EventsGateway } from '../events/events.gateway';
 
 describe('BookingsService', () => {
   let service: BookingsService;
@@ -33,6 +34,17 @@ describe('BookingsService', () => {
           provide: NotificationsService,
           useValue: {
             create: jest.fn().mockResolvedValue({}),
+          },
+        },
+        {
+          provide: EventsGateway,
+          useValue: {
+            emitBookingCreated: jest.fn(),
+            emitBookingAccepted: jest.fn(),
+            emitBookingRejected: jest.fn(),
+            emitBookingStarted: jest.fn(),
+            emitBookingCompleted: jest.fn(),
+            emitBookingUpdate: jest.fn(),
           },
         },
       ],

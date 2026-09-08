@@ -87,6 +87,7 @@ export class BookingsService {
     }
 
     try {
+      this.eventsGateway.emitBookingCreated(newBooking);
       this.eventsGateway.emitBookingUpdate(newBooking.id, newBooking);
     } catch (err) {
       console.error('Failed to emit realtime booking update', err);
@@ -240,6 +241,15 @@ export class BookingsService {
     }
 
     try {
+      if (updatedBooking.status === 'CONFIRMED') {
+        this.eventsGateway.emitBookingAccepted(updatedBooking);
+      } else if (updatedBooking.status === 'CANCELLED') {
+        this.eventsGateway.emitBookingRejected(updatedBooking);
+      } else if (updatedBooking.status === 'IN_PROGRESS') {
+        this.eventsGateway.emitBookingStarted(updatedBooking);
+      } else if (updatedBooking.status === 'COMPLETED') {
+        this.eventsGateway.emitBookingCompleted(updatedBooking);
+      }
       this.eventsGateway.emitBookingUpdate(updatedBooking.id, updatedBooking);
     } catch (err) {
       console.error('Failed to emit realtime booking update', err);
