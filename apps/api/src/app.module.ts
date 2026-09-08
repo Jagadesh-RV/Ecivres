@@ -26,9 +26,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
+import { EventsModule } from './modules/events/events.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    EventsModule,
     ThrottlerModule.forRoot([
       {
         name: 'short',
