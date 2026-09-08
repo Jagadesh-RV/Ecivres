@@ -31,6 +31,7 @@ import { PushModule } from './modules/push/push.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { EmailModule } from './modules/email/email.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { EmailModule } from './modules/email/email.module';
     StorageModule,
     QueueModule,
     EmailModule,
+    AnalyticsModule,
     ThrottlerModule.forRoot([
       {
         name: 'short',
