@@ -40,4 +40,20 @@ export class EmailService {
       html,
     });
   }
+
+  async sendBookingConfirmationEmail(to: string, details: { bookingId: string; serviceName: string; scheduledAt: string; price: number }) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Booking Confirmation #${details.bookingId}</h2>
+        <p>Your booking for <strong>${details.serviceName}</strong> has been confirmed.</p>
+        <p><strong>Scheduled Time:</strong> ${new Date(details.scheduledAt).toLocaleString()}</p>
+        <p><strong>Total Amount:</strong> $${details.price.toFixed(2)}</p>
+      </div>
+    `;
+    return this.sendEmail({
+      to,
+      subject: `Booking Confirmed #${details.bookingId}`,
+      html,
+    });
+  }
 }
