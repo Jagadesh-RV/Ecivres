@@ -239,6 +239,12 @@ export class BookingsService {
       console.error('Failed to send status update notification', err);
     }
 
+    try {
+      this.eventsGateway.emitBookingUpdate(updatedBooking.id, updatedBooking);
+    } catch (err) {
+      console.error('Failed to emit realtime booking update', err);
+    }
+
     return updatedBooking;
   }
 
