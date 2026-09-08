@@ -8,12 +8,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBookingDto } from './dto/booking.dto';
 import { UpdateBookingStatusDto, BookingStatus } from './dto/update-booking.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class BookingsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
+    private eventsGateway: EventsGateway,
   ) {}
 
   async create(userId: string, createBookingDto: CreateBookingDto) {
@@ -82,6 +84,12 @@ export class BookingsService {
       );
     } catch (err) {
       console.error('Failed to send booking notification', err);
+    }
+
+    try {
+      this.eventsGateway.emitBookingUpdate(newBooking.id, newBooking);
+    } catch (err) {
+      console.error('Failed to emit realtime booking update', err);
     }
 
     return newBooking;
