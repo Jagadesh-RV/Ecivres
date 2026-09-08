@@ -29,6 +29,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { EventsModule } from './modules/events/events.module';
 import { PushModule } from './modules/push/push.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { QueueModule } from './modules/queue/queue.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { StorageModule } from './modules/storage/storage.module';
     EventsModule,
     PushModule,
     StorageModule,
+    QueueModule,
     ThrottlerModule.forRoot([
       {
         name: 'short',
