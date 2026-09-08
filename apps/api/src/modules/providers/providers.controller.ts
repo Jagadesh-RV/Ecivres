@@ -73,4 +73,13 @@ export class ProvidersController {
   ) {
     return this.providersService.updateAvailability(user.id, body.schedule);
   }
+
+  @Patch('presence')
+  @ApiOperation({ summary: 'Update provider online/offline presence status' })
+  async updatePresence(
+    @CurrentUser() user: any,
+    @Body() body: { isOnline: boolean },
+  ) {
+    return this.providersService.updatePresenceStatus(user.id, body.isOnline);
+  }
 }

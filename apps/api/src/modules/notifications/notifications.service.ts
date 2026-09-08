@@ -1,18 +1,31 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventsGateway: EventsGateway,
+  ) {}
 
   async create(userId: string, title: string, body: string) {
-    return this.prisma.notification.create({
+    const notification = await this.prisma.notification.create({
       data: {
         userId,
         title,
         body,
       },
     });
+
+    try {
+      this.eventsGateway.emitNotificationCreated(userId, notification);
+      this.eventsGateway.emitNotification(userId, notification);
+    } catch (err) {
+      console.error('Failed to emit realtime notification', err);
+    }
+
+    return notification;
   }
 
   async findAllForUser(userId: string) {
