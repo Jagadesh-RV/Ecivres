@@ -25,4 +25,19 @@ export class EmailService {
       status: 'SENT',
     };
   }
+
+  async sendWelcomeEmail(to: string, name: string) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Welcome to EcivreS Marketplace, ${name}!</h2>
+        <p>We are excited to have you join our marketplace platform.</p>
+        <p>Explore thousands of verified local services or set up your provider business today.</p>
+      </div>
+    `;
+    return this.sendEmail({
+      to,
+      subject: 'Welcome to EcivreS Marketplace',
+      html,
+    });
+  }
 }
