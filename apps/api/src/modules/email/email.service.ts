@@ -86,4 +86,20 @@ export class EmailService {
       html,
     });
   }
+
+  async sendPasswordResetEmail(to: string, resetToken: string, resetLink: string) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Password Reset Request</h2>
+        <p>You requested a password reset for your EcivreS account.</p>
+        <p><a href="${resetLink}" style="padding: 10px 20px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 5px;">Reset Your Password</a></p>
+        <p>Or use reset token: <code>${resetToken}</code></p>
+      </div>
+    `;
+    return this.sendEmail({
+      to,
+      subject: 'Reset Your EcivreS Password',
+      html,
+    });
+  }
 }
