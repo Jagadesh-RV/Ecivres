@@ -71,4 +71,19 @@ export class EmailService {
       html,
     });
   }
+
+  async sendPaymentReceiptEmail(to: string, details: { paymentId: string; amount: number; serviceName: string; currency: string }) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Payment Receipt #${details.paymentId}</h2>
+        <p>Thank you for your payment for <strong>${details.serviceName}</strong>.</p>
+        <p><strong>Amount Paid:</strong> ${details.currency} $${details.amount.toFixed(2)}</p>
+      </div>
+    `;
+    return this.sendEmail({
+      to,
+      subject: `Payment Receipt #${details.paymentId}`,
+      html,
+    });
+  }
 }
