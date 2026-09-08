@@ -14,6 +14,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let usersService: UsersService;
   let jwtService: JwtService;
+  let configService: ConfigService;
   let prisma: PrismaService;
 
   beforeEach(async () => {
@@ -56,6 +57,7 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     usersService = module.get<UsersService>(UsersService);
     jwtService = module.get<JwtService>(JwtService);
+    configService = module.get<ConfigService>(ConfigService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 

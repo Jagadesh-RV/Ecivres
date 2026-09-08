@@ -3,6 +3,8 @@ import { ProvidersService } from './providers.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 
+import { EventsGateway } from '../events/events.gateway';
+
 describe('ProvidersService', () => {
   let service: ProvidersService;
   let prismaService: any;
@@ -30,6 +32,14 @@ describe('ProvidersService', () => {
       providers: [
         ProvidersService,
         { provide: PrismaService, useValue: prismaService },
+        {
+          provide: EventsGateway,
+          useValue: {
+            emitProviderOnline: jest.fn(),
+            emitProviderOffline: jest.fn(),
+            emitProviderAvailability: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

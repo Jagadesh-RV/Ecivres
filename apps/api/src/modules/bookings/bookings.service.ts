@@ -8,12 +8,16 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBookingDto } from './dto/booking.dto';
 import { UpdateBookingStatusDto, BookingStatus } from './dto/update-booking.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EventsGateway } from '../events/events.gateway';
+import { PushDispatcherService } from '../push/push-dispatcher.service';
 
 @Injectable()
 export class BookingsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
+    private eventsGateway: EventsGateway,
+    private pushDispatcherService: PushDispatcherService,
   ) {}
 
   async create(userId: string, createBookingDto: CreateBookingDto) {
@@ -82,6 +86,13 @@ export class BookingsService {
       );
     } catch (err) {
       console.error('Failed to send booking notification', err);
+    }
+
+    try {
+      this.eventsGateway.emitBookingCreated(newBooking);
+      this.eventsGateway.emitBookingUpdate(newBooking.id, newBooking);
+    } catch (err) {
+      console.error('Failed to emit realtime booking update', err);
     }
 
     return newBooking;
@@ -229,6 +240,30 @@ export class BookingsService {
       );
     } catch (err) {
       console.error('Failed to send status update notification', err);
+    }
+
+    try {
+      if (updatedBooking.status === 'CONFIRMED') {
+        this.eventsGateway.emitBookingAccepted(updatedBooking);
+        this.pushDispatcherService
+          .sendBookingAcceptancePush(updatedBooking.customerId, updatedBooking.id, updatedBooking.service.name)
+          .catch((err) => console.error('Push error:', err));
+      } else if (updatedBooking.status === 'CANCELLED') {
+        this.eventsGateway.emitBookingRejected(updatedBooking);
+      } else if (updatedBooking.status === 'IN_PROGRESS') {
+        this.eventsGateway.emitBookingStarted(updatedBooking);
+      } else if (updatedBooking.status === 'COMPLETED') {
+        this.eventsGateway.emitBookingCompleted(updatedBooking);
+        this.pushDispatcherService
+          .sendBookingCompletionPush(updatedBooking.customerId, updatedBooking.id, updatedBooking.service.name)
+          .catch((err) => console.error('Push error:', err));
+        this.pushDispatcherService
+          .sendReviewReminderPush(updatedBooking.customerId, updatedBooking.id, updatedBooking.service.name)
+          .catch((err) => console.error('Push error:', err));
+      }
+      this.eventsGateway.emitBookingUpdate(updatedBooking.id, updatedBooking);
+    } catch (err) {
+      console.error('Failed to emit realtime booking update', err);
     }
 
     return updatedBooking;
