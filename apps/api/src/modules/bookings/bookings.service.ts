@@ -9,6 +9,7 @@ import { CreateBookingDto } from './dto/booking.dto';
 import { UpdateBookingStatusDto, BookingStatus } from './dto/update-booking.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EventsGateway } from '../events/events.gateway';
+import { PushDispatcherService } from '../push/push-dispatcher.service';
 
 @Injectable()
 export class BookingsService {
@@ -16,6 +17,7 @@ export class BookingsService {
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
     private eventsGateway: EventsGateway,
+    private pushDispatcherService: PushDispatcherService,
   ) {}
 
   async create(userId: string, createBookingDto: CreateBookingDto) {
@@ -243,12 +245,21 @@ export class BookingsService {
     try {
       if (updatedBooking.status === 'CONFIRMED') {
         this.eventsGateway.emitBookingAccepted(updatedBooking);
+        this.pushDispatcherService
+          .sendBookingAcceptancePush(updatedBooking.customerId, updatedBooking.id, updatedBooking.service.name)
+          .catch((err) => console.error('Push error:', err));
       } else if (updatedBooking.status === 'CANCELLED') {
         this.eventsGateway.emitBookingRejected(updatedBooking);
       } else if (updatedBooking.status === 'IN_PROGRESS') {
         this.eventsGateway.emitBookingStarted(updatedBooking);
       } else if (updatedBooking.status === 'COMPLETED') {
         this.eventsGateway.emitBookingCompleted(updatedBooking);
+        this.pushDispatcherService
+          .sendBookingCompletionPush(updatedBooking.customerId, updatedBooking.id, updatedBooking.service.name)
+          .catch((err) => console.error('Push error:', err));
+        this.pushDispatcherService
+          .sendReviewReminderPush(updatedBooking.customerId, updatedBooking.id, updatedBooking.service.name)
+          .catch((err) => console.error('Push error:', err));
       }
       this.eventsGateway.emitBookingUpdate(updatedBooking.id, updatedBooking);
     } catch (err) {

@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EventsGateway } from '../events/events.gateway';
+import { PushDispatcherService } from '../push/push-dispatcher.service';
 
 describe('BookingsService', () => {
   let service: BookingsService;
@@ -45,6 +46,14 @@ describe('BookingsService', () => {
             emitBookingStarted: jest.fn(),
             emitBookingCompleted: jest.fn(),
             emitBookingUpdate: jest.fn(),
+          },
+        },
+        {
+          provide: PushDispatcherService,
+          useValue: {
+            sendBookingAcceptancePush: jest.fn().mockResolvedValue({}),
+            sendBookingCompletionPush: jest.fn().mockResolvedValue({}),
+            sendReviewReminderPush: jest.fn().mockResolvedValue({}),
           },
         },
       ],
