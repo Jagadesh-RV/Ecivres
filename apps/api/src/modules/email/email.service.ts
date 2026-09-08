@@ -56,4 +56,19 @@ export class EmailService {
       html,
     });
   }
+
+  async sendCancellationEmail(to: string, details: { bookingId: string; serviceName: string; reason?: string }) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Booking Cancellation Notice #${details.bookingId}</h2>
+        <p>Your booking for <strong>${details.serviceName}</strong> has been cancelled.</p>
+        ${details.reason ? `<p><strong>Reason:</strong> ${details.reason}</p>` : ''}
+      </div>
+    `;
+    return this.sendEmail({
+      to,
+      subject: `Booking Cancelled #${details.bookingId}`,
+      html,
+    });
+  }
 }
