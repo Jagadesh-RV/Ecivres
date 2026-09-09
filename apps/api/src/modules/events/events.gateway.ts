@@ -75,6 +75,22 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { status: 'broadcasted', providerId: data.providerId };
   }
 
+  @SubscribeMessage('updateProviderLocation')
+  handleUpdateProviderLocation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { bookingId: string; providerId: string; latitude: number; longitude: number; speed?: number; heading?: number },
+  ) {
+    if (data?.bookingId) {
+      this.server.to(`booking_${data.bookingId}`).emit('providerLocationStream', data);
+      return { status: 'streamed', bookingId: data.bookingId };
+    }
+  }
+
+  emitProviderLocationStream(locationData: { bookingId: string; providerId: string; latitude: number; longitude: number }) {
+    if (!this.server || !locationData?.bookingId) return;
+    this.server.to(`booking_${locationData.bookingId}`).emit('providerLocationStream', locationData);
+  }
+
   // Broadcasters for Service modules to emit events
   emitBookingCreated(booking: any) {
     if (!this.server || !booking?.id) return;
