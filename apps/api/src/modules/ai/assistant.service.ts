@@ -61,6 +61,43 @@ export class AiAssistantService {
   }
 
   /**
+   * Customer Knowledge Base Help Engine
+   */
+  processCustomerHelp(query: string): AssistantResponse {
+    const text = query.toLowerCase();
+
+    if (text.includes('refund') || text.includes('cancel') || text.includes('money back')) {
+      return {
+        reply: 'Bookings cancelled at least 2 hours before appointment time receive a 100% instant refund back to your original payment method.',
+        suggestions: ['View Active Bookings', 'Cancel a Booking', 'Refund Policy'],
+        recommendedAction: 'VIEW_FAQ',
+      };
+    }
+
+    if (text.includes('coupon') || text.includes('promo') || text.includes('discount')) {
+      return {
+        reply: 'You can apply promo codes at checkout. Use WELCOME10 for 10% off your first service booking!',
+        suggestions: ['Apply WELCOME10', 'Browse Service Catalog'],
+        recommendedAction: 'VIEW_FAQ',
+      };
+    }
+
+    if (text.includes('payment') || text.includes('card') || text.includes('apple pay') || text.includes('stripe')) {
+      return {
+        reply: 'EcivreS supports Credit/Debit Cards (Stripe), Apple Pay, Google Pay, and Cash on Delivery.',
+        suggestions: ['Manage Saved Payment Cards', 'View Billing History'],
+        recommendedAction: 'VIEW_FAQ',
+      };
+    }
+
+    return {
+      reply: 'I am EcivreS Customer Support. How can I help you today?',
+      suggestions: ['Check booking status', 'Refund & Cancellation Policy', 'Apply Promo Code'],
+      recommendedAction: 'NONE',
+    };
+  }
+
+  /**
    * Generates AI booking suggestions based on user intent
    */
   async generateBookingSuggestions(serviceQuery: string): Promise<AssistantResponse['suggestedBooking']> {
@@ -110,10 +147,6 @@ export class AiAssistantService {
       };
     }
 
-    return {
-      reply: 'I am EcivreS AI Assistant. How can I help you today?',
-      suggestions: ['Browse top services', 'Check booking status', 'Contact support'],
-      recommendedAction: 'NONE',
-    };
+    return this.processCustomerHelp(context.message);
   }
 }
