@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EventsGateway } from '../events/events.gateway';
 
 export interface SendMessageDto {
   bookingId?: string;
@@ -11,7 +12,10 @@ export interface SendMessageDto {
 export class ChatService {
   private messagesStore: any[] = [];
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventsGateway: EventsGateway,
+  ) {}
 
   async sendMessage(senderId: string, dto: SendMessageDto) {
     const message = {
@@ -25,6 +29,7 @@ export class ChatService {
     };
 
     this.messagesStore.push(message);
+    this.eventsGateway.emitChatMessage(message);
     return message;
   }
 

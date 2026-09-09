@@ -86,6 +86,30 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('sendMessage')
+  handleSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { senderId: string; recipientId: string; bookingId?: string; content: string },
+  ) {
+    if (data?.recipientId) {
+      this.server.to(`user_${data.recipientId}`).emit('chat.message', data);
+    }
+    if (data?.bookingId) {
+      this.server.to(`booking_${data.bookingId}`).emit('chat.message', data);
+    }
+    return { status: 'sent', recipientId: data.recipientId };
+  }
+
+  emitChatMessage(message: { senderId: string; recipientId: string; bookingId?: string; content: string }) {
+    if (!this.server) return;
+    if (message.recipientId) {
+      this.server.to(`user_${message.recipientId}`).emit('chat.message', message);
+    }
+    if (message.bookingId) {
+      this.server.to(`booking_${message.bookingId}`).emit('chat.message', message);
+    }
+  }
+
   emitProviderLocationStream(locationData: { bookingId: string; providerId: string; latitude: number; longitude: number }) {
     if (!this.server || !locationData?.bookingId) return;
     this.server.to(`booking_${locationData.bookingId}`).emit('providerLocationStream', locationData);
