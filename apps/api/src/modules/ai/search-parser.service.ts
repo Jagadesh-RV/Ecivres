@@ -72,17 +72,76 @@ export class SearchParserService {
     return { bookingDate, timeSlot };
   }
 
+  /**
+   * Recognizes location filters, distance constraints, and price caps
+   */
+  recognizeLocationAndFilters(query: string): { nearMe: boolean; maxDistanceKm?: number; maxPrice?: number } {
+    const lower = query.toLowerCase();
+    const nearMe = /\b(near me|nearby|close by|local|around me)\b/.test(lower);
+
+    let maxDistanceKm: number | undefined = undefined;
+    const distanceMatch = lower.match(/within\s+(\d+)\s*(km|miles|mi)/);
+    if (distanceMatch) {
+      const val = parseInt(distanceMatch[1], 10);
+      maxDistanceKm = distanceMatch[2] === 'km' ? val : Math.round(val * 1.60934);
+    } else if (nearMe) {
+      maxDistanceKm = 15; // default 15km for "near me"
+    }
+
+    let maxPrice: number | undefined = undefined;
+    const priceMatch = lower.match(/(under|below|less than|\$)\s*(\d+)/);
+    if (priceMatch) {
+      maxPrice = parseInt(priceMatch[2], 10);
+    }
+
+    return { nearMe, maxDistanceKm, maxPrice };
+  }
+
+  /**
+   * Extracts target category or service keyword
+   */
+  extractCategoryKeyword(query: string): string | undefined {
+    const lower = query.toLowerCase();
+    const keywords = [
+      'ac repair',
+      'ac service',
+      'plumbing',
+      'plumber',
+      'electrician',
+      'electrical',
+      'cleaning',
+      'house cleaning',
+      'appliance repair',
+      'painting',
+      'carpentry',
+      'gardening',
+      'pest control',
+    ];
+
+    for (const kw of keywords) {
+      if (lower.includes(kw)) {
+        return kw;
+      }
+    }
+    return undefined;
+  }
+
   parseQuery(query: string): ParsedSearchQuery {
     const rawQuery = query ? query.trim() : '';
     const intent = this.extractIntent(rawQuery);
     const { bookingDate, timeSlot } = this.recognizeBookingDate(rawQuery);
+    const { nearMe, maxDistanceKm, maxPrice } = this.recognizeLocationAndFilters(rawQuery);
+    const categoryKeyword = this.extractCategoryKeyword(rawQuery);
 
     return {
       rawQuery,
+      categoryKeyword,
       intent,
       bookingDate,
       timeSlot,
-      nearMe: false,
+      nearMe,
+      maxDistanceKm,
+      maxPrice,
     };
   }
 }
