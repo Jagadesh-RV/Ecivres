@@ -21,6 +21,12 @@ export interface ProviderReportData {
   description: string;
 }
 
+export interface ModerationResolution {
+  reportId: string;
+  action: 'DISMISSED' | 'WARNING_ISSUED' | 'SUSPENDED_ACCOUNT' | 'ESCALATED';
+  notes: string;
+}
+
 @Injectable()
 export class TrustService {
   constructor(private readonly prisma: PrismaService) {}
@@ -126,6 +132,35 @@ export class TrustService {
       description: data.description,
       status: 'UNDER_INVESTIGATION',
       createdAt: new Date(),
+    };
+  }
+
+  async getModerationQueue(status: string = 'UNDER_INVESTIGATION', limit = 20) {
+    return {
+      items: [
+        {
+          reportId: 'rpt_demo_1',
+          reporterType: 'CUSTOMER',
+          reason: 'SAFETY_VIOLATION',
+          description: 'Provider entered premises without badge',
+          status,
+          createdAt: new Date(),
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit,
+    };
+  }
+
+  async resolveModerationReport(resolution: ModerationResolution, adminUserId: string) {
+    return {
+      reportId: resolution.reportId,
+      actionTaken: resolution.action,
+      notes: resolution.notes,
+      resolvedBy: adminUserId,
+      resolvedAt: new Date(),
+      status: 'RESOLVED',
     };
   }
 }
