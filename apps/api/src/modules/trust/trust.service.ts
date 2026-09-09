@@ -27,6 +27,13 @@ export interface ModerationResolution {
   notes: string;
 }
 
+export interface FraudAlert {
+  userId: string;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  triggers: string[];
+  recommendedAction: 'MONITOR' | 'FLAG_FOR_REVIEW' | 'TEMP_SUSPEND' | 'BLOCK';
+}
+
 @Injectable()
 export class TrustService {
   constructor(private readonly prisma: PrismaService) {}
@@ -161,6 +168,53 @@ export class TrustService {
       resolvedBy: adminUserId,
       resolvedAt: new Date(),
       status: 'RESOLVED',
+    };
+  }
+
+  /**
+   * Automatic fraud detection algorithm
+   */
+  async detectSuspiciousActivity(userId: string): Promise<FraudAlert> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { bookings: { include: { payment: true } } },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const triggers: string[] = [];
+    const bookings = user.bookings || [];
+
+    // Check cancellation rate
+    const cancelledCount = bookings.filter((b) => b.status === 'CANCELLED').length;
+    if (cancelledCount >= 3) {
+      triggers.push('HIGH_CANCELLATION_VELOCITY');
+    }
+
+    // Check failed payments
+    const failedPayments = bookings.filter((b) => b.payment?.status === 'FAILED').length;
+    if (failedPayments >= 2) {
+      triggers.push('MULTIPLE_FAILED_PAYMENTS');
+    }
+
+    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let recommendedAction: 'MONITOR' | 'FLAG_FOR_REVIEW' | 'TEMP_SUSPEND' | 'BLOCK' = 'MONITOR';
+
+    if (triggers.length === 1) {
+      riskLevel = 'MEDIUM';
+      recommendedAction = 'FLAG_FOR_REVIEW';
+    } else if (triggers.length >= 2) {
+      riskLevel = 'HIGH';
+      recommendedAction = 'TEMP_SUSPEND';
+    }
+
+    return {
+      userId,
+      riskLevel,
+      triggers,
+      recommendedAction,
     };
   }
 }
