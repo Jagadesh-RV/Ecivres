@@ -20,7 +20,6 @@ export class TrustService {
       throw new NotFoundException('Provider profile not found');
     }
 
-    // Record submission (updates provider metadata or verification status)
     return {
       submissionId: `verif_${Date.now()}`,
       providerId: provider.id,
@@ -28,6 +27,50 @@ export class TrustService {
       documentUrl: data.documentUrl,
       status: 'PENDING_REVIEW',
       submittedAt: new Date(),
+    };
+  }
+
+  async approveProviderDocument(providerId: string, documentId: string, adminUserId: string) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { id: providerId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    // Set provider verified status in database
+    const updated = await this.prisma.providerProfile.update({
+      where: { id: providerId },
+      data: { isVerified: true },
+    });
+
+    return {
+      providerId: updated.id,
+      isVerified: updated.isVerified,
+      documentId,
+      approvedBy: adminUserId,
+      approvedAt: new Date(),
+      status: 'APPROVED',
+    };
+  }
+
+  async rejectProviderDocument(providerId: string, documentId: string, reason: string, adminUserId: string) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { id: providerId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    return {
+      providerId: provider.id,
+      documentId,
+      rejectionReason: reason,
+      rejectedBy: adminUserId,
+      rejectedAt: new Date(),
+      status: 'REJECTED',
     };
   }
 }
