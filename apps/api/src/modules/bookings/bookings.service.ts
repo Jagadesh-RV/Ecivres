@@ -402,7 +402,7 @@ export class BookingsService {
         payment: booking.payment
           ? {
               update: {
-                status: 'COMPLETED',
+                status: 'SUCCESS',
               },
             }
           : undefined,
@@ -417,7 +417,7 @@ export class BookingsService {
       await this.notificationsService.create(
         updated.customerId,
         'Service Completed',
-        `Your service "${updated.service.name}" has been marked as completed.${notes ? ' Note: ' + notes : ''}`,
+        `Your service "${updated.service?.name || 'Service'}" has been marked as completed.${notes ? ' Note: ' + notes : ''}`,
       );
     } catch (err) {
       console.error('Failed to send completion notification', err);

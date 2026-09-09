@@ -50,7 +50,7 @@ export class AnalyticsService {
     const [totalBookings, completedBookings, totalFavorites] = await Promise.all([
       this.prisma.booking.count({ where: { customerId: customer.id } }),
       this.prisma.booking.count({ where: { customerId: customer.id, status: 'COMPLETED' } }),
-      this.prisma.favorite.count({ where: { userId } }),
+      ((this.prisma as any).favorite ? (this.prisma as any).favorite.count({ where: { userId } }) : Promise.resolve(0)),
     ]);
 
     return {
