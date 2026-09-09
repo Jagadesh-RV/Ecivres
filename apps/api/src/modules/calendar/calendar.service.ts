@@ -30,6 +30,13 @@ export interface OutlookCalendarSyncEvent {
   location?: string;
 }
 
+export interface ConflictCheckResult {
+  hasConflict: boolean;
+  conflictingBookingId?: string;
+  conflictReason?: string;
+  suggestedAlternativeSlots?: Date[];
+}
+
 @Injectable()
 export class CalendarService {
   constructor(private readonly prisma: PrismaService) {}
@@ -119,6 +126,73 @@ export class CalendarService {
       endDateTime: event.endDateTime,
       syncedAt: new Date(),
       status: 'CONFIRMED',
+    };
+  }
+
+  /**
+   * Automatic conflict detection for new booking scheduling requests
+   */
+  async detectSchedulingConflicts(
+    providerId: string,
+    proposedStart: Date,
+    durationMinutes: number,
+    bufferMinutes = 15,
+  ): Promise<ConflictCheckResult> {
+    const proposedStartTime = new Date(proposedStart).getTime();
+    const proposedEndTime = proposedStartTime + (durationMinutes + bufferMinutes) * 60 * 1000;
+
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { id: providerId },
+      include: {
+        services: {
+          include: {
+            bookings: {
+              where: {
+                status: { in: ['CONFIRMED', 'IN_PROGRESS', 'PENDING'] },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Provider profile not found');
+    }
+
+    let conflictingBookingId: string | undefined = undefined;
+
+    for (const service of provider.services) {
+      for (const booking of service.bookings) {
+        const bStart = new Date(booking.scheduledAt).getTime();
+        const bEnd = bStart + (service.duration + bufferMinutes) * 60 * 1000;
+
+        const overlaps =
+          (proposedStartTime >= bStart && proposedStartTime < bEnd) ||
+          (proposedEndTime > bStart && proposedEndTime <= bEnd) ||
+          (proposedStartTime <= bStart && proposedEndTime >= bEnd);
+
+        if (overlaps) {
+          conflictingBookingId = booking.id;
+          break;
+        }
+      }
+      if (conflictingBookingId) break;
+    }
+
+    if (conflictingBookingId) {
+      const alt1 = new Date(proposedStartTime + 2 * 3600 * 1000);
+      const alt2 = new Date(proposedStartTime + 4 * 3600 * 1000);
+      return {
+        hasConflict: true,
+        conflictingBookingId,
+        conflictReason: 'Overlaps with existing confirmed booking or transit buffer',
+        suggestedAlternativeSlots: [alt1, alt2],
+      };
+    }
+
+    return {
+      hasConflict: false,
     };
   }
 }
