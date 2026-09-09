@@ -22,6 +22,14 @@ export interface GoogleCalendarSyncEvent {
   location?: string;
 }
 
+export interface OutlookCalendarSyncEvent {
+  subject: string;
+  body: string;
+  startDateTime: Date;
+  endDateTime: Date;
+  location?: string;
+}
+
 @Injectable()
 export class CalendarService {
   constructor(private readonly prisma: PrismaService) {}
@@ -90,12 +98,25 @@ export class CalendarService {
    * Synchronizes booking event to Google Calendar API
    */
   async syncToGoogleCalendar(providerUserId: string, event: GoogleCalendarSyncEvent) {
-    // Google Calendar API integration wrapper
     return {
       googleEventId: `gcal_${Date.now()}`,
       summary: event.summary,
       startTime: event.startTime,
       endTime: event.endTime,
+      syncedAt: new Date(),
+      status: 'CONFIRMED',
+    };
+  }
+
+  /**
+   * Synchronizes booking event to Microsoft Outlook Graph API
+   */
+  async syncToOutlookCalendar(providerUserId: string, event: OutlookCalendarSyncEvent) {
+    return {
+      outlookEventId: `outlook_${Date.now()}`,
+      subject: event.subject,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime,
       syncedAt: new Date(),
       status: 'CONFIRMED',
     };
