@@ -7,6 +7,13 @@ export interface ProviderVerificationSubmission {
   notes?: string;
 }
 
+export interface CustomerReportData {
+  providerId: string;
+  bookingId?: string;
+  reason: 'SAFETY_VIOLATION' | 'UNPROFESSIONAL_BEHAVIOR' | 'NO_SHOW' | 'OVERCHARGING' | 'OTHER';
+  description: string;
+}
+
 @Injectable()
 export class TrustService {
   constructor(private readonly prisma: PrismaService) {}
@@ -39,7 +46,6 @@ export class TrustService {
       throw new NotFoundException('Provider profile not found');
     }
 
-    // Set provider verified status in database
     const updated = await this.prisma.providerProfile.update({
       where: { id: providerId },
       data: { isVerified: true },
@@ -71,6 +77,27 @@ export class TrustService {
       rejectedBy: adminUserId,
       rejectedAt: new Date(),
       status: 'REJECTED',
+    };
+  }
+
+  async reportProvider(reporterUserId: string, data: CustomerReportData) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { id: data.providerId },
+    });
+
+    if (!provider) {
+      throw new NotFoundException('Target provider not found');
+    }
+
+    return {
+      reportId: `rpt_prov_${Date.now()}`,
+      reporterUserId,
+      targetProviderId: data.providerId,
+      bookingId: data.bookingId,
+      reason: data.reason,
+      description: data.description,
+      status: 'UNDER_INVESTIGATION',
+      createdAt: new Date(),
     };
   }
 }
