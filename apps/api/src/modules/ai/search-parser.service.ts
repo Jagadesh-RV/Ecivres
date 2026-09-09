@@ -34,13 +34,54 @@ export class SearchParserService {
     return 'GENERAL_SEARCH';
   }
 
+  /**
+   * Recognizes booking dates and preferred time slots from natural language text
+   */
+  recognizeBookingDate(query: string): { bookingDate?: Date; timeSlot?: 'MORNING' | 'AFTERNOON' | 'EVENING' | 'ANYTIME' } {
+    const lower = query.toLowerCase();
+    const now = new Date();
+    let bookingDate: Date | undefined = undefined;
+    let timeSlot: 'MORNING' | 'AFTERNOON' | 'EVENING' | 'ANYTIME' = 'ANYTIME';
+
+    if (lower.includes('today')) {
+      bookingDate = new Date(now);
+    } else if (lower.includes('tomorrow')) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      bookingDate = tomorrow;
+    } else if (lower.includes('next week')) {
+      const nextWeek = new Date(now);
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      bookingDate = nextWeek;
+    } else if (lower.includes('weekend')) {
+      const weekend = new Date(now);
+      const day = weekend.getDay();
+      const daysUntilSaturday = day === 6 ? 0 : (6 - day + 7) % 7;
+      weekend.setDate(weekend.getDate() + daysUntilSaturday);
+      bookingDate = weekend;
+    }
+
+    if (lower.includes('morning') || lower.includes('am')) {
+      timeSlot = 'MORNING';
+    } else if (lower.includes('afternoon') || lower.includes('noon')) {
+      timeSlot = 'AFTERNOON';
+    } else if (lower.includes('evening') || lower.includes('night') || lower.includes('pm')) {
+      timeSlot = 'EVENING';
+    }
+
+    return { bookingDate, timeSlot };
+  }
+
   parseQuery(query: string): ParsedSearchQuery {
     const rawQuery = query ? query.trim() : '';
     const intent = this.extractIntent(rawQuery);
+    const { bookingDate, timeSlot } = this.recognizeBookingDate(rawQuery);
 
     return {
       rawQuery,
       intent,
+      bookingDate,
+      timeSlot,
       nearMe: false,
     };
   }
