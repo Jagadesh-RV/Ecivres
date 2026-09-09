@@ -52,7 +52,7 @@ export const RecommendedProviderCard: React.FC<RecommendedProviderProps> = ({
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-bold text-white truncate">{businessName}</h3>
             {isVerified && (
-              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" title="Verified Provider" />
+              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
             )}
           </div>
 
