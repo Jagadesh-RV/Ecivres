@@ -49,8 +49,8 @@ export class ServicesService {
     if (sortBy === 'price_asc' || sortBy === 'PRICE_ASC') orderBy = { price: 'asc' };
     if (sortBy === 'price_desc' || sortBy === 'PRICE_DESC') orderBy = { price: 'desc' };
 
-    const limit = Math.min(Number(query?.limit) || 20, 100);
-    const page = Math.max(Number(query?.page) || 1, 1);
+    const limit = Math.min(Number((query as any)?.limit) || 20, 100);
+    const page = Math.max(Number((query as any)?.page) || 1, 1);
     const skip = (page - 1) * limit;
 
     return this.prisma.service.findMany({
@@ -63,12 +63,12 @@ export class ServicesService {
         name: true,
         description: true,
         price: true,
-        durationMinutes: true,
+        duration: true,
         categoryId: true,
         providerId: true,
         createdAt: true,
         category: {
-          select: { id: true, name: true, slug: true },
+          select: { id: true, name: true },
         },
         provider: {
           select: { id: true, businessName: true, phone: true, isVerified: true },

@@ -1,4 +1,4 @@
-import { haversineDistance } from './distance-calculator';
+import { haversineDistance, calculateProviderDistanceAndEta } from './distance-calculator';
 
 describe('DistanceCalculator', () => {
   it('should return 0 distance for identical coordinates', () => {
@@ -18,5 +18,17 @@ describe('DistanceCalculator', () => {
     expect(distKm).toBeLessThan(600);
     expect(distMiles).toBeGreaterThan(340);
     expect(distMiles).toBeLessThan(380);
+  });
+
+  it('should calculate provider ETA and formatted travel time correctly', () => {
+    const provider = { latitude: 37.7749, longitude: -122.4194 };
+    const customer = { latitude: 37.8049, longitude: -122.4194 }; // ~3.33 km north
+
+    const res = calculateProviderDistanceAndEta(provider, customer);
+
+    expect(res.distanceKm).toBeGreaterThan(3);
+    expect(res.distanceKm).toBeLessThan(4);
+    expect(res.estimatedTravelTimeMinutes).toBeGreaterThan(5);
+    expect(res.formattedEta).toContain('mins');
   });
 });

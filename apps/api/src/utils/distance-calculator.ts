@@ -3,6 +3,13 @@ export interface Coordinates {
   longitude: number;
 }
 
+export interface DistanceCalculationResult {
+  distanceKm: number;
+  distanceMiles: number;
+  estimatedTravelTimeMinutes: number;
+  formattedEta: string;
+}
+
 export function haversineDistance(
   coord1: Coordinates,
   coord2: Coordinates,
@@ -22,4 +29,31 @@ export function haversineDistance(
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return Number((R * c).toFixed(2));
+}
+
+export function calculateProviderDistanceAndEta(
+  providerCoords: Coordinates,
+  customerCoords: Coordinates,
+  averageSpeedKmH = 35,
+): DistanceCalculationResult {
+  const distanceKm = haversineDistance(providerCoords, customerCoords, 'km');
+  const distanceMiles = Number((distanceKm * 0.621371).toFixed(2));
+
+  // Estimate travel time in minutes with 1.25 urban traffic multiplier
+  const rawHours = distanceKm / averageSpeedKmH;
+  const estimatedTravelTimeMinutes = Math.max(1, Math.round(rawHours * 60 * 1.25));
+
+  let formattedEta = `${estimatedTravelTimeMinutes} mins`;
+  if (estimatedTravelTimeMinutes >= 60) {
+    const hrs = Math.floor(estimatedTravelTimeMinutes / 60);
+    const mins = estimatedTravelTimeMinutes % 60;
+    formattedEta = `${hrs} hr ${mins} mins`;
+  }
+
+  return {
+    distanceKm,
+    distanceMiles,
+    estimatedTravelTimeMinutes,
+    formattedEta,
+  };
 }
