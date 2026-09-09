@@ -14,6 +14,13 @@ export interface CustomerReportData {
   description: string;
 }
 
+export interface ProviderReportData {
+  customerId: string;
+  bookingId?: string;
+  reason: 'PROPERTY_DAMAGE' | 'ABUSIVE_BEHAVIOR' | 'NON_PAYMENT' | 'HAZARDOUS_CONDITIONS' | 'OTHER';
+  description: string;
+}
+
 @Injectable()
 export class TrustService {
   constructor(private readonly prisma: PrismaService) {}
@@ -93,6 +100,27 @@ export class TrustService {
       reportId: `rpt_prov_${Date.now()}`,
       reporterUserId,
       targetProviderId: data.providerId,
+      bookingId: data.bookingId,
+      reason: data.reason,
+      description: data.description,
+      status: 'UNDER_INVESTIGATION',
+      createdAt: new Date(),
+    };
+  }
+
+  async reportCustomer(providerUserId: string, data: ProviderReportData) {
+    const customer = await this.prisma.customerProfile.findUnique({
+      where: { id: data.customerId },
+    });
+
+    if (!customer) {
+      throw new NotFoundException('Target customer not found');
+    }
+
+    return {
+      reportId: `rpt_cust_${Date.now()}`,
+      reporterUserId: providerUserId,
+      targetCustomerId: data.customerId,
       bookingId: data.bookingId,
       reason: data.reason,
       description: data.description,
