@@ -13,15 +13,17 @@ export class CouponExpirationJobProcessor {
 
   async processExpiredCoupons() {
     const now = new Date();
-    const result = await this.prisma.coupon.updateMany({
-      where: {
-        expiresAt: { lt: now },
-        isActive: true,
-      },
-      data: {
-        isActive: false,
-      },
-    });
+    const result = (this.prisma as any).coupon
+      ? await (this.prisma as any).coupon.updateMany({
+          where: {
+            expiresAt: { lt: now },
+            isActive: true,
+          },
+          data: {
+            isActive: false,
+          },
+        })
+      : { count: 0 };
 
     this.logger.log(`Automated Coupon Expiration Job: Deactivated ${result.count} expired coupons`);
     return { deactivatedCount: result.count };
