@@ -91,6 +91,8 @@ model ProviderProfile {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   services Service[]
+
+  @@index([isVerified])
 }
 
 model Category {
