@@ -53,7 +53,12 @@ export class ServicesService {
     const page = Math.max(Number((query as any)?.page) || 1, 1);
     const skip = (page - 1) * limit;
 
-    return this.prisma.service.findMany({
+    const cacheKey = `services:list:${JSON.stringify(query)}:${page}:${limit}`;
+    if ((this as any)._cache?.has(cacheKey)) {
+      return (this as any)._cache.get(cacheKey);
+    }
+
+    const results = await this.prisma.service.findMany({
       where,
       orderBy,
       take: limit,
@@ -75,6 +80,10 @@ export class ServicesService {
         },
       },
     });
+
+    if (!(this as any)._cache) (this as any)._cache = new Map();
+    (this as any)._cache.set(cacheKey, results);
+    return results;
   }
 
   async findOne(id: string) {
