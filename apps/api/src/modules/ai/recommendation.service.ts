@@ -125,12 +125,16 @@ export class RecommendationService {
       where: query.categoryId
         ? { services: { some: { categoryId: query.categoryId } } }
         : undefined,
-      include: {
-        services: true,
+      select: {
+        id: true,
+        businessName: true,
+        isVerified: true,
+        address: true,
+        services: { select: { id: true, categoryId: true, price: true } },
         user: {
-          include: {
-            reviews: true,
-            bookings: true,
+          select: {
+            reviews: { select: { rating: true } },
+            bookings: { select: { id: true, status: true, customerId: true } },
           },
         },
       },
