@@ -11,22 +11,28 @@ export interface MobileBookingItem {
 
 const ITEM_HEIGHT = 100;
 
-const BookingCard = memo(({ item, onPress }: { item: MobileBookingItem; onPress: (id: string) => void }) => (
-  <TouchableOpacity
-    style={styles.card}
-    onPress={() => onPress(item.id)}
-    activeOpacity={0.7}
-  >
-    <View style={styles.headerRow}>
-      <Text style={styles.title} numberOfLines={1}>{item.serviceName}</Text>
-      <Text style={styles.price}>${item.price.toFixed(2)}</Text>
-    </View>
-    <View style={styles.footerRow}>
-      <Text style={styles.status}>{item.status}</Text>
-      <Text style={styles.date}>{new Date(item.scheduledAt).toLocaleDateString()}</Text>
-    </View>
-  </TouchableOpacity>
-));
+const BookingCard = memo(
+  ({ item, onPress }: { item: MobileBookingItem; onPress: (id: string) => void }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onPress(item.id)}
+      activeOpacity={0.7}
+    >
+      <View style={styles.headerRow}>
+        <Text style={styles.title} numberOfLines={1}>{item.serviceName}</Text>
+        <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+      </View>
+      <View style={styles.footerRow}>
+        <Text style={styles.status}>{item.status}</Text>
+        <Text style={styles.date}>{new Date(item.scheduledAt).toLocaleDateString()}</Text>
+      </View>
+    </TouchableOpacity>
+  ),
+  (prevProps, nextProps) =>
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.status === nextProps.item.status &&
+    prevProps.item.price === nextProps.item.price,
+);
 
 export function OptimizedBookingList({
   data,
