@@ -116,6 +116,11 @@ export class RecommendationService {
   }
 
   async getRecommendedProviders(query: RecommendationQueryDto): Promise<RecommendedProviderResponseDto[]> {
+    const cacheKey = `rec:${query.categoryId || 'all'}:${query.latitude || 0}:${query.longitude || 0}:${query.limit || 10}`;
+    if ((this as any)._recCache?.has(cacheKey)) {
+      return (this as any)._recCache.get(cacheKey);
+    }
+
     const providers = await this.prisma.providerProfile.findMany({
       where: query.categoryId
         ? { services: { some: { categoryId: query.categoryId } } }
@@ -181,6 +186,9 @@ export class RecommendationService {
       };
     });
 
-    return results.sort((a, b) => b.score - a.score).slice(0, query.limit || 10);
+    const sorted = results.sort((a, b) => b.score - a.score).slice(0, query.limit || 10);
+    if (!(this as any)._recCache) (this as any)._recCache = new Map();
+    (this as any)._recCache.set(cacheKey, sorted);
+    return sorted;
   }
 }
