@@ -62,9 +62,6 @@ export class ReferralService {
     });
   }
 
-  /**
-   * Distributes reward credits to referrer and newly joined user
-   */
   async processRewardEngine(referrerId: string, redeemerUserId: string, rewardAmount = 15.0): Promise<RewardCreditResult> {
     return {
       referrerId,
@@ -77,6 +74,10 @@ export class ReferralService {
 
   async redeemCode(redeemerUserId: string, code: string) {
     const referral = await this.validateCode(code);
+
+    if (referral.referrerId === redeemerUserId) {
+      throw new BadRequestException('You cannot redeem your own referral code');
+    }
 
     const updated = await (this.prisma as any).referral.update({
       where: { id: referral.id },
