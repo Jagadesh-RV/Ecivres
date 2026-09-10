@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, Share } from 'react-native';
 
 export const ReferralScreen: React.FC = () => {
   const [referralCode] = useState('REF-M7K2P9');
   const [inputCode, setInputCode] = useState('');
   const [totalEarned] = useState(45.0);
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Use my referral code ${referralCode} to get $15 off your first service booking on EcivreS Marketplace! Download now.`,
+        title: 'EcivreS $15 Referral Reward',
+      });
+    } catch (err: any) {
+      Alert.alert('Error', err.message);
+    }
+  };
 
   const handleRedeem = () => {
     if (inputCode.trim()) {
@@ -22,9 +33,10 @@ export const ReferralScreen: React.FC = () => {
           Share your referral code. When your friend completes their first service, both of you earn $15 in booking credits.
         </Text>
 
-        <View style={styles.codeBox}>
+        <TouchableOpacity style={styles.codeBox} onPress={handleShare} activeOpacity={0.8}>
           <Text style={styles.codeText}>{referralCode}</Text>
-        </View>
+          <Text style={styles.shareHint}>Tap to Share Code 📤</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.statsRow}>
@@ -106,6 +118,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     letterSpacing: 2,
+  },
+  shareHint: {
+    color: '#818CF8',
+    fontSize: 11,
+    marginTop: 4,
   },
   statsRow: {
     flexDirection: 'row',
