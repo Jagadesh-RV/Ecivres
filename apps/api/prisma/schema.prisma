@@ -137,6 +137,7 @@ model Booking {
   @@index([customerId, status])
   @@index([serviceId, status])
   @@index([scheduledAt])
+  @@index([status, scheduledAt])
 }
 
 enum BookingStatus {
