@@ -21,7 +21,7 @@ export interface RecommendedProviderProps {
   onSelect?: (providerId: string) => void;
 }
 
-export const RecommendedProviderCard: React.FC<RecommendedProviderProps> = ({
+export const RecommendedProviderCard: React.FC<RecommendedProviderProps> = React.memo(({
   providerId,
   businessName,
   isVerified,
@@ -113,4 +113,4 @@ export const RecommendedProviderCard: React.FC<RecommendedProviderProps> = ({
       </button>
     </div>
   );
-};
+});
