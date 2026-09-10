@@ -18,6 +18,12 @@ export class ReferralController {
     return this.referralService.getOrCreateUserReferralCode(user.id);
   }
 
+  @Get('dashboard')
+  @ApiOperation({ summary: 'Get referral dashboard analytics and earnings' })
+  async getReferralDashboard(@CurrentUser() user: any) {
+    return this.referralService.getReferralDashboard(user.id);
+  }
+
   @Post('redeem')
   @ApiOperation({ summary: 'Redeem a referral code' })
   async redeemReferralCode(@CurrentUser() user: any, @Body() dto: RedeemReferralDto) {

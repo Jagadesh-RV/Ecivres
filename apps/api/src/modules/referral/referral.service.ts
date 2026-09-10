@@ -9,6 +9,14 @@ export interface RewardCreditResult {
   status: 'CREDITED';
 }
 
+export interface ReferralDashboardData {
+  referralCode: string;
+  totalReferrals: number;
+  totalEarnings: number;
+  currency: string;
+  history: any[];
+}
+
 @Injectable()
 export class ReferralService {
   constructor(private readonly prisma: PrismaService) {}
@@ -79,7 +87,6 @@ export class ReferralService {
       throw new BadRequestException('You cannot redeem your own referral code');
     }
 
-    // Check if user has already redeemed any referral code
     const existingRedemption = await (this.prisma as any).referral.findFirst({
       where: { referredUserId: redeemerUserId, status: 'COMPLETED' },
     });
@@ -102,6 +109,23 @@ export class ReferralService {
     return {
       ...updated,
       reward,
+    };
+  }
+
+  async getReferralDashboard(userId: string): Promise<ReferralDashboardData> {
+    const userReferral = await this.getOrCreateUserReferralCode(userId);
+    const completedReferrals = await (this.prisma as any).referral.findMany({
+      where: { referrerId: userId, status: 'COMPLETED' },
+    });
+
+    const totalEarnings = completedReferrals.reduce((sum: number, r: any) => sum + (r.rewardAmount || 15.0), 0);
+
+    return {
+      referralCode: userReferral.code,
+      totalReferrals: completedReferrals.length,
+      totalEarnings: Math.round(totalEarnings * 100) / 100,
+      currency: 'USD',
+      history: completedReferrals,
     };
   }
 }
