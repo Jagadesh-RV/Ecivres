@@ -26,4 +26,31 @@ export class ReferralService {
 
     return referral;
   }
+
+  async getOrCreateUserReferralCode(userId: string) {
+    const existing = await (this.prisma as any).referral.findFirst({
+      where: { referrerId: userId, status: 'PENDING' },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    let code = this.generateCode(userId);
+    let attempts = 0;
+    while (attempts < 5) {
+      const conflict = await (this.prisma as any).referral.findUnique({ where: { code } });
+      if (!conflict) break;
+      code = this.generateCode(userId);
+      attempts++;
+    }
+
+    return (this.prisma as any).referral.create({
+      data: {
+        referrerId: userId,
+        code,
+        rewardAmount: 15.0,
+      },
+    });
+  }
 }
