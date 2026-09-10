@@ -53,4 +53,17 @@ export class ReferralService {
       },
     });
   }
+
+  async redeemCode(redeemerUserId: string, code: string) {
+    const referral = await this.validateCode(code);
+
+    return (this.prisma as any).referral.update({
+      where: { id: referral.id },
+      data: {
+        referredUserId: redeemerUserId,
+        status: 'COMPLETED',
+        redeemedAt: new Date(),
+      },
+    });
+  }
 }
