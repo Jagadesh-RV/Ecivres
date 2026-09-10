@@ -30,7 +30,12 @@ async function bootstrap() {
   );
 
   // Gzip Compression for Performance
-  app.use(compression());
+  app.use(
+    compression({
+      threshold: 1024, // compress responses > 1KB
+      level: 6,
+    }),
+  );
 
   // Global Exception Filter
   app.useGlobalFilters(new HttpExceptionFilter());
