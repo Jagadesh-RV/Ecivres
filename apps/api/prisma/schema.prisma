@@ -133,6 +133,10 @@ model Booking {
   service  Service @relation(fields: [serviceId], references: [id])
   payment  Payment?
   review   Review?
+
+  @@index([customerId, status])
+  @@index([serviceId, status])
+  @@index([scheduledAt])
 }
 
 enum BookingStatus {
