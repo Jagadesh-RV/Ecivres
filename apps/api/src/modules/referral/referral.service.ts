@@ -79,6 +79,15 @@ export class ReferralService {
       throw new BadRequestException('You cannot redeem your own referral code');
     }
 
+    // Check if user has already redeemed any referral code
+    const existingRedemption = await (this.prisma as any).referral.findFirst({
+      where: { referredUserId: redeemerUserId, status: 'COMPLETED' },
+    });
+
+    if (existingRedemption) {
+      throw new BadRequestException('User has already redeemed a referral code');
+    }
+
     const updated = await (this.prisma as any).referral.update({
       where: { id: referral.id },
       data: {
