@@ -91,6 +91,8 @@ model ProviderProfile {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   services Service[]
+
+  @@index([isVerified])
 }
 
 model Category {
@@ -133,6 +135,11 @@ model Booking {
   service  Service @relation(fields: [serviceId], references: [id])
   payment  Payment?
   review   Review?
+
+  @@index([customerId, status])
+  @@index([serviceId, status])
+  @@index([scheduledAt])
+  @@index([status, scheduledAt])
 }
 
 enum BookingStatus {
@@ -194,4 +201,22 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Referral {
+  id             String         @id @default(uuid())
+  referrerId     String
+  referredUserId String?
+  code           String         @unique
+  status         ReferralStatus @default(PENDING)
+  rewardAmount   Float          @default(15.00)
+  createdAt      DateTime       @default(now())
+  redeemedAt     DateTime?
+}
+
+enum ReferralStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+  CANCELLED
 }

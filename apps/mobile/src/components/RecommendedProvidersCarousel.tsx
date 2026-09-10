@@ -78,6 +78,10 @@ export const RecommendedProvidersCarousel: React.FC<RecommendedProvidersCarousel
         renderItem={renderItem}
         horizontal
         showsHorizontalScrollIndicator={false}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={3}
+        removeClippedSubviews={true}
         contentContainerStyle={styles.listContent}
       />
     </View>

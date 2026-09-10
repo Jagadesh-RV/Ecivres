@@ -19,14 +19,23 @@ export class CategoriesService {
     });
   }
 
-  findAll() {
-    return this.prisma.category.findMany({
+  async findAll() {
+    const cacheKey = 'categories:all';
+    if ((this as any)._catCache?.has(cacheKey)) {
+      return (this as any)._catCache.get(cacheKey);
+    }
+
+    const categories = await this.prisma.category.findMany({
       include: {
         _count: {
           select: { services: true }
         }
       }
     });
+
+    if (!(this as any)._catCache) (this as any)._catCache = new Map();
+    (this as any)._catCache.set(cacheKey, categories);
+    return categories;
   }
 
   async findOne(id: string) {
