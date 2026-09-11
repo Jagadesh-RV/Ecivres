@@ -8,6 +8,7 @@ import {
   CreateCustomerProfileDto,
   UpdateCustomerProfileDto,
 } from './dto/customer-profile.dto';
+import { generateSmartGreeting } from './utils/customer-greeting.util';
 
 @Injectable()
 export class CustomersService {
@@ -34,7 +35,6 @@ export class CustomersService {
       throw new ConflictException('Customer profile already exists');
     }
 
-    // Ensure the user also gets the CUSTOMER role if they don't have it
     const role = await this.prisma.role.findUnique({
       where: { name: 'CUSTOMER' },
     });
@@ -67,5 +67,40 @@ export class CustomersService {
       where: { userId },
       data: updateDto,
     });
+  }
+
+  async getDashboard2(userId: string) {
+    const profile = await this.getProfile(userId).catch(() => null);
+    const firstName = profile?.firstName || 'Customer';
+
+    const greeting = generateSmartGreeting(firstName);
+
+    const recentBookings = await this.prisma.booking.findMany({
+      where: { customerId: userId },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      include: {
+        service: {
+          select: { id: true, name: true, price: true, provider: { select: { businessName: true } } },
+        },
+      },
+    });
+
+    const activeBooking = recentBookings.find((b) => b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS');
+
+    return {
+      greeting,
+      recentBookings,
+      continueBooking: activeBooking || null,
+      aiQuickActions: [
+        { label: 'Emergency AC Repair', action: 'SMART_SEARCH', query: 'Emergency AC repair near me' },
+        { label: 'Book Instant Plumbing', action: 'SMART_SEARCH', query: 'Plumbing repair today' },
+        { label: 'Rebook Last Service', action: 'REBOOK', bookingId: recentBookings[0]?.id },
+      ],
+      trendingServices: [
+        { id: 'tr_1', title: 'Deep Home Cleaning', discount: '20% OFF', category: 'Cleaning' },
+        { id: 'tr_2', title: 'Full AC Maintenance', discount: 'Popular', category: 'HVAC' },
+      ],
+    };
   }
 }
