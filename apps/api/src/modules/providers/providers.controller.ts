@@ -6,11 +6,16 @@ import {
   Body,
   UseGuards,
   Param,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ProvidersService } from './providers.service';
+import { ProviderAnalyticsService } from './provider-analytics.service';
+import { ProviderStaffService } from './provider-staff.service';
+import { ProviderInventoryService } from './provider-inventory.service';
+import { ProviderPortfolioService } from './provider-portfolio.service';
 import {
   CreateProviderProfileDto,
   UpdateProviderProfileDto,
@@ -21,7 +26,13 @@ import {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class ProvidersController {
-  constructor(private readonly providersService: ProvidersService) {}
+  constructor(
+    private readonly providersService: ProvidersService,
+    private readonly analyticsService: ProviderAnalyticsService,
+    private readonly staffService: ProviderStaffService,
+    private readonly inventoryService: ProviderInventoryService,
+    private readonly portfolioService: ProviderPortfolioService,
+  ) {}
 
   @Get('profile')
   @ApiOperation({ summary: 'Get current provider profile' })
@@ -33,6 +44,54 @@ export class ProvidersController {
   @ApiOperation({ summary: 'Get provider analytics and revenue dashboard metrics' })
   async getDashboardStats(@CurrentUser() user: any) {
     return this.providersService.getProviderDashboardStats(user.id);
+  }
+
+  @Get('business-analytics')
+  @ApiOperation({ summary: 'Get advanced business suite analytics & AI insights' })
+  async getBusinessAnalytics(@CurrentUser() user: any) {
+    return this.analyticsService.getBusinessAnalytics(user.id);
+  }
+
+  @Get('staff')
+  @ApiOperation({ summary: 'Get list of staff members for provider' })
+  async getStaff(@CurrentUser() user: any) {
+    return this.staffService.getStaffMembers(user.id);
+  }
+
+  @Post('staff')
+  @ApiOperation({ summary: 'Add a new staff member' })
+  async addStaff(@CurrentUser() user: any, @Body() dto: any) {
+    return this.staffService.addStaffMember(user.id, dto);
+  }
+
+  @Get('inventory')
+  @ApiOperation({ summary: 'Get inventory list for provider' })
+  async getInventory(@CurrentUser() user: any) {
+    return this.inventoryService.getInventory(user.id);
+  }
+
+  @Post('inventory')
+  @ApiOperation({ summary: 'Add inventory item' })
+  async addInventory(@CurrentUser() user: any, @Body() dto: any) {
+    return this.inventoryService.addInventoryItem(user.id, dto);
+  }
+
+  @Get('tax-estimate')
+  @ApiOperation({ summary: 'Calculate estimated tax & profit report' })
+  async getTaxEstimate(@CurrentUser() user: any) {
+    return this.inventoryService.calculateTaxEstimate(user.id);
+  }
+
+  @Get('portfolio')
+  @ApiOperation({ summary: 'Get provider before/after portfolio items' })
+  async getPortfolio(@CurrentUser() user: any) {
+    return this.portfolioService.getPortfolio(user.id);
+  }
+
+  @Post('portfolio')
+  @ApiOperation({ summary: 'Add portfolio work item' })
+  async addPortfolio(@CurrentUser() user: any, @Body() dto: any) {
+    return this.portfolioService.addPortfolioItem(user.id, dto);
   }
 
   @Post('profile')
@@ -83,3 +142,4 @@ export class ProvidersController {
     return this.providersService.updatePresenceStatus(user.id, body.isOnline);
   }
 }
+
