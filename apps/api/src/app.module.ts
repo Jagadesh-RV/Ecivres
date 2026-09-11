@@ -35,6 +35,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AiModule } from './modules/ai/ai.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReferralModule } from './modules/referral/referral.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ReferralModule } from './modules/referral/referral.module';
     AiModule,
     ChatModule,
     ReferralModule,
+    WishlistModule,
     EventsModule,
     PushModule,
     StorageModule,

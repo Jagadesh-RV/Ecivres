@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'ecivres-api'
+    metrics_path: '/api/v1/metrics'
+    static_configs:
+      - targets: ['ecivres-api-service.production.svc.cluster.local:3001']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter.production.svc.cluster.local:9121']
+
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgres-exporter.production.svc.cluster.local:9187']

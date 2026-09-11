@@ -21,6 +21,12 @@ export class CustomersController {
     return this.customersService.getProfile(user.id);
   }
 
+  @Get('dashboard-2')
+  @ApiOperation({ summary: 'Get Customer Dashboard 2.0 personalized view' })
+  async getDashboard2(@CurrentUser() user: any) {
+    return this.customersService.getDashboard2(user.id);
+  }
+
   @Post('profile')
   @ApiOperation({ summary: 'Create customer profile' })
   async createProfile(

@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RecommendationService } from './recommendation.service';
 import { SearchParserService } from './search-parser.service';
 import { AiAssistantService, AssistantConversationContext } from './assistant.service';
+import { AiPricingAssistantService } from './pricing-assistant.service';
+import { AiCustomerInsightsService } from './customer-insights.service';
 import { RecommendationQueryDto, RecommendedProviderResponseDto } from './dto/recommendation.dto';
 import { SmartSearchDto } from './dto/smart-search.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -15,6 +17,8 @@ export class RecommendationController {
     private readonly recommendationService: RecommendationService,
     private readonly searchParserService: SearchParserService,
     private readonly assistantService: AiAssistantService,
+    private readonly pricingAssistantService: AiPricingAssistantService,
+    private readonly customerInsightsService: AiCustomerInsightsService,
   ) {}
 
   @Get('recommendations/providers')
@@ -60,4 +64,27 @@ export class RecommendationController {
 
     return this.assistantService.processUserMessage(context);
   }
+
+  @Get('pricing/dynamic')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get AI dynamic pricing recommendation for service' })
+  async getDynamicPrice(
+    @CurrentUser() user: any,
+    @Query('serviceId') serviceId: string,
+    @Query('demandMultiplier') demandMultiplier?: number,
+  ) {
+    return this.pricingAssistantService.calculateDynamicPrice(
+      serviceId,
+      user.id,
+      demandMultiplier ? Number(demandMultiplier) : 1.0,
+    );
+  }
+
+  @Get('customer/insights')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get AI customer spending pattern & churn risk insights' })
+  async getCustomerInsights(@CurrentUser() user: any) {
+    return this.customerInsightsService.getCustomerInsights(user.id);
+  }
 }
+
