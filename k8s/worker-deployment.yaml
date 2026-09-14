@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecivres-worker
+  namespace: production
+  labels:
+    app: ecivres-worker
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: ecivres-worker
+  template:
+    metadata:
+      labels:
+        app: ecivres-worker
+    spec:
+      containers:
+        - name: worker
+          image: ecivres/api:v4.0.0
+          command: ["pnpm", "--filter", "api", "run", "start:worker"]
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1024Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2048Mi"
+          envFrom:
+            - configMapRef:
+                name: ecivres-config
+            - secretRef:
+                name: ecivres-secrets

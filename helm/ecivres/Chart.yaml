@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ecivres
+description: Production Helm Chart for EcivreS Marketplace Platform
+type: application
+version: 4.0.0
+appVersion: "4.0.0"

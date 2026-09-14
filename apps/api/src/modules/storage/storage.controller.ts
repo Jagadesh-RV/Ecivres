@@ -1,23 +1,20 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { StorageService } from './storage.service';
-import type { PresignedUrlRequest } from './storage.service';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { SignedUrlService } from './signed-url.service';
 
-@ApiTags('storage')
 @Controller('storage')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class StorageController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(private readonly signedUrlService: SignedUrlService) {}
 
-  @Post('presigned-url')
-  @ApiOperation({ summary: 'Generate AWS S3 signed upload URL for profile/service images & documents' })
-  async getPresignedUploadUrl(
-    @CurrentUser() user: any,
-    @Body() body: PresignedUrlRequest,
-  ) {
-    return this.storageService.generatePresignedUploadUrl(body, user.id);
+  @Post('presigned-upload')
+  getUploadUrl(@Body() body: { fileName: string; folder: string }) {
+    const key = `${body.folder || 'uploads'}/${Date.now()}_${body.fileName}`;
+    return this.signedUrlService.generatePresignedUploadUrl('ecivres-media-assets', key);
+  }
+
+  @Get('signed-cdn-url')
+  getSignedCdnUrl(@Query('key') key: string) {
+    return {
+      cdnUrl: this.signedUrlService.generatePresignedDownloadUrl('cdn.ecivres.com', key),
+    };
   }
 }

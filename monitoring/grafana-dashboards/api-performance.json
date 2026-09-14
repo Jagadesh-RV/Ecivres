@@ -1,0 +1,31 @@
+{
+  "title": "EcivreS Production API Performance Dashboard",
+  "tags": ["production", "api", "opentelemetry"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "API Request Throughput (RPS)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[5m]))",
+          "legendFormat": "RPS"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "P99 Latency (ms)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "api_p99_latency_seconds * 1000",
+          "legendFormat": "P99 Latency (ms)"
+        }
+      ]
+    }
+  ]
+}

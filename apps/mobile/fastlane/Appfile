@@ -1,0 +1,5 @@
+app_identifier("com.ecivres.mobile") # The bundle identifier of your app
+apple_id("devops@ecivres.com") # Your Apple Developer Account
+
+itc_team_id("12345678") # App Store Connect Team ID
+team_id("ABCDE12345") # Developer Portal Team ID

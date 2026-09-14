@@ -1,0 +1,24 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build signed Android AAB and deploy to Google Play Store Track"
+  lane :deploy_play_store do
+    gradle(
+      task: "bundle",
+      build_type: "Release"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: "app/build/outputs/bundle/release/app-release.aab"
+    )
+  end
+end
+
+platform :ios do
+  desc "Build iOS IPA and upload to Apple TestFlight"
+  lane :deploy_testflight do
+    match(type: "appstore")
+    build_app(workspace: "Ecivres.xcworkspace", scheme: "Ecivres")
+    upload_to_testflight
+  end
+end

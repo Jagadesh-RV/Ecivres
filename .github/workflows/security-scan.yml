@@ -1,0 +1,25 @@
+name: Security SAST & Container Scan
+
+on:
+  push:
+    branches: [ main, develop, release/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep SAST Scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/owasp-top-10
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'

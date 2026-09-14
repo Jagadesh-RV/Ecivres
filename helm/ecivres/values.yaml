@@ -1,0 +1,35 @@
+replicaCount: 3
+
+image:
+  repository: ecivres/api
+  pullPolicy: IfNotPresent
+  tag: "v4.0.0"
+
+service:
+  type: ClusterIP
+  port: 3001
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: api.ecivres.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 70
