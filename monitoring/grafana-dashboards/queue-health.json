@@ -1,0 +1,33 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "BullMQ Active Queue Depth",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "bullmq_active_jobs_count", "legendFormat": "{{queue_name}}" }
+      ]
+    },
+    {
+      "title": "Dead Letter Queue (DLQ) Failures",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "bullmq_failed_jobs_total", "legendFormat": "Failed Jobs" }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["queue", "bullmq", "redis"],
+  "title": "EcivreS - BullMQ Queue Health",
+  "uid": "ecivres-queue-health"
+}

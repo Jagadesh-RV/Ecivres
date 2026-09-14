@@ -1,0 +1,38 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ecivres-eks-production
+  region: us-east-1
+  version: "1.28"
+
+vpc:
+  id: "vpc-ecivres-production"
+  subnets:
+    private:
+      us-east-1a: { id: "subnet-private-1a" }
+      us-east-1b: { id: "subnet-private-1b" }
+      us-east-1c: { id: "subnet-private-1c" }
+
+managedNodeGroups:
+  - name: ecivres-ng-general
+    instanceType: m6i.xlarge
+    minSize: 3
+    maxSize: 10
+    desiredCapacity: 3
+    privateNetworking: true
+    volumeSize: 100
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        albIngress: true
+        cloudWatch: true
+
+  - name: ecivres-ng-compute-heavy
+    instanceType: c6i.2xlarge
+    minSize: 2
+    maxSize: 8
+    desiredCapacity: 2
+    privateNetworking: true
+    labels:
+      workload: heavy-compute

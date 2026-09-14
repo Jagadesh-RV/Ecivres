@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecivres-api-service
+  namespace: ecivres-prod
+  labels:
+    app: ecivres-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: ecivres-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecivres-api-headless
+  namespace: ecivres-prod
+  labels:
+    app: ecivres-api
+spec:
+  clusterIP: None
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  selector:
+    app: ecivres-api

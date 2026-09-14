@@ -1,0 +1,25 @@
+replicaCount: 10
+
+image:
+  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/ecivres-api
+  pullPolicy: IfNotPresent
+  tag: "v4.0.0"
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 5
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

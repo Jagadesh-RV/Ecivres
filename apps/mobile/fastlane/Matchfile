@@ -1,0 +1,6 @@
+git_url("git@github.com:ecivres/certificates.git")
+storage_mode("git")
+type("appstore") # Default type can be appstore, adhoc, enterprise or development
+
+app_identifier(["com.ecivres.mobile"])
+username("devops@ecivres.com")

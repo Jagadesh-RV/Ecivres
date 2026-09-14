@@ -1,0 +1,27 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "id": 3,
+  "panels": [
+    {
+      "title": "PgBouncer Connection Pool Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "pgbouncer_pools_active_clients", "legendFormat": "Active Clients" },
+        { "expr": "pgbouncer_pools_waiting_clients", "legendFormat": "Waiting Clients" }
+      ]
+    },
+    {
+      "title": "PostgreSQL Query Latency (P95 & P99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, rate(pg_stat_statements_seconds_bucket[5m]))", "legendFormat": "P95" },
+        { "expr": "histogram_quantile(0.99, rate(pg_stat_statements_seconds_bucket[5m]))", "legendFormat": "P99" }
+      ]
+    }
+  ],
+  "title": "EcivreS - Database & PgBouncer Performance",
+  "uid": "ecivres-db-performance"
+}
