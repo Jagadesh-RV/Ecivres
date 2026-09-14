@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecivres-api-pdb
+  namespace: ecivres-prod
+spec:
+  minAvailable: 80%
+  selector:
+    matchLabels:
+      app: ecivres-api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecivres-worker-pdb
+  namespace: ecivres-prod
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: ecivres-worker
