@@ -39,12 +39,14 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { GrowthModule } from './modules/growth/growth.module';
 import { SuperAppModule } from './modules/superapp/superapp.module';
 import { BusinessOsModule } from './modules/business-os/business-os.module';
+import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     SuperAppModule,
     BusinessOsModule,
+    DataIntelligenceModule,
     AiModule,
     ChatModule,
     ReferralModule,
