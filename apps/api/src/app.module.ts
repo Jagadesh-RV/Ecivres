@@ -37,10 +37,12 @@ import { ChatModule } from './modules/chat/chat.module';
 import { ReferralModule } from './modules/referral/referral.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { GrowthModule } from './modules/growth/growth.module';
+import { SuperAppModule } from './modules/superapp/superapp.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    SuperAppModule,
     AiModule,
     ChatModule,
     ReferralModule,
