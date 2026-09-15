@@ -37,10 +37,18 @@ import { ChatModule } from './modules/chat/chat.module';
 import { ReferralModule } from './modules/referral/referral.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { GrowthModule } from './modules/growth/growth.module';
+import { SuperAppModule } from './modules/superapp/superapp.module';
+import { BusinessOsModule } from './modules/business-os/business-os.module';
+import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
+import { ObservabilityModule } from './modules/observability/observability.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    SuperAppModule,
+    BusinessOsModule,
+    DataIntelligenceModule,
+    ObservabilityModule,
     AiModule,
     ChatModule,
     ReferralModule,

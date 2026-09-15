@@ -419,6 +419,16 @@ importers:
         specifier: ^8.0.0
         version: 8.57.1
 
+  packages/sdk-ts:
+    dependencies:
+      axios:
+        specifier: ^1.7.0
+        version: 1.20.0
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
   packages/types: {}
 
   packages/validation:

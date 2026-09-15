@@ -32,3 +32,19 @@ describe('CorrelationIdMiddleware', () => {
     expect(next).toHaveBeenCalled();
   });
 });
+
+describe('SyntheticBenchmarkService', () => {
+  it('should run benchmark and evaluate SLA latency threshold', async () => {
+    const { SyntheticBenchmarkService } = require('./synthetic-benchmark.service');
+    const service = new SyntheticBenchmarkService();
+
+    const report = await service.runSyntheticBenchmark({
+      testSuiteName: 'checkout_stress_test',
+      simulatedRps: 500,
+      durationSeconds: 30,
+    });
+
+    expect(report.totalRequestsProcessed).toBe(15000);
+    expect(report.slaStatus).toBe('PASS');
+  });
+});

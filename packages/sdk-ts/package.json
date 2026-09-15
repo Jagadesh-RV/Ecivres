@@ -1,0 +1,16 @@
+{
+  "name": "@ecivres/sdk",
+  "version": "1.0.0",
+  "description": "Official EcivreS TypeScript / JavaScript Client SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

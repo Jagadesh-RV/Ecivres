@@ -27,4 +27,10 @@ describe('DepartmentBudgetService', () => {
       'exceeds monthly budget limit',
     );
   });
+
+  it('should update department budget limit and recalculate remaining allocation', async () => {
+    const updated = await service.updateDepartmentBudget('dept_hr', 10000);
+    expect(updated.monthlyLimit).toBe(10000);
+    expect(updated.isOverLimit).toBe(false);
+  });
 });
