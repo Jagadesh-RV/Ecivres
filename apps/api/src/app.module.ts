@@ -40,6 +40,7 @@ import { GrowthModule } from './modules/growth/growth.module';
 import { SuperAppModule } from './modules/superapp/superapp.module';
 import { BusinessOsModule } from './modules/business-os/business-os.module';
 import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
+import { ObservabilityModule } from './modules/observability/observability.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { DataIntelligenceModule } from './modules/data-intelligence/data-intelli
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
+    ObservabilityModule,
     AiModule,
     ChatModule,
     ReferralModule,
