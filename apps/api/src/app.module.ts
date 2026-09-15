@@ -38,11 +38,13 @@ import { ReferralModule } from './modules/referral/referral.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { GrowthModule } from './modules/growth/growth.module';
 import { SuperAppModule } from './modules/superapp/superapp.module';
+import { BusinessOsModule } from './modules/business-os/business-os.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     SuperAppModule,
+    BusinessOsModule,
     AiModule,
     ChatModule,
     ReferralModule,
