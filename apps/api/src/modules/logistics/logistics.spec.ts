@@ -33,4 +33,26 @@ describe('Smart Logistics Engine Services', () => {
       expect(res.trafficCongestionLevel).toBeDefined();
     });
   });
+
+  describe('FleetTelemetryService', () => {
+    let telemetry: FleetTelemetryService;
+
+    beforeEach(() => {
+      const { FleetTelemetryService } = require('./fleet-telemetry.service');
+      telemetry = new FleetTelemetryService();
+    });
+
+    it('should flag anomaly on high speed velocity telemetry', async () => {
+      const res = await telemetry.processTelemetry({
+        providerId: 'prov_100',
+        latitude: 37.77,
+        longitude: -122.41,
+        speedKmh: 185,
+        batteryLevel: 50,
+      });
+
+      expect(res.anomalyDetected).toBe(true);
+      expect(res.anomalyReason).toContain('Speed exceeds');
+    });
+  });
 });

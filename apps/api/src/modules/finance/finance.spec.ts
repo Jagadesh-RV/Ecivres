@@ -49,4 +49,25 @@ describe('Marketplace Finance Services', () => {
       expect(report.netTaxableIncome).toBe(report.grossEarnings - report.platformFees);
     });
   });
+
+  describe('MicroLoanService', () => {
+    let microLoanService: MicroLoanService;
+
+    beforeEach(() => {
+      const { MicroLoanService } = require('./micro-loan.service');
+      microLoanService = new MicroLoanService();
+    });
+
+    it('should approve micro loan application and calculate monthly installments', async () => {
+      const result = await microLoanService.evaluateAndIssueLoan({
+        providerId: 'prov_99',
+        requestedAmount: 1000,
+        repaymentTermMonths: 6,
+      });
+
+      expect(result.status).toBe('APPROVED');
+      expect(result.approvedAmount).toBe(1000);
+      expect(result.monthlyInstallment).toBeGreaterThan(0);
+    });
+  });
 });

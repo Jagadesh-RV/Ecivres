@@ -58,4 +58,11 @@ export class DepartmentBudgetService {
       dept.current += amount;
     }
   }
+
+  async updateDepartmentBudget(departmentId: string, limit: number): Promise<DepartmentBudgetStatus> {
+    const dept = this.departmentLimits.get(departmentId) || { name: 'General Ops', limit: 3000, current: 0 };
+    dept.limit = limit;
+    this.departmentLimits.set(departmentId, dept);
+    return this.checkDepartmentBudget(departmentId, 0);
+  }
 }

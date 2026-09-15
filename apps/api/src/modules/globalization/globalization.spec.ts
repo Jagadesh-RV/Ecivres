@@ -29,4 +29,24 @@ describe('Global Expansion Services', () => {
       expect(res.totalWithTax).toBe(120);
     });
   });
+
+  describe('ContentTranslatorService', () => {
+    let translator: ContentTranslatorService;
+
+    beforeEach(() => {
+      const { ContentTranslatorService } = require('./content-translator.service');
+      translator = new ContentTranslatorService();
+    });
+
+    it('should translate input texts to target locale format', async () => {
+      const res = await translator.translateTexts({
+        sourceLanguage: 'en',
+        targetLanguage: 'es',
+        texts: ['House Cleaning', 'Plumbing Repair'],
+      });
+
+      expect(res.targetLanguage).toBe('es');
+      expect(res.translations['House Cleaning']).toBe('[ES] House Cleaning');
+    });
+  });
 });
