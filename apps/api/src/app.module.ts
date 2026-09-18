@@ -41,10 +41,12 @@ import { SuperAppModule } from './modules/superapp/superapp.module';
 import { BusinessOsModule } from './modules/business-os/business-os.module';
 import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
 import { ObservabilityModule } from './modules/observability/observability.module';
+import { IotModule } from './modules/iot/iot.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    IotModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
