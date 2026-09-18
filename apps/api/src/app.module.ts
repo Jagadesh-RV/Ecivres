@@ -44,6 +44,7 @@ import { ObservabilityModule } from './modules/observability/observability.modul
 import { IotModule } from './modules/iot/iot.module';
 import { InsuranceModule } from './modules/insurance/insurance.module';
 import { FranchiseModule } from './modules/franchise/franchise.module';
+import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { FranchiseModule } from './modules/franchise/franchise.module';
     IotModule,
     InsuranceModule,
     FranchiseModule,
+    SupplyChainModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
