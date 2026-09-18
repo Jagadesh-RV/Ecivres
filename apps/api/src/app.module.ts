@@ -45,6 +45,7 @@ import { IotModule } from './modules/iot/iot.module';
 import { InsuranceModule } from './modules/insurance/insurance.module';
 import { FranchiseModule } from './modules/franchise/franchise.module';
 import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
+import { GovernmentModule } from './modules/government/government.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
     InsuranceModule,
     FranchiseModule,
     SupplyChainModule,
+    GovernmentModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
