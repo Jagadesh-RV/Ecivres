@@ -47,6 +47,7 @@ import { FranchiseModule } from './modules/franchise/franchise.module';
 import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
 import { GovernmentModule } from './modules/government/government.module';
 import { AiAgentsModule } from './modules/ai-agents/ai-agents.module';
+import { IdentityModule } from './modules/identity/identity.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { AiAgentsModule } from './modules/ai-agents/ai-agents.module';
     SupplyChainModule,
     GovernmentModule,
     AiAgentsModule,
+    IdentityModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
