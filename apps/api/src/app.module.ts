@@ -43,12 +43,14 @@ import { DataIntelligenceModule } from './modules/data-intelligence/data-intelli
 import { ObservabilityModule } from './modules/observability/observability.module';
 import { IotModule } from './modules/iot/iot.module';
 import { InsuranceModule } from './modules/insurance/insurance.module';
+import { FranchiseModule } from './modules/franchise/franchise.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     IotModule,
     InsuranceModule,
+    FranchiseModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
