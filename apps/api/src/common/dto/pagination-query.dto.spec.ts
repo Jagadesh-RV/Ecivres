@@ -1,3 +1,4 @@
+﻿import 'reflect-metadata';
 import { PaginationQueryDto } from './pagination-query.dto';
 
 describe('PaginationQueryDto', () => {
