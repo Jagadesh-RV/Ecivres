@@ -42,11 +42,13 @@ import { BusinessOsModule } from './modules/business-os/business-os.module';
 import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
 import { ObservabilityModule } from './modules/observability/observability.module';
 import { IotModule } from './modules/iot/iot.module';
+import { InsuranceModule } from './modules/insurance/insurance.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     IotModule,
+    InsuranceModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
