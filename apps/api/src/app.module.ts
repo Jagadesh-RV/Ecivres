@@ -1,3 +1,4 @@
+import { ApiMarketplaceModule } from './modules/api-marketplace/api-marketplace.module';
 import { SmartContractsModule } from './modules/smart-contracts/smart-contracts.module';
 import { KnowledgeGraphModule } from './modules/knowledge-graph/knowledge-graph.module';
 import { WorkforceModule } from './modules/workforce/workforce.module';
@@ -62,6 +63,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ApiMarketplaceModule,
     SmartContractsModule,
     KnowledgeGraphModule,
     WorkforceModule,
