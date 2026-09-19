@@ -1,3 +1,4 @@
+import { KnowledgeGraphModule } from './modules/knowledge-graph/knowledge-graph.module';
 import { WorkforceModule } from './modules/workforce/workforce.module';
 import { ProcurementModule } from './modules/procurement/procurement.module';
 import { ProviderCrmModule } from './modules/provider-crm/provider-crm.module';
@@ -60,6 +61,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    KnowledgeGraphModule,
     WorkforceModule,
     ProcurementModule,
     ProviderCrmModule,
