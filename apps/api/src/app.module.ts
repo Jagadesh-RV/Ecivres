@@ -1,3 +1,4 @@
+import { ProcurementModule } from './modules/procurement/procurement.module';
 import { ProviderCrmModule } from './modules/provider-crm/provider-crm.module';
 import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
@@ -58,6 +59,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ProcurementModule,
     ProviderCrmModule,
     AdvertisingModule,
     LoyaltyModule,
