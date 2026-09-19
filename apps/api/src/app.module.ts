@@ -48,6 +48,7 @@ import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
 import { GovernmentModule } from './modules/government/government.module';
 import { AiAgentsModule } from './modules/ai-agents/ai-agents.module';
 import { IdentityModule } from './modules/identity/identity.module';
+import { SmartCityModule } from './modules/smart-city/smart-city.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { IdentityModule } from './modules/identity/identity.module';
     GovernmentModule,
     AiAgentsModule,
     IdentityModule,
+    SmartCityModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
