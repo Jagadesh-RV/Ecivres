@@ -1,3 +1,4 @@
+import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -56,6 +57,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AdvertisingModule,
     LoyaltyModule,
     ConfigModule.forRoot({ isGlobal: true }),
     IotModule,
