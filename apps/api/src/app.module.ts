@@ -47,6 +47,11 @@ import { FranchiseModule } from './modules/franchise/franchise.module';
 import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
 import { GovernmentModule } from './modules/government/government.module';
 import { AiAgentsModule } from './modules/ai-agents/ai-agents.module';
+import { IdentityModule } from './modules/identity/identity.module';
+import { SmartCityModule } from './modules/smart-city/smart-city.module';
+import { CommerceIntelModule } from './modules/commerce-intel/commerce-intel.module';
+import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
+import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
@@ -57,6 +62,11 @@ import { AiAgentsModule } from './modules/ai-agents/ai-agents.module';
     SupplyChainModule,
     GovernmentModule,
     AiAgentsModule,
+    IdentityModule,
+    SmartCityModule,
+    CommerceIntelModule,
+    AutoOpsModule,
+    EdgeModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
