@@ -1,3 +1,4 @@
+import { ProviderCrmModule } from './modules/provider-crm/provider-crm.module';
 import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { Module } from '@nestjs/common';
@@ -57,6 +58,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ProviderCrmModule,
     AdvertisingModule,
     LoyaltyModule,
     ConfigModule.forRoot({ isGlobal: true }),
