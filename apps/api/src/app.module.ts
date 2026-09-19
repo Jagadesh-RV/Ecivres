@@ -51,6 +51,7 @@ import { IdentityModule } from './modules/identity/identity.module';
 import { SmartCityModule } from './modules/smart-city/smart-city.module';
 import { CommerceIntelModule } from './modules/commerce-intel/commerce-intel.module';
 import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
+import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
     SmartCityModule,
     CommerceIntelModule,
     AutoOpsModule,
+    EdgeModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
