@@ -50,6 +50,7 @@ import { AiAgentsModule } from './modules/ai-agents/ai-agents.module';
 import { IdentityModule } from './modules/identity/identity.module';
 import { SmartCityModule } from './modules/smart-city/smart-city.module';
 import { CommerceIntelModule } from './modules/commerce-intel/commerce-intel.module';
+import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { CommerceIntelModule } from './modules/commerce-intel/commerce-intel.mod
     IdentityModule,
     SmartCityModule,
     CommerceIntelModule,
+    AutoOpsModule,
     SuperAppModule,
     BusinessOsModule,
     DataIntelligenceModule,
