@@ -1,3 +1,4 @@
+import { SmartContractsModule } from './modules/smart-contracts/smart-contracts.module';
 import { KnowledgeGraphModule } from './modules/knowledge-graph/knowledge-graph.module';
 import { WorkforceModule } from './modules/workforce/workforce.module';
 import { ProcurementModule } from './modules/procurement/procurement.module';
@@ -61,6 +62,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    SmartContractsModule,
     KnowledgeGraphModule,
     WorkforceModule,
     ProcurementModule,
