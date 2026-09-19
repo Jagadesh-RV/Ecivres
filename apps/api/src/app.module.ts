@@ -1,3 +1,4 @@
+import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
@@ -55,6 +56,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    LoyaltyModule,
     ConfigModule.forRoot({ isGlobal: true }),
     IotModule,
     InsuranceModule,
