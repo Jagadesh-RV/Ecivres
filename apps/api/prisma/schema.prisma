@@ -344,3 +344,147 @@ model EdgeWorkerRoute {
 
   @@index([regionCode])
 }
+model LoyaltyAccount {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  tier            String   @default("BRONZE")
+  points          Int      @default(0)
+  cashbackBalance Float    @default(0.0)
+  referralCode    String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tier])
+}
+
+model AdCampaign {
+  id              String   @id @default(uuid())
+  campaignId      String   @unique
+  providerId      String
+  title           String
+  bidCpc          Float
+  budget          Float
+  impressions     Int      @default(0)
+  clicks          Int      @default(0)
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([status])
+}
+
+model CustomerCrmRecord {
+  id              String   @id @default(uuid())
+  recordId        String   @unique
+  providerId      String
+  customerId      String
+  leadScore       Int      @default(50)
+  notes           String?
+  nextFollowUpAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId, customerId])
+}
+
+model ProcurementContract {
+  id              String   @id @default(uuid())
+  contractId      String   @unique
+  organizationId  String
+  vendorName      String
+  totalBudget     Float
+  status          String   @default("PENDING_APPROVAL")
+  approvedBy      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model WorkforceShift {
+  id              String   @id @default(uuid())
+  shiftId         String   @unique
+  organizationId  String
+  staffId         String
+  startTime       DateTime
+  endTime         DateTime
+  overtimeHours   Float    @default(0.0)
+  status          String   @default("SCHEDULED")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId, staffId])
+}
+
+model KnowledgeGraphEdge {
+  id              String   @id @default(uuid())
+  edgeId          String   @unique
+  sourceEntity    String
+  targetEntity    String
+  relationship    String
+  weight          Float    @default(1.0)
+  createdAt       DateTime @default(now())
+
+  @@index([sourceEntity, targetEntity])
+}
+
+model SmartContractEscrow {
+  id              String   @id @default(uuid())
+  escrowId        String   @unique
+  bookingId       String   @unique
+  amount          Float
+  milestone       String
+  isReleased      Boolean  @default(false)
+  disputeStatus   String   @default("NONE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([isReleased])
+}
+
+model ApiMarketplaceApp {
+  id              String   @id @default(uuid())
+  appId           String   @unique
+  developerId     String
+  name            String
+  apiKey          String   @unique
+  ratePlan        String   @default("FREE")
+  monthlyRequests Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([developerId])
+}
+
+model BiAnalyticsReport {
+  id              String   @id @default(uuid())
+  reportId        String   @unique
+  title           String
+  metricsJson     String
+  generatedAt     DateTime @default(now())
+}
+
+model AutonomousRecoveryAction {
+  id              String   @id @default(uuid())
+  actionId        String   @unique
+  clusterName     String
+  targetDeployment String
+  reason          String
+  status          String   @default("SUCCESS")
+  executedAt      DateTime @default(now())
+
+  @@index([clusterName])
+}
+
+model EdgeInferenceCache {
+  id              String   @id @default(uuid())
+  cacheId         String   @unique
+  region          String
+  modelKey        String
+  latencyMs       Int      @default(8)
+  updatedAt       DateTime @updatedAt
+
+  @@index([region, modelKey])
+}
