@@ -220,3 +220,127 @@ enum ReferralStatus {
   EXPIRED
   CANCELLED
 }
+model Device {
+  id              String   @id @default(uuid())
+  deviceId        String   @unique
+  name            String
+  deviceType      String
+  ownerId         String
+  healthScore     Float    @default(100.0)
+  status          String   @default("ONLINE")
+  lastHeartbeatAt DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model InsuranceClaim {
+  id              String   @id @default(uuid())
+  claimId         String   @unique
+  policyNumber    String
+  providerId      String
+  estimatedCost   Float
+  approvedCost    Float?
+  status          String   @default("PENDING")
+  filedAt         DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([status])
+}
+
+model FranchiseBranch {
+  id              String   @id @default(uuid())
+  branchId        String   @unique
+  franchiseId     String
+  name            String
+  territoryCode   String
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([franchiseId])
+  @@index([territoryCode])
+}
+
+model SupplierPO {
+  id              String   @id @default(uuid())
+  orderId         String   @unique
+  supplierId      String
+  totalAmount     Float
+  status          String   @default("ISSUED")
+  issuedAt        DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([supplierId])
+  @@index([status])
+}
+
+model LicenseVerification {
+  id              String   @id @default(uuid())
+  verificationId  String   @unique
+  providerId      String
+  licenseType     String
+  licenseNumber   String
+  status          String   @default("PENDING")
+  verifiedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId])
+}
+
+model VerifiableCredential {
+  id              String   @id @default(uuid())
+  credentialId    String   @unique
+  userId          String
+  credentialType  String
+  issuer          String
+  isValid         Boolean  @default(true)
+  issuedAt        DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SmartCityRequest {
+  id              String   @id @default(uuid())
+  requestId       String   @unique
+  municipalityId  String
+  category        String
+  priority        String   @default("MEDIUM")
+  status          String   @default("OPEN")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([municipalityId])
+  @@index([status])
+}
+
+model IncidentReport {
+  id              String   @id @default(uuid())
+  incidentId      String   @unique
+  serviceName     String
+  severity        String   @default("WARNING")
+  status          String   @default("OPEN")
+  remediatedAt    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([serviceName])
+  @@index([status])
+}
+
+model EdgeWorkerRoute {
+  id              String   @id @default(uuid())
+  routeId         String   @unique
+  regionCode      String
+  originUrl       String
+  edgeUrl         String
+  latencyMs       Int      @default(15)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@index([regionCode])
+}
