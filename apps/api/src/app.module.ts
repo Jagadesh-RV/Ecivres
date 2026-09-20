@@ -1,3 +1,4 @@
+import { AutonomousFinanceModule } from './modules/autonomous-finance/autonomous-finance.module';
 import { CommerceGraphModule } from './modules/commerce-graph-v2/commerce-graph.module';
 import { ProcurementHubModule } from './modules/procurement-hub/procurement-hub.module';
 import { WorkforceAiModule } from './modules/workforce-ai-v2/workforce-ai.module';
@@ -73,6 +74,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AutonomousFinanceModule,
     CommerceGraphModule,
     ProcurementHubModule,
     WorkforceAiModule,
