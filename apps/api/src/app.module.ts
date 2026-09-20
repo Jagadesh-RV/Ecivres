@@ -1,3 +1,4 @@
+import { AutonomousRecoveryModule } from './modules/autonomous-recovery/autonomous-recovery.module';
 import { EnterpriseBiModule } from './modules/enterprise-bi/enterprise-bi.module';
 import { ApiMarketplaceModule } from './modules/api-marketplace/api-marketplace.module';
 import { SmartContractsModule } from './modules/smart-contracts/smart-contracts.module';
@@ -64,6 +65,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AutonomousRecoveryModule,
     EnterpriseBiModule,
     ApiMarketplaceModule,
     SmartContractsModule,
