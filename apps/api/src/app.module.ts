@@ -1,3 +1,4 @@
+import { EmergencySosModule } from './modules/emergency-sos/emergency-sos.module';
 import { FranchiseNetworkModule } from './modules/franchise-v2/franchise-network.module';
 import { EdgeAiModule } from './modules/edge-ai/edge-ai.module';
 import { AutonomousRecoveryModule } from './modules/autonomous-recovery/autonomous-recovery.module';
@@ -67,6 +68,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    EmergencySosModule,
     FranchiseNetworkModule,
     EdgeAiModule,
     AutonomousRecoveryModule,
