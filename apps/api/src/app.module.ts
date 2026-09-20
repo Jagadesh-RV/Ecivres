@@ -1,3 +1,25 @@
+import { EdgeAiModule as EdgeAiModuleV2 } from './modules/edge-ai-v2/edge-ai.module';
+import { AutonomousOpsModule } from './modules/autonomous-ops-v2/autonomous-ops.module';
+import { DeveloperMarketplaceModule } from './modules/developer-marketplace/developer-marketplace.module';
+import { AutonomousFinanceModule } from './modules/autonomous-finance/autonomous-finance.module';
+import { CommerceGraphModule } from './modules/commerce-graph-v2/commerce-graph.module';
+import { ProcurementHubModule } from './modules/procurement-hub/procurement-hub.module';
+import { WorkforceAiModule } from './modules/workforce-ai-v2/workforce-ai.module';
+import { SmartHomeIotModule } from './modules/smart-home-iot/smart-home-iot.module';
+import { ClaimsAutomationModule } from './modules/claims-automation/claims-automation.module';
+import { EmergencySosModule } from './modules/emergency-sos/emergency-sos.module';
+import { FranchiseNetworkModule } from './modules/franchise-v2/franchise-network.module';
+import { EdgeAiModule } from './modules/edge-ai/edge-ai.module';
+import { AutonomousRecoveryModule } from './modules/autonomous-recovery/autonomous-recovery.module';
+import { EnterpriseBiModule } from './modules/enterprise-bi/enterprise-bi.module';
+import { ApiMarketplaceModule } from './modules/api-marketplace/api-marketplace.module';
+import { SmartContractsModule } from './modules/smart-contracts/smart-contracts.module';
+import { KnowledgeGraphModule } from './modules/knowledge-graph/knowledge-graph.module';
+import { WorkforceModule } from './modules/workforce/workforce.module';
+import { ProcurementModule } from './modules/procurement/procurement.module';
+import { ProviderCrmModule } from './modules/provider-crm/provider-crm.module';
+import { AdvertisingModule } from './modules/advertising/advertising.module';
+import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
@@ -55,6 +77,28 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    EdgeAiModuleV2,
+    AutonomousOpsModule,
+    DeveloperMarketplaceModule,
+    AutonomousFinanceModule,
+    CommerceGraphModule,
+    ProcurementHubModule,
+    WorkforceAiModule,
+    SmartHomeIotModule,
+    ClaimsAutomationModule,
+    EmergencySosModule,
+    FranchiseNetworkModule,
+    EdgeAiModule,
+    AutonomousRecoveryModule,
+    EnterpriseBiModule,
+    ApiMarketplaceModule,
+    SmartContractsModule,
+    KnowledgeGraphModule,
+    WorkforceModule,
+    ProcurementModule,
+    ProviderCrmModule,
+    AdvertisingModule,
+    LoyaltyModule,
     ConfigModule.forRoot({ isGlobal: true }),
     IotModule,
     InsuranceModule,

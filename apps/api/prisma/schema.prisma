@@ -344,3 +344,287 @@ model EdgeWorkerRoute {
 
   @@index([regionCode])
 }
+model LoyaltyAccount {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  tier            String   @default("BRONZE")
+  points          Int      @default(0)
+  cashbackBalance Float    @default(0.0)
+  referralCode    String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tier])
+}
+
+model AdCampaign {
+  id              String   @id @default(uuid())
+  campaignId      String   @unique
+  providerId      String
+  title           String
+  bidCpc          Float
+  budget          Float
+  impressions     Int      @default(0)
+  clicks          Int      @default(0)
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([status])
+}
+
+model CustomerCrmRecord {
+  id              String   @id @default(uuid())
+  recordId        String   @unique
+  providerId      String
+  customerId      String
+  leadScore       Int      @default(50)
+  notes           String?
+  nextFollowUpAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId, customerId])
+}
+
+model ProcurementContract {
+  id              String   @id @default(uuid())
+  contractId      String   @unique
+  organizationId  String
+  vendorName      String
+  totalBudget     Float
+  status          String   @default("PENDING_APPROVAL")
+  approvedBy      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model WorkforceShift {
+  id              String   @id @default(uuid())
+  shiftId         String   @unique
+  organizationId  String
+  staffId         String
+  startTime       DateTime
+  endTime         DateTime
+  overtimeHours   Float    @default(0.0)
+  status          String   @default("SCHEDULED")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId, staffId])
+}
+
+model KnowledgeGraphEdge {
+  id              String   @id @default(uuid())
+  edgeId          String   @unique
+  sourceEntity    String
+  targetEntity    String
+  relationship    String
+  weight          Float    @default(1.0)
+  createdAt       DateTime @default(now())
+
+  @@index([sourceEntity, targetEntity])
+}
+
+model SmartContractEscrow {
+  id              String   @id @default(uuid())
+  escrowId        String   @unique
+  bookingId       String   @unique
+  amount          Float
+  milestone       String
+  isReleased      Boolean  @default(false)
+  disputeStatus   String   @default("NONE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([isReleased])
+}
+
+model ApiMarketplaceApp {
+  id              String   @id @default(uuid())
+  appId           String   @unique
+  developerId     String
+  name            String
+  apiKey          String   @unique
+  ratePlan        String   @default("FREE")
+  monthlyRequests Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([developerId])
+}
+
+model BiAnalyticsReport {
+  id              String   @id @default(uuid())
+  reportId        String   @unique
+  title           String
+  metricsJson     String
+  generatedAt     DateTime @default(now())
+}
+
+model AutonomousRecoveryAction {
+  id              String   @id @default(uuid())
+  actionId        String   @unique
+  clusterName     String
+  targetDeployment String
+  reason          String
+  status          String   @default("SUCCESS")
+  executedAt      DateTime @default(now())
+
+  @@index([clusterName])
+}
+
+model EdgeInferenceCache {
+  id              String   @id @default(uuid())
+  cacheId         String   @unique
+  region          String
+  modelKey        String
+  latencyMs       Int      @default(8)
+  updatedAt       DateTime @updatedAt
+
+  @@index([region, modelKey])
+}
+model FranchiseNetwork {
+  id              String   @id @default(uuid())
+  networkId       String   @unique
+  regionCode      String
+  name            String
+  royaltyRate     Float    @default(0.08)
+  activeBranches  Int      @default(1)
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([regionCode])
+}
+
+model EmergencySosBooking {
+  id              String   @id @default(uuid())
+  sosId           String   @unique
+  customerId      String
+  serviceCategory String
+  latitude        Float
+  longitude       Float
+  priorityScore   Int      @default(100)
+  status          String   @default("DISPATCHED")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model InsuranceDamageClaim {
+  id              String   @id @default(uuid())
+  damageClaimId   String   @unique
+  policyId        String
+  providerId      String
+  assessedAmount  Float
+  coverageValid   Boolean  @default(true)
+  status          String   @default("UNDER_REVIEW")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([policyId])
+}
+
+model SmartHomeDevice {
+  id              String   @id @default(uuid())
+  smartDeviceId   String   @unique
+  homeId          String
+  deviceType      String
+  telemetryTopic  String
+  lastStatus      String   @default("HEALTHY")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([homeId])
+}
+
+model WorkforceSchedule {
+  id              String   @id @default(uuid())
+  scheduleId      String   @unique
+  organizationId  String
+  weekNumber      Int
+  aiOptimized     Boolean  @default(true)
+  totalShiftHours Float    @default(160.0)
+  createdAt       DateTime @default(now())
+
+  @@index([organizationId])
+}
+
+model ProcurementPurchaseRequest {
+  id              String   @id @default(uuid())
+  requestId       String   @unique
+  organizationId  String
+  itemDescription String
+  estimatedCost   Float
+  approvalLevel   String   @default("MANAGER")
+  status          String   @default("SUBMITTED")
+  createdAt       DateTime @default(now())
+
+  @@index([organizationId])
+}
+
+model CommerceGraphNode {
+  id              String   @id @default(uuid())
+  nodeId          String   @unique
+  entityType      String
+  label           String
+  propertiesJson  String
+  createdAt       DateTime @default(now())
+
+  @@index([entityType])
+}
+
+model AutonomousSettlement {
+  id              String   @id @default(uuid())
+  settlementId    String   @unique
+  escrowId        String
+  grossAmount     Float
+  platformFee     Float
+  netPayout       Float
+  status          String   @default("SETTLED")
+  settledAt       DateTime @default(now())
+
+  @@index([escrowId])
+}
+
+model DeveloperWebhook {
+  id              String   @id @default(uuid())
+  webhookId       String   @unique
+  appId           String
+  targetUrl       String
+  eventsJson      String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@index([appId])
+}
+
+model OpsScalingAction {
+  id              String   @id @default(uuid())
+  scalingId       String   @unique
+  clusterId       String
+  targetReplicas  Int
+  triggerMetric   String
+  executedAt      DateTime @default(now())
+
+  @@index([clusterId])
+}
+
+model EdgeOfflineInference {
+  id              String   @id @default(uuid())
+  inferenceId     String   @unique
+  edgeNodeId      String
+  inputHash       String
+  outputJson      String
+  latencyMs       Int      @default(5)
+  executedAt      DateTime @default(now())
+
+  @@index([edgeNodeId])
+}
