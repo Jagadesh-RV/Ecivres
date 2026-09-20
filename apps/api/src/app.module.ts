@@ -1,3 +1,4 @@
+import { EdgeAiModule as EdgeAiModuleV2 } from './modules/edge-ai-v2/edge-ai.module';
 import { AutonomousOpsModule } from './modules/autonomous-ops-v2/autonomous-ops.module';
 import { DeveloperMarketplaceModule } from './modules/developer-marketplace/developer-marketplace.module';
 import { AutonomousFinanceModule } from './modules/autonomous-finance/autonomous-finance.module';
@@ -76,6 +77,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    EdgeAiModuleV2,
     AutonomousOpsModule,
     DeveloperMarketplaceModule,
     AutonomousFinanceModule,
