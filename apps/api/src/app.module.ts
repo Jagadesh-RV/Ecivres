@@ -1,3 +1,4 @@
+import { CommerceGraphModule } from './modules/commerce-graph-v2/commerce-graph.module';
 import { ProcurementHubModule } from './modules/procurement-hub/procurement-hub.module';
 import { WorkforceAiModule } from './modules/workforce-ai-v2/workforce-ai.module';
 import { SmartHomeIotModule } from './modules/smart-home-iot/smart-home-iot.module';
@@ -72,6 +73,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    CommerceGraphModule,
     ProcurementHubModule,
     WorkforceAiModule,
     SmartHomeIotModule,
