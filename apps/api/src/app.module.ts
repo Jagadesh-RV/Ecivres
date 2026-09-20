@@ -1,3 +1,4 @@
+import { ClaimsAutomationModule } from './modules/claims-automation/claims-automation.module';
 import { EmergencySosModule } from './modules/emergency-sos/emergency-sos.module';
 import { FranchiseNetworkModule } from './modules/franchise-v2/franchise-network.module';
 import { EdgeAiModule } from './modules/edge-ai/edge-ai.module';
@@ -68,6 +69,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ClaimsAutomationModule,
     EmergencySosModule,
     FranchiseNetworkModule,
     EdgeAiModule,
