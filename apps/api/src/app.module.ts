@@ -1,3 +1,4 @@
+import { EdgeAiModule } from './modules/edge-ai/edge-ai.module';
 import { AutonomousRecoveryModule } from './modules/autonomous-recovery/autonomous-recovery.module';
 import { EnterpriseBiModule } from './modules/enterprise-bi/enterprise-bi.module';
 import { ApiMarketplaceModule } from './modules/api-marketplace/api-marketplace.module';
@@ -65,6 +66,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    EdgeAiModule,
     AutonomousRecoveryModule,
     EnterpriseBiModule,
     ApiMarketplaceModule,
