@@ -1,3 +1,4 @@
+import { ProcurementHubModule } from './modules/procurement-hub/procurement-hub.module';
 import { WorkforceAiModule } from './modules/workforce-ai-v2/workforce-ai.module';
 import { SmartHomeIotModule } from './modules/smart-home-iot/smart-home-iot.module';
 import { ClaimsAutomationModule } from './modules/claims-automation/claims-automation.module';
@@ -71,6 +72,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ProcurementHubModule,
     WorkforceAiModule,
     SmartHomeIotModule,
     ClaimsAutomationModule,
