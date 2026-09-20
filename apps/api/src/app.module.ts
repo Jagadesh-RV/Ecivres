@@ -1,3 +1,4 @@
+import { AutonomousOpsModule } from './modules/autonomous-ops-v2/autonomous-ops.module';
 import { DeveloperMarketplaceModule } from './modules/developer-marketplace/developer-marketplace.module';
 import { AutonomousFinanceModule } from './modules/autonomous-finance/autonomous-finance.module';
 import { CommerceGraphModule } from './modules/commerce-graph-v2/commerce-graph.module';
@@ -75,6 +76,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AutonomousOpsModule,
     DeveloperMarketplaceModule,
     AutonomousFinanceModule,
     CommerceGraphModule,
