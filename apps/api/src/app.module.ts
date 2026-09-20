@@ -1,3 +1,4 @@
+import { SmartHomeIotModule } from './modules/smart-home-iot/smart-home-iot.module';
 import { ClaimsAutomationModule } from './modules/claims-automation/claims-automation.module';
 import { EmergencySosModule } from './modules/emergency-sos/emergency-sos.module';
 import { FranchiseNetworkModule } from './modules/franchise-v2/franchise-network.module';
@@ -69,6 +70,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    SmartHomeIotModule,
     ClaimsAutomationModule,
     EmergencySosModule,
     FranchiseNetworkModule,
