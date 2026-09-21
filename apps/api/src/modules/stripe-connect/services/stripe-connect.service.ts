@@ -54,4 +54,11 @@ export class StripeConnectService {
       detailsSubmitted: account.detailsSubmitted,
     };
   }
+
+  async checkPayoutEligibility(providerId: string, amountUSD: number) {
+    const status = await this.getAccountStatus(providerId);
+    const eligible = status.registered && status.payoutsEnabled && amountUSD >= 10.0;
+    this.logger.log(`Payout eligibility check for ${providerId} ($${amountUSD}): ${eligible}`);
+    return { providerId, amountUSD, eligible, reason: eligible ? 'ELIGIBLE' : 'INCOMPLETE_CONNECT_ACCOUNT' };
+  }
 }
