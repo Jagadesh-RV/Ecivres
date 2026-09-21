@@ -27,4 +27,16 @@ export class WhatsAppMessagingService {
       parameters: { providerName, etaMinutes },
     };
   }
+
+  async sendVerificationOtp(toPhoneNumber: string, otpCode: string) {
+    const templateName = 'ecivres_auth_otp';
+    this.logger.log(`Sending WhatsApp OTP template '${templateName}' to ${toPhoneNumber}`);
+    return {
+      messageId: `wamid_${Date.now()}`,
+      to: toPhoneNumber,
+      template: templateName,
+      status: 'DELIVERED',
+      parameters: { otpCode },
+    };
+  }
 }
