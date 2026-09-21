@@ -11,4 +11,14 @@ export class GoogleMapsService {
       { placeId: 'place_102', description: `${query} Avenue, Westside Tech Park` },
     ];
   }
+
+  async geocodeAddress(address: string) {
+    this.logger.log(`Geocoding address: ${address}`);
+    return {
+      address,
+      latitude: 37.7749,
+      longitude: -122.4194,
+      formattedAddress: `${address}, San Francisco, CA 94103, USA`,
+    };
+  }
 }
