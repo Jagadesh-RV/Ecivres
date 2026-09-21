@@ -1,3 +1,4 @@
+import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 import { GoogleMapsModule } from './modules/google-maps/google-maps.module';
 import { StripeConnectModule } from './modules/stripe-connect/stripe-connect.module';
 import { EdgeAiModule as EdgeAiModuleV2 } from './modules/edge-ai-v2/edge-ai.module';
@@ -79,6 +80,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    WhatsAppModule,
     GoogleMapsModule,
     StripeConnectModule,
     EdgeAiModuleV2,
