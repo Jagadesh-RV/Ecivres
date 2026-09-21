@@ -78,4 +78,10 @@ export class StripeConnectService {
       status: 'REQUIRES_PAYMENT_METHOD',
     };
   }
+
+  async transferPlatformCommission(providerId: string, commissionAmountUSD: number) {
+    const transferId = `tr_commission_${Date.now()}`;
+    this.logger.log(`Transferring $${commissionAmountUSD} platform commission from provider ${providerId} (${transferId})`);
+    return { transferId, providerId, commissionAmountUSD, status: 'TRANSFERRED' };
+  }
 }
