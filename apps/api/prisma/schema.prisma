@@ -628,3 +628,84 @@ model EdgeOfflineInference {
 
   @@index([edgeNodeId])
 }
+model StripeConnectAccount {
+  id              String   @id @default(uuid())
+  providerId      String   @unique
+  stripeAccountId String   @unique
+  onboardingUrl   String?
+  payoutsEnabled  Boolean  @default(false)
+  detailsSubmitted Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId])
+}
+
+model IndianVerificationRecord {
+  id                String   @id @default(uuid())
+  providerId        String   @unique
+  aadhaarHash       String?
+  panNumber         String?
+  gstin             String?
+  businessLicenseNo String?
+  verificationStatus String  @default("PENDING")
+  verifiedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([verificationStatus])
+}
+
+model OcrExtractedDocument {
+  id            String   @id @default(uuid())
+  documentId    String   @unique
+  userId        String
+  documentType  String
+  extractedText String
+  confidence    Float    @default(0.95)
+  status        String   @default("PARSED")
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+model FraudRiskScore {
+  id                String   @id @default(uuid())
+  targetId          String   @unique
+  targetType        String
+  behavioralScore   Int      @default(0)
+  anomalyDetected   Boolean  @default(false)
+  fakeReviewRisk    Float    @default(0.0)
+  riskLevel         String   @default("LOW")
+  updatedAt         DateTime @updatedAt
+
+  @@index([targetId, targetType])
+}
+
+model MarketplaceAnalyticsEvent {
+  id          String   @id @default(uuid())
+  eventId     String   @unique
+  eventType   String
+  userId      String?
+  payloadJson String
+  timestamp   DateTime @default(now())
+
+  @@index([eventType])
+  @@index([timestamp])
+}
+
+model OperationsIncident {
+  id          String   @id @default(uuid())
+  incidentId  String   @unique
+  severity    String   @default("MEDIUM")
+  title       String
+  description String
+  status      String   @default("OPEN")
+  slaBreached Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([severity])
+  @@index([status])
+}

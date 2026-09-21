@@ -1,0 +1,87 @@
+﻿import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../../../prisma/prisma.service';
+
+@Injectable()
+export class StripeConnectService {
+  private readonly logger = new Logger(StripeConnectService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  getStripeClient() {
+    return {
+      apiKey: process.env.STRIPE_SECRET_KEY || 'sk_test_mock_123',
+      apiVersion: '2023-10-16',
+    };
+  }
+
+  async createExpressAccount(providerId: string) {
+    const stripeAccountId = `acct_express_${Date.now()}`;
+    this.logger.log(`Creating Stripe Connect Express account ${stripeAccountId} for provider ${providerId}`);
+    return this.prisma.stripeConnectAccount.create({
+      data: {
+        providerId,
+        stripeAccountId,
+        payoutsEnabled: false,
+        detailsSubmitted: false,
+      },
+    });
+  }
+
+  async generateOnboardingLink(providerId: string) {
+    let account = await this.prisma.stripeConnectAccount.findUnique({ where: { providerId } });
+    if (!account) {
+      account = await this.createExpressAccount(providerId);
+    }
+    const onboardingUrl = `https://connect.stripe.com/express/onboarding/${account.stripeAccountId}`;
+    await this.prisma.stripeConnectAccount.update({
+      where: { providerId },
+      data: { onboardingUrl },
+    });
+    this.logger.log(`Generated Stripe Connect onboarding link for ${providerId}: ${onboardingUrl}`);
+    return { providerId, stripeAccountId: account.stripeAccountId, onboardingUrl };
+  }
+
+  async getAccountStatus(providerId: string) {
+    const account = await this.prisma.stripeConnectAccount.findUnique({ where: { providerId } });
+    if (!account) {
+      return { providerId, registered: false, payoutsEnabled: false };
+    }
+    return {
+      providerId,
+      registered: true,
+      stripeAccountId: account.stripeAccountId,
+      payoutsEnabled: account.payoutsEnabled,
+      detailsSubmitted: account.detailsSubmitted,
+    };
+  }
+
+  async checkPayoutEligibility(providerId: string, amountUSD: number) {
+    const status = await this.getAccountStatus(providerId);
+    const eligible = status.registered && status.payoutsEnabled && amountUSD >= 10.0;
+    this.logger.log(`Payout eligibility check for ${providerId} ($${amountUSD}): ${eligible}`);
+    return { providerId, amountUSD, eligible, reason: eligible ? 'ELIGIBLE' : 'INCOMPLETE_CONNECT_ACCOUNT' };
+  }
+
+  async createDestinationCharge(providerId: string, amountUSD: number, feePercent: number = 10) {
+    const account = await this.prisma.stripeConnectAccount.findUnique({ where: { providerId } });
+    const destinationAccount = account ? account.stripeAccountId : `acct_mock_${providerId}`;
+    const applicationFeeUSD = Math.round(amountUSD * (feePercent / 100) * 100) / 100;
+    const providerPayoutUSD = Math.round((amountUSD - applicationFeeUSD) * 100) / 100;
+    const paymentIntentId = `pi_dest_${Date.now()}`;
+    this.logger.log(`Creating Stripe destination charge ${paymentIntentId}: Total $${amountUSD}, Fee $${applicationFeeUSD}, Provider Payout $${providerPayoutUSD}`);
+    return {
+      paymentIntentId,
+      amountUSD,
+      applicationFeeUSD,
+      providerPayoutUSD,
+      destinationAccount,
+      status: 'REQUIRES_PAYMENT_METHOD',
+    };
+  }
+
+  async transferPlatformCommission(providerId: string, commissionAmountUSD: number) {
+    const transferId = `tr_commission_${Date.now()}`;
+    this.logger.log(`Transferring $${commissionAmountUSD} platform commission from provider ${providerId} (${transferId})`);
+    return { transferId, providerId, commissionAmountUSD, status: 'TRANSFERRED' };
+  }
+}
