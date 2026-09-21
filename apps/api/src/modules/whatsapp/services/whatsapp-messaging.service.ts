@@ -39,4 +39,16 @@ export class WhatsAppMessagingService {
       parameters: { otpCode },
     };
   }
+
+  async sendSupportEscalation(toPhoneNumber: string, ticketId: string, issueSummary: string) {
+    const templateName = 'ecivres_support_escalation';
+    this.logger.log(`Sending WhatsApp support escalation template '${templateName}' to ${toPhoneNumber} for ticket ${ticketId}`);
+    return {
+      messageId: `wamid_${Date.now()}`,
+      to: toPhoneNumber,
+      template: templateName,
+      status: 'DELIVERED',
+      parameters: { ticketId, issueSummary },
+    };
+  }
 }
