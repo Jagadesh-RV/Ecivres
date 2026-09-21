@@ -18,4 +18,10 @@ describe('GoogleMapsService', () => {
     expect(res.bookingId).toBe('bk_100');
     expect(res.updatedEtaMinutes).toBe(12);
   });
+
+  it('should geocode address to coordinates', async () => {
+    const res = await service.geocodeAddress('123 Main St');
+    expect(res.latitude).toBe(37.7749);
+    expect(res.longitude).toBe(-122.4194);
+  });
 });
