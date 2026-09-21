@@ -40,4 +40,18 @@ export class StripeConnectService {
     this.logger.log(`Generated Stripe Connect onboarding link for ${providerId}: ${onboardingUrl}`);
     return { providerId, stripeAccountId: account.stripeAccountId, onboardingUrl };
   }
+
+  async getAccountStatus(providerId: string) {
+    const account = await this.prisma.stripeConnectAccount.findUnique({ where: { providerId } });
+    if (!account) {
+      return { providerId, registered: false, payoutsEnabled: false };
+    }
+    return {
+      providerId,
+      registered: true,
+      stripeAccountId: account.stripeAccountId,
+      payoutsEnabled: account.payoutsEnabled,
+      detailsSubmitted: account.detailsSubmitted,
+    };
+  }
 }
