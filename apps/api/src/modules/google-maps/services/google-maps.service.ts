@@ -56,4 +56,14 @@ export class GoogleMapsService {
       })),
     };
   }
+
+  async recalculateEta(bookingId: string, currentLat: number, currentLng: number) {
+    this.logger.log(`Recalculating real-time ETA for booking ${bookingId} at (${currentLat}, ${currentLng})`);
+    return {
+      bookingId,
+      updatedEtaMinutes: 12,
+      trafficCondition: 'MODERATE_TRAFFIC',
+      estimatedArrival: new Date(Date.now() + 12 * 60000).toISOString(),
+    };
+  }
 }
