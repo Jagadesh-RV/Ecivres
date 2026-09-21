@@ -20,4 +20,9 @@ export class StripeWebhookService {
     }
     return { received: true, eventType: event.type };
   }
+
+  async handlePaymentSuccess(paymentIntentId: string, amount: number) {
+    this.logger.log(`Processing payment intent success webhook for ${paymentIntentId} ($${amount})`);
+    return { paymentIntentId, status: 'SUCCEEDED', processedAt: new Date().toISOString() };
+  }
 }
