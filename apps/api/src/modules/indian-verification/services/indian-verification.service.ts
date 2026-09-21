@@ -16,4 +16,16 @@ export class IndianVerificationService {
       update: { aadhaarHash },
     });
   }
+
+  async verifyPan(providerId: string, panNumber: string) {
+    const isValidPan = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber.toUpperCase());
+    this.logger.log(`Verifying PAN format for provider ${providerId} (${panNumber}): ${isValidPan}`);
+    return this.prisma.indianVerificationRecord.update({
+      where: { providerId },
+      data: {
+        panNumber: panNumber.toUpperCase(),
+        verificationStatus: isValidPan ? 'PAN_VERIFIED' : 'FAILED',
+      },
+    });
+  }
 }
