@@ -28,4 +28,17 @@ export class IndianVerificationService {
       },
     });
   }
+
+  async verifyGstin(providerId: string, gstin: string) {
+    const isValidGst = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(gstin.toUpperCase());
+    this.logger.log(`Verifying GSTIN for provider ${providerId} (${gstin}): ${isValidGst}`);
+    return this.prisma.indianVerificationRecord.update({
+      where: { providerId },
+      data: {
+        gstin: gstin.toUpperCase(),
+        verificationStatus: isValidGst ? 'VERIFIED' : 'FAILED',
+        verifiedAt: isValidGst ? new Date() : null,
+      },
+    });
+  }
 }
