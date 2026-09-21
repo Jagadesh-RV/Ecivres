@@ -21,4 +21,13 @@ export class GoogleMapsService {
       formattedAddress: `${address}, San Francisco, CA 94103, USA`,
     };
   }
+
+  async reverseGeocode(latitude: number, longitude: number) {
+    this.logger.log(`Reverse geocoding coordinates: (${latitude}, ${longitude})`);
+    return {
+      latitude,
+      longitude,
+      formattedAddress: `742 Evergreen Terrace, Springfield (${latitude}, ${longitude})`,
+    };
+  }
 }
