@@ -15,4 +15,16 @@ export class WhatsAppMessagingService {
       parameters: { bookingId, serviceName, date },
     };
   }
+
+  async sendProviderArrivalNotification(toPhoneNumber: string, providerName: string, etaMinutes: number) {
+    const templateName = 'ecivres_provider_arrival';
+    this.logger.log(`Sending WhatsApp template '${templateName}' to ${toPhoneNumber} (Provider: ${providerName}, ETA: ${etaMinutes}m)`);
+    return {
+      messageId: `wamid_${Date.now()}`,
+      to: toPhoneNumber,
+      template: templateName,
+      status: 'DELIVERED',
+      parameters: { providerName, etaMinutes },
+    };
+  }
 }
