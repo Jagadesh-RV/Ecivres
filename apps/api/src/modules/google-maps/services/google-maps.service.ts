@@ -41,4 +41,19 @@ export class GoogleMapsService {
       polylineEncoded: 'a~4gF_u~xV~B?v@wB',
     };
   }
+
+  async getDistanceMatrix(origins: string[], destinations: string[]) {
+    this.logger.log(`Calculating Distance Matrix for ${origins.length} origins and ${destinations.length} destinations`);
+    return {
+      origins,
+      destinations,
+      rows: origins.map(o => ({
+        elements: destinations.map(d => ({
+          distanceMeters: 8500,
+          durationSeconds: 900,
+          status: 'OK',
+        })),
+      })),
+    };
+  }
 }
