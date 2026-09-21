@@ -25,4 +25,9 @@ export class StripeWebhookService {
     this.logger.log(`Processing payment intent success webhook for ${paymentIntentId} ($${amount})`);
     return { paymentIntentId, status: 'SUCCEEDED', processedAt: new Date().toISOString() };
   }
+
+  async handlePaymentFailure(paymentIntentId: string, errorMessage: string) {
+    this.logger.warn(`Processing payment intent failure webhook for ${paymentIntentId}: ${errorMessage}`);
+    return { paymentIntentId, status: 'FAILED', reason: errorMessage };
+  }
 }
