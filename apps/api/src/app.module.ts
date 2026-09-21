@@ -1,3 +1,5 @@
+import { GoogleMapsModule } from './modules/google-maps/google-maps.module';
+import { StripeConnectModule } from './modules/stripe-connect/stripe-connect.module';
 import { EdgeAiModule as EdgeAiModuleV2 } from './modules/edge-ai-v2/edge-ai.module';
 import { AutonomousOpsModule } from './modules/autonomous-ops-v2/autonomous-ops.module';
 import { DeveloperMarketplaceModule } from './modules/developer-marketplace/developer-marketplace.module';
@@ -77,6 +79,8 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    GoogleMapsModule,
+    StripeConnectModule,
     EdgeAiModuleV2,
     AutonomousOpsModule,
     DeveloperMarketplaceModule,
