@@ -61,4 +61,21 @@ export class StripeConnectService {
     this.logger.log(`Payout eligibility check for ${providerId} ($${amountUSD}): ${eligible}`);
     return { providerId, amountUSD, eligible, reason: eligible ? 'ELIGIBLE' : 'INCOMPLETE_CONNECT_ACCOUNT' };
   }
+
+  async createDestinationCharge(providerId: string, amountUSD: number, feePercent: number = 10) {
+    const account = await this.prisma.stripeConnectAccount.findUnique({ where: { providerId } });
+    const destinationAccount = account ? account.stripeAccountId : `acct_mock_${providerId}`;
+    const applicationFeeUSD = Math.round(amountUSD * (feePercent / 100) * 100) / 100;
+    const providerPayoutUSD = Math.round((amountUSD - applicationFeeUSD) * 100) / 100;
+    const paymentIntentId = `pi_dest_${Date.now()}`;
+    this.logger.log(`Creating Stripe destination charge ${paymentIntentId}: Total $${amountUSD}, Fee $${applicationFeeUSD}, Provider Payout $${providerPayoutUSD}`);
+    return {
+      paymentIntentId,
+      amountUSD,
+      applicationFeeUSD,
+      providerPayoutUSD,
+      destinationAccount,
+      status: 'REQUIRES_PAYMENT_METHOD',
+    };
+  }
 }
