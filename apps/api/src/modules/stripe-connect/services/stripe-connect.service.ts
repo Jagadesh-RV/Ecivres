@@ -13,4 +13,17 @@ export class StripeConnectService {
       apiVersion: '2023-10-16',
     };
   }
+
+  async createExpressAccount(providerId: string) {
+    const stripeAccountId = `acct_express_${Date.now()}`;
+    this.logger.log(`Creating Stripe Connect Express account ${stripeAccountId} for provider ${providerId}`);
+    return this.prisma.stripeConnectAccount.create({
+      data: {
+        providerId,
+        stripeAccountId,
+        payoutsEnabled: false,
+        detailsSubmitted: false,
+      },
+    });
+  }
 }
