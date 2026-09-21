@@ -30,4 +30,15 @@ export class GoogleMapsService {
       formattedAddress: `742 Evergreen Terrace, Springfield (${latitude}, ${longitude})`,
     };
   }
+
+  async calculateRoute(originLat: number, originLng: number, destLat: number, destLng: number) {
+    this.logger.log(`Calculating Routes API navigation from (${originLat}, ${originLng}) to (${destLat}, ${destLng})`);
+    return {
+      origin: { latitude: originLat, longitude: originLng },
+      destination: { latitude: destLat, longitude: destLng },
+      distanceKm: 12.4,
+      durationMinutes: 18,
+      polylineEncoded: 'a~4gF_u~xV~B?v@wB',
+    };
+  }
 }
