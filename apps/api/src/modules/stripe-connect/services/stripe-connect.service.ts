@@ -26,4 +26,18 @@ export class StripeConnectService {
       },
     });
   }
+
+  async generateOnboardingLink(providerId: string) {
+    let account = await this.prisma.stripeConnectAccount.findUnique({ where: { providerId } });
+    if (!account) {
+      account = await this.createExpressAccount(providerId);
+    }
+    const onboardingUrl = `https://connect.stripe.com/express/onboarding/${account.stripeAccountId}`;
+    await this.prisma.stripeConnectAccount.update({
+      where: { providerId },
+      data: { onboardingUrl },
+    });
+    this.logger.log(`Generated Stripe Connect onboarding link for ${providerId}: ${onboardingUrl}`);
+    return { providerId, stripeAccountId: account.stripeAccountId, onboardingUrl };
+  }
 }
