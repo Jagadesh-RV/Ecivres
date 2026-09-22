@@ -35,4 +35,15 @@ describe('IndianVerificationService', () => {
     const res = await service.verifyAadhaar('prov_1', '123456789012');
     expect(res.aadhaarHash).toBe('hash_9012');
   });
+
+  it('should validate PAN card format', async () => {
+    mockPrisma.indianVerificationRecord.update.mockResolvedValue({
+      providerId: 'prov_1',
+      panNumber: 'ABCDE1234F',
+      verificationStatus: 'PAN_VERIFIED',
+    });
+
+    const res = await service.verifyPan('prov_1', 'ABCDE1234F');
+    expect(res.verificationStatus).toBe('PAN_VERIFIED');
+  });
 });
