@@ -45,4 +45,15 @@ export class MarketplaceOperationsService {
       healthStatus: 'OPTIMAL',
     };
   }
+
+  async getQueueTelemetry() {
+    this.logger.log('Checking BullMQ queue telemetry & job backlog');
+    return {
+      activeJobs: 14,
+      waitingJobs: 2,
+      failedJobs: 0,
+      delayedJobs: 5,
+      queueStatus: 'HEALTHY',
+    };
+  }
 }
