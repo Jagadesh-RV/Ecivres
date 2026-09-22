@@ -19,4 +19,17 @@ export class EventCollectorService {
       },
     });
   }
+
+  async trackPaymentEvent(userId: string, paymentIntentId: string, amountUSD: number, status: string) {
+    const eventId = `evt_pmt_${Date.now()}`;
+    this.logger.log(`Ingesting payment event stream ${eventId} ($${amountUSD} - ${status})`);
+    return this.prisma.marketplaceAnalyticsEvent.create({
+      data: {
+        eventId,
+        eventType: `PAYMENT_${status.toUpperCase()}`,
+        userId,
+        payloadJson: JSON.stringify({ paymentIntentId, amountUSD, status }),
+      },
+    });
+  }
 }
