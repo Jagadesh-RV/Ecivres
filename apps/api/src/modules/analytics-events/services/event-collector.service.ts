@@ -58,4 +58,17 @@ export class EventCollectorService {
       },
     });
   }
+
+  async trackCancellationEvent(userId: string, bookingId: string, reason: string) {
+    const eventId = `evt_cnc_${Date.now()}`;
+    this.logger.log(`Ingesting cancellation event stream ${eventId} for booking ${bookingId}`);
+    return this.prisma.marketplaceAnalyticsEvent.create({
+      data: {
+        eventId,
+        eventType: 'BOOKING_CANCELLED',
+        userId,
+        payloadJson: JSON.stringify({ bookingId, reason }),
+      },
+    });
+  }
 }
