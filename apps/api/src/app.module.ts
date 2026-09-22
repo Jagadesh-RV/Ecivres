@@ -1,3 +1,4 @@
+import { IndianVerificationModule } from './modules/indian-verification/indian-verification.module';
 import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 import { GoogleMapsModule } from './modules/google-maps/google-maps.module';
 import { StripeConnectModule } from './modules/stripe-connect/stripe-connect.module';
@@ -80,6 +81,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    IndianVerificationModule,
     WhatsAppModule,
     GoogleMapsModule,
     StripeConnectModule,
