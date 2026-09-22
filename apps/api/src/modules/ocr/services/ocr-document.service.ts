@@ -33,4 +33,15 @@ export class OcrDocumentService {
       lineItemsCount: 3,
     };
   }
+
+  async parseReceipt(documentId: string) {
+    this.logger.log(`Parsing store receipt for ${documentId}`);
+    return {
+      documentId,
+      merchant: 'Home Depot Supplies',
+      subtotalUSD: 84.50,
+      totalUSD: 91.25,
+      date: new Date().toISOString().split('T')[0],
+    };
+  }
 }
