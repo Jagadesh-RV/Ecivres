@@ -41,4 +41,12 @@ export class IndianVerificationService {
       },
     });
   }
+
+  async verifyBusinessLicense(providerId: string, licenseNumber: string) {
+    this.logger.log(`Verifying Business License for provider ${providerId} (${licenseNumber})`);
+    return this.prisma.indianVerificationRecord.update({
+      where: { providerId },
+      data: { businessLicenseNo: licenseNumber },
+    });
+  }
 }
