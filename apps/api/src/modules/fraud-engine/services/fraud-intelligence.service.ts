@@ -31,4 +31,16 @@ export class FraudIntelligenceService {
       flaggedForModeration: fakeRisk > 0.5,
     };
   }
+
+  async detectPaymentAnomaly(userId: string, amountUSD: number, ipAddress: string) {
+    const isAnomaly = amountUSD > 5000.0;
+    this.logger.log(`Evaluated payment anomaly for user ${userId} ($${amountUSD} from ${ipAddress}): ${isAnomaly}`);
+    return {
+      userId,
+      amountUSD,
+      ipAddress,
+      anomalyDetected: isAnomaly,
+      action: isAnomaly ? 'REQUIRE_3DS_STEP_UP' : 'ALLOW',
+    };
+  }
 }
