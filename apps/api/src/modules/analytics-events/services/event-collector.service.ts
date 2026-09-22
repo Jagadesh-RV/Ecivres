@@ -45,4 +45,17 @@ export class EventCollectorService {
       },
     });
   }
+
+  async trackReferralEvent(referrerUserId: string, referredUserId: string, referralCode: string) {
+    const eventId = `evt_ref_${Date.now()}`;
+    this.logger.log(`Ingesting referral event stream ${eventId} (Code: ${referralCode})`);
+    return this.prisma.marketplaceAnalyticsEvent.create({
+      data: {
+        eventId,
+        eventType: 'USER_REFERRAL_CONVERTED',
+        userId: referrerUserId,
+        payloadJson: JSON.stringify({ referredUserId, referralCode }),
+      },
+    });
+  }
 }
