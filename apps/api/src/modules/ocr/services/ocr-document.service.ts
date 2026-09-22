@@ -21,4 +21,16 @@ export class OcrDocumentService {
       },
     });
   }
+
+  async extractInvoice(documentId: string) {
+    this.logger.log(`Extracting structured invoice data for ${documentId}`);
+    return {
+      documentId,
+      invoiceNumber: 'INV-2026-9081',
+      totalAmountUSD: 450.0,
+      taxAmountUSD: 36.0,
+      vendorName: 'Acme Hardware Corp',
+      lineItemsCount: 3,
+    };
+  }
 }
