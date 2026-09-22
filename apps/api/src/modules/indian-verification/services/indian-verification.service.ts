@@ -49,4 +49,19 @@ export class IndianVerificationService {
       data: { businessLicenseNo: licenseNumber },
     });
   }
+
+  async getVerificationStatus(providerId: string) {
+    const record = await this.prisma.indianVerificationRecord.findUnique({ where: { providerId } });
+    if (!record) {
+      return { providerId, status: 'UNVERIFIED', verified: false };
+    }
+    return {
+      providerId,
+      status: record.verificationStatus,
+      verified: record.verificationStatus === 'VERIFIED',
+      hasAadhaar: !!record.aadhaarHash,
+      hasPan: !!record.panNumber,
+      hasGst: !!record.gstin,
+    };
+  }
 }
