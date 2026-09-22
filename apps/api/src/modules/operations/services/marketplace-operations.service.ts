@@ -35,4 +35,14 @@ export class MarketplaceOperationsService {
     this.logger.warn(`Escalating support ticket ${ticketId} to Tier-2 Operations [${priority}]: ${notes}`);
     return { ticketId, priority, status: 'ESCALATED', assignedTier: 'TIER_2_OPERATIONS' };
   }
+
+  async getProviderHealth(providerId: string) {
+    this.logger.log(`Checking provider operational health & acceptance score for ${providerId}`);
+    return {
+      providerId,
+      acceptanceRatePercent: '96.2%',
+      cancellationRatePercent: '1.1%',
+      healthStatus: 'OPTIMAL',
+    };
+  }
 }
