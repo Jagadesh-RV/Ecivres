@@ -32,4 +32,17 @@ export class EventCollectorService {
       },
     });
   }
+
+  async trackSearchEvent(userId: string, searchQuery: string, categoryId?: string) {
+    const eventId = `evt_srch_${Date.now()}`;
+    this.logger.log(`Ingesting search event stream ${eventId} ("${searchQuery}")`);
+    return this.prisma.marketplaceAnalyticsEvent.create({
+      data: {
+        eventId,
+        eventType: 'SEARCH_QUERY',
+        userId,
+        payloadJson: JSON.stringify({ searchQuery, categoryId }),
+      },
+    });
+  }
 }
