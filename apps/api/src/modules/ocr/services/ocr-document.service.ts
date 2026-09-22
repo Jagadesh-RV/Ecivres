@@ -44,4 +44,14 @@ export class OcrDocumentService {
       date: new Date().toISOString().split('T')[0],
     };
   }
+
+  async extractBusinessLicense(documentId: string) {
+    this.logger.log(`Extracting business license metadata for ${documentId}`);
+    return {
+      documentId,
+      licenseNumber: 'LIC-CA-889012',
+      issuingAuthority: 'California Dept of Consumer Affairs',
+      expirationDate: '2028-12-31',
+    };
+  }
 }
