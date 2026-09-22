@@ -54,4 +54,15 @@ export class OcrDocumentService {
       expirationDate: '2028-12-31',
     };
   }
+
+  async parseInsuranceCertificate(documentId: string) {
+    this.logger.log(`Parsing insurance certificate for ${documentId}`);
+    return {
+      documentId,
+      policyNumber: 'POL-STATEFARM-9011',
+      insurerName: 'State Farm General Insurance',
+      coverageLimitUSD: 1000000.0,
+      effectiveUntil: '2027-06-30',
+    };
+  }
 }
