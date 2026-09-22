@@ -43,4 +43,13 @@ export class FraudIntelligenceService {
       action: isAnomaly ? 'REQUIRE_3DS_STEP_UP' : 'ALLOW',
     };
   }
+
+  async scoreDeviceReputation(deviceFingerprint: string) {
+    this.logger.log(`Scoring device reputation for fingerprint ${deviceFingerprint}`);
+    return {
+      deviceFingerprint,
+      trustScore: 92,
+      isSuspiciousDevice: false,
+    };
+  }
 }
