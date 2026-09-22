@@ -1,3 +1,4 @@
+import { OperationsModule } from './modules/operations/operations.module';
 import { AnalyticsEventsModule } from './modules/analytics-events/analytics-events.module';
 import { FraudEngineModule } from './modules/fraud-engine/fraud-engine.module';
 import { OcrModule } from './modules/ocr/ocr.module';
@@ -84,6 +85,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    OperationsModule,
     AnalyticsEventsModule,
     FraudEngineModule,
     OcrModule,
