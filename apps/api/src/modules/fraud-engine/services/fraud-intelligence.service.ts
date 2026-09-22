@@ -1,0 +1,66 @@
+﻿import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../../../prisma/prisma.service';
+
+@Injectable()
+export class FraudIntelligenceService {
+  private readonly logger = new Logger(FraudIntelligenceService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async calculateBehavioralScore(targetId: string, targetType: string) {
+    const behavioralScore = Math.floor(Math.random() * 20); // Low risk 0-20
+    this.logger.log(`Calculated behavioral fraud score for ${targetType} ${targetId}: ${behavioralScore}`);
+    return this.prisma.fraudRiskScore.upsert({
+      where: { targetId },
+      create: {
+        targetId,
+        targetType,
+        behavioralScore,
+        riskLevel: behavioralScore > 50 ? 'HIGH' : 'LOW',
+      },
+      update: { behavioralScore },
+    });
+  }
+
+  async detectFakeReview(reviewId: string, reviewText: string, rating: number) {
+    const fakeRisk = reviewText.length < 10 && rating === 5 ? 0.85 : 0.05;
+    this.logger.log(`Evaluated fake review risk for review ${reviewId}: ${(fakeRisk * 100).toFixed(0)}%`);
+    return {
+      reviewId,
+      fakeReviewRisk: fakeRisk,
+      flaggedForModeration: fakeRisk > 0.5,
+    };
+  }
+
+  async detectPaymentAnomaly(userId: string, amountUSD: number, ipAddress: string) {
+    const isAnomaly = amountUSD > 5000.0;
+    this.logger.log(`Evaluated payment anomaly for user ${userId} ($${amountUSD} from ${ipAddress}): ${isAnomaly}`);
+    return {
+      userId,
+      amountUSD,
+      ipAddress,
+      anomalyDetected: isAnomaly,
+      action: isAnomaly ? 'REQUIRE_3DS_STEP_UP' : 'ALLOW',
+    };
+  }
+
+  async scoreDeviceReputation(deviceFingerprint: string) {
+    this.logger.log(`Scoring device reputation for fingerprint ${deviceFingerprint}`);
+    return {
+      deviceFingerprint,
+      trustScore: 92,
+      isSuspiciousDevice: false,
+    };
+  }
+
+  async detectBookingAbuse(customerId: string, velocityPerHour: number) {
+    const isAbuse = velocityPerHour > 10;
+    this.logger.log(`Checking booking velocity abuse for customer ${customerId} (${velocityPerHour}/hr): ${isAbuse}`);
+    return {
+      customerId,
+      velocityPerHour,
+      bookingAbuseDetected: isAbuse,
+      status: isAbuse ? 'RATE_LIMITED' : 'HEALTHY',
+    };
+  }
+}

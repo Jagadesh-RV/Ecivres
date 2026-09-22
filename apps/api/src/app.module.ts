@@ -1,3 +1,8 @@
+import { OperationsModule } from './modules/operations/operations.module';
+import { AnalyticsEventsModule } from './modules/analytics-events/analytics-events.module';
+import { FraudEngineModule } from './modules/fraud-engine/fraud-engine.module';
+import { OcrModule } from './modules/ocr/ocr.module';
+import { IndianVerificationModule } from './modules/indian-verification/indian-verification.module';
 import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 import { GoogleMapsModule } from './modules/google-maps/google-maps.module';
 import { StripeConnectModule } from './modules/stripe-connect/stripe-connect.module';
@@ -80,6 +85,11 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    OperationsModule,
+    AnalyticsEventsModule,
+    FraudEngineModule,
+    OcrModule,
+    IndianVerificationModule,
     WhatsAppModule,
     GoogleMapsModule,
     StripeConnectModule,

@@ -1,0 +1,11 @@
+﻿{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAM12345.com.ecivres.app",
+        "paths": ["/bookings/*", "/provider/*", "/customer/*"]
+      }
+    ]
+  }
+}
