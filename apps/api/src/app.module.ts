@@ -1,3 +1,4 @@
+import { AnalyticsEventsModule } from './modules/analytics-events/analytics-events.module';
 import { FraudEngineModule } from './modules/fraud-engine/fraud-engine.module';
 import { OcrModule } from './modules/ocr/ocr.module';
 import { IndianVerificationModule } from './modules/indian-verification/indian-verification.module';
@@ -83,6 +84,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AnalyticsEventsModule,
     FraudEngineModule,
     OcrModule,
     IndianVerificationModule,
