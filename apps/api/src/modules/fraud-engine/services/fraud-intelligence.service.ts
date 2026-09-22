@@ -52,4 +52,15 @@ export class FraudIntelligenceService {
       isSuspiciousDevice: false,
     };
   }
+
+  async detectBookingAbuse(customerId: string, velocityPerHour: number) {
+    const isAbuse = velocityPerHour > 10;
+    this.logger.log(`Checking booking velocity abuse for customer ${customerId} (${velocityPerHour}/hr): ${isAbuse}`);
+    return {
+      customerId,
+      velocityPerHour,
+      bookingAbuseDetected: isAbuse,
+      status: isAbuse ? 'RATE_LIMITED' : 'HEALTHY',
+    };
+  }
 }
