@@ -30,4 +30,9 @@ export class MarketplaceOperationsService {
       openIncidentsCount: await this.prisma.operationsIncident.count({ where: { status: 'OPEN' } }),
     };
   }
+
+  async escalateSupportTicket(ticketId: string, priority: string, notes: string) {
+    this.logger.warn(`Escalating support ticket ${ticketId} to Tier-2 Operations [${priority}]: ${notes}`);
+    return { ticketId, priority, status: 'ESCALATED', assignedTier: 'TIER_2_OPERATIONS' };
+  }
 }
