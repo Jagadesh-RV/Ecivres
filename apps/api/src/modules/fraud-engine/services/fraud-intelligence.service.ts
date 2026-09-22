@@ -21,4 +21,14 @@ export class FraudIntelligenceService {
       update: { behavioralScore },
     });
   }
+
+  async detectFakeReview(reviewId: string, reviewText: string, rating: number) {
+    const fakeRisk = reviewText.length < 10 && rating === 5 ? 0.85 : 0.05;
+    this.logger.log(`Evaluated fake review risk for review ${reviewId}: ${(fakeRisk * 100).toFixed(0)}%`);
+    return {
+      reviewId,
+      fakeReviewRisk: fakeRisk,
+      flaggedForModeration: fakeRisk > 0.5,
+    };
+  }
 }
