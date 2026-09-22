@@ -1,0 +1,14 @@
+﻿{
+  "NSPrivacyTracking": false,
+  "NSPrivacyTrackingDomains": [],
+  "NSPrivacyAccessedAPITypes": [
+    {
+      "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+      "NSPrivacyAccessedAPITypeReasons": ["D670.1"]
+    },
+    {
+      "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+      "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+    }
+  ]
+}
