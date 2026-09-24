@@ -51,4 +51,13 @@ export class IncidentGovernanceService {
       resolvedAt: new Date().toISOString(),
     };
   }
+
+  async generatePostmortemTemplate(incidentId: string, rootCause: string) {
+    this.logger.log(`Generating blameless postmortem template for ${incidentId}`);
+    return {
+      incidentId,
+      rootCause,
+      templateMarkdown: `# Postmortem Report — ${incidentId}\n\n## Root Cause Analysis\n${rootCause}\n\n## Action Items\n- [ ] Prevent recurrence via automated test gate\n- [ ] Update operational runbooks`,
+    };
+  }
 }
