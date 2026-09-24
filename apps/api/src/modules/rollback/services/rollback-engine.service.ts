@@ -42,4 +42,13 @@ export class RollbackEngineService {
       reason,
     };
   }
+
+  async shiftTrafficToStable(targetStableVersion: string) {
+    this.logger.warn(`Shifting 100% production traffic back to stable version ${targetStableVersion}`);
+    return {
+      activeVersion: targetStableVersion,
+      canaryTrafficWeight: 0,
+      stableTrafficWeight: 100,
+    };
+  }
 }
