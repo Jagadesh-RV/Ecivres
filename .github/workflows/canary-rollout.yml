@@ -14,3 +14,5 @@ jobs:
     steps:
       - name: Shift 5% Traffic to Canary Build
         run: echo "Traffic shifted to 5% canary for version ${{ inputs.target_version }}"
+      - name: Soak Monitor 5% Traffic (5 Mins)
+        run: echo "Soaking 5% canary traffic for metrics verification..."
