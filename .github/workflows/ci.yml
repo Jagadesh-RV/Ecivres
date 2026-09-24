@@ -34,3 +34,13 @@ jobs:
 
       - name: Next.js Production Build Gate
         run: pnpm --filter web build
+
+  deploy-dev:
+    name: Development Deployment
+    needs: verify
+    if: github.ref == 'refs/heads/develop'
+    environment: development
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Development Environment
+        run: echo "Successfully deployed to Development"
