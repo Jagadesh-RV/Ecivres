@@ -62,4 +62,19 @@ export class RollbackEngineService {
       postRollbackHealth: 'HEALTHY',
     };
   }
+
+  async logAutomatedRollbackIncident(failedReleaseVersion: string, reason: string) {
+    const incidentId = `inc_rollback_${Date.now()}`;
+    this.logger.error(`Logging automated incident ${incidentId} for rollback of ${failedReleaseVersion}`);
+    return this.prisma.operationsIncident.create({
+      data: {
+        incidentId,
+        title: `Automated Rollback: ${failedReleaseVersion}`,
+        description: reason,
+        severity: 'CRITICAL',
+        status: 'OPEN',
+        slaBreached: true,
+      },
+    });
+  }
 }
