@@ -27,4 +27,20 @@ export class CanaryMetricsMonitorService {
       status: isBreached ? 'BREACHED' : 'HEALTHY',
     };
   }
+
+  async evaluateAutomaticRollback(canaryVersion: string, errorRatePercent: number, p95LatencyMs: number) {
+    const errCheck = await this.checkErrorRateThreshold(canaryVersion, errorRatePercent);
+    const latCheck = await this.checkP95LatencyThreshold(canaryVersion, p95LatencyMs);
+    const triggerRollback = errCheck.status === 'BREACHED' || latCheck.status === 'BREACHED';
+    
+    if (triggerRollback) {
+      this.logger.error(`AUTOMATIC CANARY ROLLBACK TRIGGERED FOR ${canaryVersion}`);
+    }
+
+    return {
+      canaryVersion,
+      triggerRollback,
+      action: triggerRollback ? 'IMMEDIATE_ROLLBACK_TO_STABLE' : 'CONTINUE_ROLLOUT',
+    };
+  }
 }
