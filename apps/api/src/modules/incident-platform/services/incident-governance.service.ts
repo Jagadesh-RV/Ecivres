@@ -41,4 +41,14 @@ export class IncidentGovernanceService {
     this.logger.log(`Timeline update for ${incidentId} by ${authorId}: ${eventNote}`);
     return { incidentId, eventNote, authorId, timestamp };
   }
+
+  async resolveIncident(incidentId: string, resolutionSummary: string) {
+    this.logger.log(`Resolving incident ${incidentId}: ${resolutionSummary}`);
+    return {
+      incidentId,
+      status: 'RESOLVED',
+      resolutionSummary,
+      resolvedAt: new Date().toISOString(),
+    };
+  }
 }
