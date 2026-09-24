@@ -1,3 +1,4 @@
+import { IncidentPlatformModule } from './modules/incident-platform/incident-platform.module';
 import { RollbackModule } from './modules/rollback/rollback.module';
 import { CanaryModule } from './modules/canary/canary.module';
 import { OperationsModule } from './modules/operations/operations.module';
@@ -87,6 +88,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    IncidentPlatformModule,
     RollbackModule,
     CanaryModule,
     OperationsModule,
