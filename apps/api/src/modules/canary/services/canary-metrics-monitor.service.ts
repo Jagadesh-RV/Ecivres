@@ -43,4 +43,13 @@ export class CanaryMetricsMonitorService {
       action: triggerRollback ? 'IMMEDIATE_ROLLBACK_TO_STABLE' : 'CONTINUE_ROLLOUT',
     };
   }
+
+  async updateTrafficWeight(canaryVersion: string, targetWeightPercent: number) {
+    this.logger.log(`Updating canary ${canaryVersion} traffic allocation weight to ${targetWeightPercent}%`);
+    return {
+      canaryVersion,
+      activeTrafficWeightPercent: targetWeightPercent,
+      stableTrafficWeightPercent: 100 - targetWeightPercent,
+    };
+  }
 }
