@@ -35,4 +35,10 @@ export class IncidentGovernanceService {
       assignedAt: new Date().toISOString(),
     };
   }
+
+  async addTimelineEvent(incidentId: string, eventNote: string, authorId: string) {
+    const timestamp = new Date().toISOString();
+    this.logger.log(`Timeline update for ${incidentId} by ${authorId}: ${eventNote}`);
+    return { incidentId, eventNote, authorId, timestamp };
+  }
 }
