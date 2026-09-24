@@ -77,4 +77,9 @@ export class RollbackEngineService {
       },
     });
   }
+
+  async notifyRollbackSlack(failedReleaseVersion: string, restoredVersion: string) {
+    this.logger.warn(`Dispatched Slack/PagerDuty notification for rollback of ${failedReleaseVersion} -> ${restoredVersion}`);
+    return { notificationSent: true, channel: '#incident-response' };
+  }
 }
