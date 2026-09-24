@@ -33,4 +33,13 @@ export class RollbackEngineService {
       restorationStatus: 'RESTORED',
     };
   }
+
+  async freezeRollout(failedReleaseVersion: string, reason: string) {
+    this.logger.warn(`Freezing rollout pipeline for ${failedReleaseVersion}: ${reason}`);
+    return {
+      failedReleaseVersion,
+      rolloutState: 'FROZEN',
+      reason,
+    };
+  }
 }
