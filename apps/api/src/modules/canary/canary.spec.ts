@@ -29,4 +29,10 @@ describe('CanaryMetricsMonitorService', () => {
     expect(res.triggerRollback).toBe(false);
     expect(res.action).toBe('CONTINUE_ROLLOUT');
   });
+
+  it('should update progressive traffic weight allocation', async () => {
+    const res = await service.updateTrafficWeight('v8.2.0', 25);
+    expect(res.activeTrafficWeightPercent).toBe(25);
+    expect(res.stableTrafficWeightPercent).toBe(75);
+  });
 });
