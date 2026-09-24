@@ -14,6 +14,7 @@ jobs:
   verify:
     name: Lint, Typecheck & Test Verification Gates
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
@@ -45,6 +46,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     environment: development
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Deploy to Development Environment
         run: echo "Successfully deployed to Development"
@@ -55,6 +57,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment: production
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Deploy to Production Environment
         run: echo "Successfully deployed to Production after manual approval gate"
