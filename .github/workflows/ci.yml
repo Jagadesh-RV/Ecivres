@@ -44,3 +44,13 @@ jobs:
     steps:
       - name: Deploy to Development Environment
         run: echo "Successfully deployed to Development"
+
+  deploy-prod:
+    name: Production Deployment (Approval Required)
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production Environment
+        run: echo "Successfully deployed to Production after manual approval gate"
