@@ -30,4 +30,12 @@ describe('IncidentGovernanceService', () => {
     expect(res.severity).toBe('SEV-2');
     expect(res.responseSlaMinutes).toBe(30);
   });
+
+  it('should assign incident commander owner and track timeline events', async () => {
+    const assignRes = await service.assignIncidentOwner('inc_1', 'usr_commander_1', 'INCIDENT_COMMANDER');
+    expect(assignRes.assignedOwnerId).toBe('usr_commander_1');
+
+    const timelineRes = await service.addTimelineEvent('inc_1', 'Mitigation patch applied', 'usr_commander_1');
+    expect(timelineRes.eventNote).toContain('Mitigation patch applied');
+  });
 });
