@@ -25,4 +25,14 @@ export class IncidentGovernanceService {
     this.logger.warn(`Classified incident "${title}" as ${severity} (Response SLA: ${responseSlaMinutes}m)`);
     return { title, severity, responseSlaMinutes };
   }
+
+  async assignIncidentOwner(incidentId: string, assignedOwnerId: string, ownerRole: string) {
+    this.logger.log(`Assigned Incident Commander ${assignedOwnerId} (${ownerRole}) to incident ${incidentId}`);
+    return {
+      incidentId,
+      assignedOwnerId,
+      ownerRole,
+      assignedAt: new Date().toISOString(),
+    };
+  }
 }
