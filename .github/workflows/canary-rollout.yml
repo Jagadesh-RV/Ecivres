@@ -1,0 +1,16 @@
+﻿name: Progressive Canary Rollout Engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: 'Target release version to roll out (e.g. v8.2.0)'
+        required: true
+
+jobs:
+  canary-5-percent:
+    name: Step 1: Deploy 5% Traffic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shift 5% Traffic to Canary Build
+        run: echo "Traffic shifted to 5% canary for version ${{ inputs.target_version }}"
