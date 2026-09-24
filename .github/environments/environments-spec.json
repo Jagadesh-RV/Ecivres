@@ -1,0 +1,7 @@
+﻿{
+  "environments": [
+    { "name": "development", "protected": false },
+    { "name": "staging", "protected": true, "required_reviewers": 1 },
+    { "name": "production", "protected": true, "required_reviewers": 2, "wait_timer_minutes": 15 }
+  ]
+}

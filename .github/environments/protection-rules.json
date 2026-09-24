@@ -1,0 +1,4 @@
+﻿{
+  "protected_branches_only": true,
+  "custom_deployment_rules": ["require_clean_git_tree", "require_passing_smoke_tests"]
+}
