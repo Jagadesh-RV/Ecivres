@@ -26,3 +26,13 @@ jobs:
         run: echo "Traffic shifted to 25% canary for version ${{ inputs.target_version }}"
       - name: Soak Monitor 25% Traffic (10 Mins)
         run: echo "Soaking 25% canary traffic for metrics verification..."
+
+  canary-50-percent:
+    name: Step 3: Deploy 50% Traffic
+    needs: canary-25-percent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shift 50% Traffic to Canary Build
+        run: echo "Traffic shifted to 50% canary for version ${{ inputs.target_version }}"
+      - name: Soak Monitor 50% Traffic (15 Mins)
+        run: echo "Soaking 50% canary traffic for metrics verification..."
