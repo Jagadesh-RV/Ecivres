@@ -49,4 +49,10 @@ describe('RollbackEngineService', () => {
     expect(res.targetVersion).toBe('v8.1.0');
     expect(res.restorationStatus).toBe('RESTORED');
   });
+
+  it('should verify post-rollback health checks successfully', async () => {
+    const res = await service.verifyPostRollbackHealth('v8.1.0');
+    expect(res.postRollbackHealth).toBe('HEALTHY');
+    expect(res.healthEndpoint).toBe('200_OK');
+  });
 });
