@@ -1,0 +1,27 @@
+﻿name: Post-Deployment Smoke Test Suite
+
+on:
+  workflow_run:
+    workflows: ["EcivreS Enterprise CI/CD Pipeline"]
+    types: [completed]
+
+jobs:
+  run-smoke-tests:
+    name: Run Post-Deploy Synthetic Smoke Tests
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Execute Synthetic Production Smoke Suite
+        run: pnpm --filter api test tests/smoke

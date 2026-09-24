@@ -1,3 +1,6 @@
+import { IncidentPlatformModule } from './modules/incident-platform/incident-platform.module';
+import { RollbackModule } from './modules/rollback/rollback.module';
+import { CanaryModule } from './modules/canary/canary.module';
 import { OperationsModule } from './modules/operations/operations.module';
 import { AnalyticsEventsModule } from './modules/analytics-events/analytics-events.module';
 import { FraudEngineModule } from './modules/fraud-engine/fraud-engine.module';
@@ -85,6 +88,9 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    IncidentPlatformModule,
+    RollbackModule,
+    CanaryModule,
     OperationsModule,
     AnalyticsEventsModule,
     FraudEngineModule,

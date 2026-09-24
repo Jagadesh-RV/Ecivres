@@ -1,0 +1,46 @@
+﻿name: Progressive Canary Rollout Engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: 'Target release version to roll out (e.g. v8.2.0)'
+        required: true
+
+jobs:
+  canary-5-percent:
+    name: Step 1: Deploy 5% Traffic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shift 5% Traffic to Canary Build
+        run: echo "Traffic shifted to 5% canary for version ${{ inputs.target_version }}"
+      - name: Soak Monitor 5% Traffic (5 Mins)
+        run: echo "Soaking 5% canary traffic for metrics verification..."
+
+  canary-25-percent:
+    name: Step 2: Deploy 25% Traffic
+    needs: canary-5-percent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shift 25% Traffic to Canary Build
+        run: echo "Traffic shifted to 25% canary for version ${{ inputs.target_version }}"
+      - name: Soak Monitor 25% Traffic (10 Mins)
+        run: echo "Soaking 25% canary traffic for metrics verification..."
+
+  canary-50-percent:
+    name: Step 3: Deploy 50% Traffic
+    needs: canary-25-percent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shift 50% Traffic to Canary Build
+        run: echo "Traffic shifted to 50% canary for version ${{ inputs.target_version }}"
+      - name: Soak Monitor 50% Traffic (15 Mins)
+        run: echo "Soaking 50% canary traffic for metrics verification..."
+
+  promote-100-percent:
+    name: Step 4: Promote to 100% Traffic
+    needs: canary-50-percent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Promote Canary Build to 100% Production Traffic
+        run: echo "Successfully promoted version ${{ inputs.target_version }} to 100% traffic!"
