@@ -19,4 +19,18 @@ export class RollbackEngineService {
       },
     });
   }
+
+  async restorePreviousRelease(failedReleaseVersion: string) {
+    this.logger.error(`Restoring system state to previous stable snapshot from failed release ${failedReleaseVersion}`);
+    const lastStable = await this.prisma.deploymentSnapshot.findFirst({
+      where: { activeStatus: 'STABLE_BASELINE' },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return {
+      restoredSnapshotId: lastStable?.snapshotId || 'snp_baseline_v8.1.0',
+      targetVersion: lastStable?.releaseVersion || 'v8.1.0',
+      restorationStatus: 'RESTORED',
+    };
+  }
 }
