@@ -4,6 +4,7 @@
     "Lint Verification Gate",
     "TypeScript Typecheck Gate",
     "API Unit Test Suite Gate",
-    "Next.js Production Build Gate"
+    "Next.js Production Build Gate",
+    "Security Vulnerability Audit"
   ]
 }
