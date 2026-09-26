@@ -58,4 +58,10 @@ describe('ViralReferralService', () => {
     const res = await service.qualifyAndRewardReferral('u_2', 50.0);
     expect(res?.status).toBe('REWARDED');
   });
+
+  it('should detect fraud when referrer and referee share same IP or device', async () => {
+    const res = await service.evaluateReferralFraudRisk('192.168.1.10', '192.168.1.10', 'dev_1', 'dev_1');
+    expect(res.isFraud).toBe(true);
+    expect(res.riskReason).toBe('SAME_IP_ADDRESS');
+  });
 });
