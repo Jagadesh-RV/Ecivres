@@ -62,4 +62,19 @@ export class ViralReferralService {
       },
     });
   }
+
+  async evaluateReferralFraudRisk(referrerIp: string, refereeIp: string, referrerDeviceId: string, refereeDeviceId: string) {
+    const isSameIp = referrerIp === refereeIp && referrerIp !== '127.0.0.1';
+    const isSameDevice = referrerDeviceId === refereeDeviceId;
+    const isFraud = isSameIp || isSameDevice;
+
+    if (isFraud) {
+      this.logger.error(`REFERRAL FRAUD DETECTED! Same IP (${isSameIp}) or Same Device (${isSameDevice})`);
+    }
+
+    return {
+      isFraud,
+      riskReason: isFraud ? (isSameIp ? 'SAME_IP_ADDRESS' : 'SAME_DEVICE_FINGERPRINT') : 'CLEAN',
+    };
+  }
 }
