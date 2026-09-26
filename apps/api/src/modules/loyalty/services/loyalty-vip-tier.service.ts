@@ -31,4 +31,11 @@ export class LoyaltyVipTierService {
     this.logger.log(`Birthday evaluation for ${vipTier}: Eligible=${isBirthday} Reward=$${rewardCouponUsd}`);
     return { isBirthday, rewardCouponUsd };
   }
+
+  generateSurpriseReward(bookingMilestoneCount: number) {
+    const isSurprise = bookingMilestoneCount % 10 === 0;
+    const surpriseBonusUsd = isSurprise ? 25.0 : 0.0;
+    this.logger.log(`Surprise reward evaluation for milestone ${bookingMilestoneCount}: Triggered=${isSurprise}`);
+    return { isSurprise, surpriseBonusUsd };
+  }
 }
