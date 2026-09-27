@@ -15,4 +15,16 @@ export class RevenueIntelligenceService {
       arrUsd,
     };
   }
+
+  calculateCustomerLtv(averageOrderValueUsd: number, annualPurchaseFrequency: number, averageLifespanYears: number, grossMarginPercent = 65.0) {
+    const ltvUsd = averageOrderValueUsd * annualPurchaseFrequency * averageLifespanYears * (grossMarginPercent / 100);
+    this.logger.log(`Calculated Customer LTV: $${ltvUsd.toFixed(2)} USD`);
+    return {
+      averageOrderValueUsd,
+      annualPurchaseFrequency,
+      averageLifespanYears,
+      grossMarginPercent,
+      ltvUsd: Number(ltvUsd.toFixed(2)),
+    };
+  }
 }
