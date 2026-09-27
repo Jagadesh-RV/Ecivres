@@ -18,4 +18,12 @@ export class CommunityDiscussionService {
       createdAt: new Date().toISOString(),
     };
   }
+
+  getFeaturedProviderShowcases(category?: string) {
+    this.logger.log(`Fetching featured provider showcases (Category: ${category || 'ALL'})`);
+    return [
+      { showcaseId: 'shw_1', providerName: 'Apex Plumbing Experts', title: 'Luxury Bathroom Renovation Showcase', beforeImageUrl: 'https://images.ecivres.com/b1.jpg', afterImageUrl: 'https://images.ecivres.com/a1.jpg', likesCount: 142 },
+      { showcaseId: 'shw_2', providerName: 'EcoClean Home Care', title: 'Deep Kitchen Restoration', beforeImageUrl: 'https://images.ecivres.com/b2.jpg', afterImageUrl: 'https://images.ecivres.com/a2.jpg', likesCount: 98 },
+    ];
+  }
 }
