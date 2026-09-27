@@ -20,4 +20,14 @@ export class CreatorProfileService {
       status: 'ACTIVE',
     };
   }
+
+  async calculateCommission(bookingAmountUsd: number, commissionRatePercent: number) {
+    const commissionUsd = Number(((bookingAmountUsd * commissionRatePercent) / 100).toFixed(2));
+    this.logger.log(`Calculated creator commission: $${commissionUsd} USD (${commissionRatePercent}% on $${bookingAmountUsd})`);
+    return {
+      bookingAmountUsd,
+      commissionRatePercent,
+      commissionUsd,
+    };
+  }
 }
