@@ -1,3 +1,4 @@
+import { ReputationModule } from './modules/reputation/reputation.module';
 import { RevenueIntelligenceModule } from './modules/analytics/revenue-intelligence.module';
 import { CustomerMissionsModule } from './modules/missions/customer-missions.module';
 import { CreatorModule } from './modules/creator/creator.module';
@@ -92,6 +93,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ReputationModule,
     RevenueIntelligenceModule,
     CustomerMissionsModule,
     CreatorModule,
