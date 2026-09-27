@@ -23,4 +23,15 @@ export class TrustScoreService {
       trustScore: finalScore,
     };
   }
+
+  evaluateVerifiedBadges(trustScore: number, backgroundCheckPassed: boolean, insuranceActive: boolean) {
+    const badges: string[] = [];
+
+    if (backgroundCheckPassed) badges.push('BACKGROUND_VERIFIED');
+    if (insuranceActive) badges.push('INSURED_PROVIDER');
+    if (trustScore >= 90) badges.push('TOP_RATED_ELITE');
+
+    this.logger.log(`Assigned Verified Badges: [${badges.join(', ')}]`);
+    return { trustScore, badges };
+  }
 }
