@@ -30,4 +30,18 @@ export class CreatorProfileService {
       commissionUsd,
     };
   }
+
+  async trackCampaign(creatorId: string, campaignName: string, targetCategory: string) {
+    const campaignId = `cmp_${Date.now()}`;
+    this.logger.log(`Created campaign ${campaignId} "${campaignName}" for creator ${creatorId}`);
+    return {
+      campaignId,
+      creatorId,
+      campaignName,
+      targetCategory,
+      clicksCount: 0,
+      conversionsCount: 0,
+      totalGmvUsd: 0.0,
+    };
+  }
 }
