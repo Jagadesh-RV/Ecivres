@@ -1,3 +1,4 @@
+import { CommunityModule } from './modules/community/community.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
 import { RevenueIntelligenceModule } from './modules/analytics/revenue-intelligence.module';
 import { CustomerMissionsModule } from './modules/missions/customer-missions.module';
@@ -93,6 +94,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    CommunityModule,
     ReputationModule,
     RevenueIntelligenceModule,
     CustomerMissionsModule,
