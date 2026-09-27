@@ -26,4 +26,18 @@ export class CommunityDiscussionService {
       { showcaseId: 'shw_2', providerName: 'EcoClean Home Care', title: 'Deep Kitchen Restoration', beforeImageUrl: 'https://images.ecivres.com/b2.jpg', afterImageUrl: 'https://images.ecivres.com/a2.jpg', likesCount: 98 },
     ];
   }
+
+  submitQuestion(authorId: string, question: string, category: string) {
+    const questionId = `qna_${Date.now()}`;
+    this.logger.log(`Submitted community Q&A question ${questionId} by ${authorId}`);
+    return {
+      questionId,
+      authorId,
+      question,
+      category,
+      answersCount: 0,
+      isResolved: false,
+      createdAt: new Date().toISOString(),
+    };
+  }
 }
