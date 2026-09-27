@@ -1,3 +1,4 @@
+import { CreatorModule } from './modules/creator/creator.module';
 import { ViralReferralModule } from './modules/referral/viral-referral.module';
 import { IncidentPlatformModule } from './modules/incident-platform/incident-platform.module';
 import { RollbackModule } from './modules/rollback/rollback.module';
@@ -89,6 +90,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    CreatorModule,
     ViralReferralModule,
     IncidentPlatformModule,
     RollbackModule,
