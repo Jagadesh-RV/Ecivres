@@ -12,4 +12,15 @@ export class CustomerMissionService {
       { id: 'msn_3', title: 'Share Invite Link with 1 Friend', rewardPoints: 75, isCompleted: false },
     ];
   }
+
+  evaluateBookingStreak(currentStreakConsecutiveMonths: number) {
+    const isStreakBonusEligible = currentStreakConsecutiveMonths >= 3;
+    const streakBonusUsd = isStreakBonusEligible ? 20.0 : 0.0;
+    this.logger.log(`Evaluated ${currentStreakConsecutiveMonths}-month booking streak: Bonus=$${streakBonusUsd}`);
+    return {
+      currentStreakConsecutiveMonths,
+      isStreakBonusEligible,
+      streakBonusUsd,
+    };
+  }
 }
