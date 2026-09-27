@@ -1,3 +1,4 @@
+import { RevenueIntelligenceModule } from './modules/analytics/revenue-intelligence.module';
 import { CustomerMissionsModule } from './modules/missions/customer-missions.module';
 import { CreatorModule } from './modules/creator/creator.module';
 import { ViralReferralModule } from './modules/referral/viral-referral.module';
@@ -91,6 +92,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    RevenueIntelligenceModule,
     CustomerMissionsModule,
     CreatorModule,
     ViralReferralModule,
