@@ -23,4 +23,12 @@ export class CustomerMissionService {
       streakBonusUsd,
     };
   }
+
+  getUserBadges(userId: string) {
+    this.logger.log(`Fetching achievement badges for user ${userId}`);
+    return [
+      { badgeId: 'bdg_early_adopter', title: 'Early Platform VIP', icon: 'star', unlockedAt: new Date().toISOString() },
+      { badgeId: 'bdg_home_master', title: 'Master of Maintenance', icon: 'shield-check', unlockedAt: new Date().toISOString() },
+    ];
+  }
 }
