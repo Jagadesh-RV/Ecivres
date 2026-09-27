@@ -30,4 +30,10 @@ describe('LoyaltyVipTierService', () => {
     expect(res.tier).toBe('GOLD');
     expect(res.cashbackRatePercent).toBe(5.0);
   });
+
+  it('should evaluate $50 birthday bonus coupon for DIAMOND user on birthday', () => {
+    const res = service.evaluateBirthdayReward('09-27', '09-27', 'DIAMOND');
+    expect(res.isBirthday).toBe(true);
+    expect(res.rewardCouponUsd).toBe(50);
+  });
 });
