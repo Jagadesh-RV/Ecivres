@@ -27,4 +27,25 @@ export class RevenueIntelligenceService {
       ltvUsd: Number(ltvUsd.toFixed(2)),
     };
   }
+
+  predictCustomerChurnRisk(daysSinceLastBooking: number, supportTicketsCount: number, averageRatingGiven: number) {
+    let churnRiskScore = 10; // Low churn
+
+    if (daysSinceLastBooking > 90) churnRiskScore += 50;
+    else if (daysSinceLastBooking > 45) churnRiskScore += 25;
+
+    if (supportTicketsCount > 3) churnRiskScore += 30;
+    if (averageRatingGiven < 3.5) churnRiskScore += 30;
+
+    const riskLevel = churnRiskScore >= 70 ? 'HIGH' : churnRiskScore >= 40 ? 'MEDIUM' : 'LOW';
+    this.logger.warn(`Predicted customer churn risk: ${riskLevel} (${churnRiskScore} pts)`);
+
+    return {
+      daysSinceLastBooking,
+      supportTicketsCount,
+      averageRatingGiven,
+      churnRiskScore,
+      riskLevel,
+    };
+  }
 }
