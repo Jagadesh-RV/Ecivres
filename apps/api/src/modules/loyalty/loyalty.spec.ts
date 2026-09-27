@@ -1,45 +1,39 @@
 ﻿import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
-import { LoyaltyTierService } from './services/loyalty-tier.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import { LoyaltyVipTierService } from './services/loyalty-vip-tier.service';
 
-describe('LoyaltyTierService', () => {
-  let service: LoyaltyTierService;
-
-  const mockPrisma = {
-    loyaltyAccount: {
-      findUnique: jest.fn(),
-    },
-  };
+describe('LoyaltyVipTierService', () => {
+  let service: LoyaltyVipTierService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        LoyaltyTierService,
-        { provide: PrismaService, useValue: mockPrisma },
-      ],
+      providers: [LoyaltyVipTierService],
     }).compile();
 
-    service = module.get<LoyaltyTierService>(LoyaltyTierService);
+    service = module.get<LoyaltyVipTierService>(LoyaltyVipTierService);
   });
 
-  it('should return default BRONZE tier when no account exists', async () => {
-    mockPrisma.loyaltyAccount.findUnique.mockResolvedValue(null);
-    const res = await service.getUserTier('usr_1');
-    expect(res.tier).toBe('BRONZE');
+  it('should calculate DIAMOND VIP tier for high spenders', () => {
+    const res = service.calculateVipTier(6000, 60);
+    expect(res.tier).toBe('DIAMOND');
+    expect(res.cashbackRatePercent).toBe(10.0);
   });
 
-  it('should calculate cashback for GOLD tier accurately', async () => {
-    mockPrisma.loyaltyAccount.findUnique.mockResolvedValue({
-      userId: 'usr_2',
-      tier: 'GOLD',
-      points: 500,
-      cashbackBalance: 20.0,
-    });
+  it('should calculate PLATINUM VIP tier', () => {
+    const res = service.calculateVipTier(2500, 25);
+    expect(res.tier).toBe('PLATINUM');
+    expect(res.cashbackRatePercent).toBe(7.5);
+  });
 
-    const res = await service.calculateCashback('usr_2', 100);
+  it('should calculate GOLD VIP tier', () => {
+    const res = service.calculateVipTier(800, 10);
     expect(res.tier).toBe('GOLD');
-    expect(res.cashbackEarned).toBe(8.0);
-    expect(res.newBalance).toBe(28.0);
+    expect(res.cashbackRatePercent).toBe(5.0);
+  });
+
+  it('should evaluate $50 birthday bonus coupon for DIAMOND user on birthday', () => {
+    const res = service.evaluateBirthdayReward('09-27', '09-27', 'DIAMOND');
+    expect(res.isBirthday).toBe(true);
+    expect(res.rewardCouponUsd).toBe(50);
   });
 });

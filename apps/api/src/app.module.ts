@@ -1,3 +1,9 @@
+import { CommunityModule } from './modules/community/community.module';
+import { ReputationModule } from './modules/reputation/reputation.module';
+import { RevenueIntelligenceModule } from './modules/analytics/revenue-intelligence.module';
+import { CustomerMissionsModule } from './modules/missions/customer-missions.module';
+import { CreatorModule } from './modules/creator/creator.module';
+import { ViralReferralModule } from './modules/referral/viral-referral.module';
 import { IncidentPlatformModule } from './modules/incident-platform/incident-platform.module';
 import { RollbackModule } from './modules/rollback/rollback.module';
 import { CanaryModule } from './modules/canary/canary.module';
@@ -88,6 +94,12 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    CommunityModule,
+    ReputationModule,
+    RevenueIntelligenceModule,
+    CustomerMissionsModule,
+    CreatorModule,
+    ViralReferralModule,
     IncidentPlatformModule,
     RollbackModule,
     CanaryModule,

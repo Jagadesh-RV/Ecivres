@@ -709,3 +709,27 @@ model OperationsIncident {
   @@index([severity])
   @@index([status])
 }
+
+
+enum ViralReferralStatus {
+  PENDING
+  QUALIFIED
+  REWARDED
+  REJECTED_FRAUD
+}
+
+model ReferralTreeRecord {
+  id               String         @id @default(uuid())
+  referrerId       String
+  refereeId        String         @unique
+  referralCode     String
+  qrCodeUrl        String?
+  status           ViralReferralStatus @default(PENDING)
+  rewardAmountUsd  Float          @default(15.0)
+  rewardEarnedAt   DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([referrerId])
+  @@index([referralCode])
+}
