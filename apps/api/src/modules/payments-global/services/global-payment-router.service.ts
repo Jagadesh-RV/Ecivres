@@ -16,4 +16,16 @@ export class GlobalPaymentRouterService {
     }
     return 'STRIPE_GLOBAL';
   }
+
+  async processPayPalPayment(orderId: string, amount: number, currency: string) {
+    this.logger.log(`Processing PayPal Payment for Order ${orderId}: ${amount} ${currency}`);
+    return {
+      transactionId: `pp_tx_${Date.now()}`,
+      gateway: 'PAYPAL',
+      status: 'COMPLETED',
+      orderId,
+      amount,
+      currency,
+    };
+  }
 }
