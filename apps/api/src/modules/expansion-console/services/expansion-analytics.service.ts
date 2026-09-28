@@ -19,4 +19,15 @@ export class ExpansionAnalyticsService {
       totalGlobalMrrUsd: 470000,
     };
   }
+
+  getComplianceHealthReport(countryCode: string) {
+    this.logger.log(`Evaluating international legal/tax compliance health for country ${countryCode}`);
+    return {
+      countryCode,
+      taxFilingStatus: 'UP_TO_DATE',
+      kycVerificationPercentage: 98.6,
+      gdprDataPrivacyCompliance: true,
+      lastAuditTimestamp: new Date().toISOString(),
+    };
+  }
 }
