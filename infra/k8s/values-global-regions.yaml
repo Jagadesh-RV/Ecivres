@@ -1,0 +1,21 @@
+﻿global:
+  environment: production
+  platform: ecivres
+
+regions:
+  us-east-1:
+    countryCode: US
+    replicaCount: 10
+    redisEndpoint: ecivres-redis-us.internal
+  ap-south-1:
+    countryCode: IN
+    replicaCount: 12
+    redisEndpoint: ecivres-redis-in.internal
+  eu-west-1:
+    countryCode: GB
+    replicaCount: 6
+    redisEndpoint: ecivres-redis-gb.internal
+  me-central-1:
+    countryCode: AE
+    replicaCount: 4
+    redisEndpoint: ecivres-redis-ae.internal

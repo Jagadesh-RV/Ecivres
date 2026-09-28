@@ -733,3 +733,21 @@ model ReferralTreeRecord {
   @@index([referrerId])
   @@index([referralCode])
 }
+
+
+model CountryRecord {
+  id               String   @id @default(uuid())
+  code             String   @unique // ISO 2-letter e.g. US, IN, GB, AE
+  name             String
+  currencyCode     String   // e.g. USD, INR, GBP, AED
+  currencySymbol   String   // e.g. $, ₹, £, AED
+  defaultLanguage  String   @default("en")
+  isRtl            Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  taxType          String   @default("VAT") // VAT, GST, SALES_TAX
+  taxRatePercent   Float    @default(0.0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([code])
+}

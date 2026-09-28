@@ -1,3 +1,11 @@
+import { ExpansionConsoleModule } from './modules/expansion-console/expansion-console.module';
+import { CustomerExperienceGlobalModule } from './modules/customer-experience-global/customer-experience-global.module';
+import { DispatchGlobalModule } from './modules/dispatch-global/dispatch-global.module';
+import { VerificationGlobalModule } from './modules/verification-global/verification-global.module';
+import { TaxGlobalModule } from './modules/tax-global/tax-global.module';
+import { PaymentsGlobalModule } from './modules/payments-global/payments-global.module';
+import { I18nModule } from './modules/i18n/i18n.module';
+import { CountryModule } from './modules/country/country.module';
 import { CommunityModule } from './modules/community/community.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
 import { RevenueIntelligenceModule } from './modules/analytics/revenue-intelligence.module';
@@ -94,6 +102,14 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ExpansionConsoleModule,
+    CustomerExperienceGlobalModule,
+    DispatchGlobalModule,
+    VerificationGlobalModule,
+    TaxGlobalModule,
+    PaymentsGlobalModule,
+    I18nModule,
+    CountryModule,
     CommunityModule,
     ReputationModule,
     RevenueIntelligenceModule,
