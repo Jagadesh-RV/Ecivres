@@ -1,3 +1,4 @@
+import { CustomerExperienceGlobalModule } from './modules/customer-experience-global/customer-experience-global.module';
 import { DispatchGlobalModule } from './modules/dispatch-global/dispatch-global.module';
 import { VerificationGlobalModule } from './modules/verification-global/verification-global.module';
 import { TaxGlobalModule } from './modules/tax-global/tax-global.module';
@@ -100,6 +101,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    CustomerExperienceGlobalModule,
     DispatchGlobalModule,
     VerificationGlobalModule,
     TaxGlobalModule,
