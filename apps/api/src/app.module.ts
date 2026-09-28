@@ -1,3 +1,4 @@
+import { PaymentsGlobalModule } from './modules/payments-global/payments-global.module';
 import { I18nModule } from './modules/i18n/i18n.module';
 import { CountryModule } from './modules/country/country.module';
 import { CommunityModule } from './modules/community/community.module';
@@ -96,6 +97,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    PaymentsGlobalModule,
     I18nModule,
     CountryModule,
     CommunityModule,
