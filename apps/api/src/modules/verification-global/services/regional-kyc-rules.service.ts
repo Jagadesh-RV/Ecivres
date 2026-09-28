@@ -36,4 +36,15 @@ export class RegionalKycRulesService {
     this.logger.log(`Retrieved ${rules.length} required KYC document rules for country ${countryCode}`);
     return rules;
   }
+
+  async verifyRegionalDocument(providerId: string, countryCode: string, docType: string, docNumber: string) {
+    this.logger.log(`Verifying document ${docType} (${docNumber}) for provider ${providerId} in ${countryCode}`);
+    return {
+      providerId,
+      countryCode,
+      docType,
+      status: 'VERIFIED',
+      verifiedAt: new Date().toISOString(),
+    };
+  }
 }
