@@ -28,4 +28,15 @@ export class GlobalPaymentRouterService {
       currency,
     };
   }
+
+  async processRazorpayUpiPayment(orderId: string, amountInr: number, vpaAddress: string) {
+    this.logger.log(`Processing Razorpay UPI Payment for Order ${orderId}: ₹${amountInr} via VPA ${vpaAddress}`);
+    return {
+      transactionId: `rzp_upi_${Date.now()}`,
+      gateway: 'RAZORPAY_UPI',
+      status: 'COMPLETED',
+      vpaAddress,
+      amountInr,
+    };
+  }
 }
