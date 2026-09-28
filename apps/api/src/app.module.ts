@@ -1,3 +1,4 @@
+import { I18nModule } from './modules/i18n/i18n.module';
 import { CountryModule } from './modules/country/country.module';
 import { CommunityModule } from './modules/community/community.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
@@ -95,6 +96,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    I18nModule,
     CountryModule,
     CommunityModule,
     ReputationModule,
