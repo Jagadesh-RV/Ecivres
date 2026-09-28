@@ -25,4 +25,22 @@ export class RegionalTaxCalculatorService {
       totalAmountWithTax,
     };
   }
+
+  validateBusinessTaxId(countryCode: string, taxId: string) {
+    let isValid = false;
+    const cleanId = taxId.trim().toUpperCase();
+
+    if (countryCode === 'IN') {
+      isValid = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(cleanId); // Indian GSTIN Regex
+    } else if (countryCode === 'US') {
+      isValid = /^\d{2}-\d{7}$/.test(cleanId); // US EIN Regex
+    } else if (countryCode === 'GB') {
+      isValid = /^GB\d{9}$/.test(cleanId); // UK VAT Regex
+    } else {
+      isValid = cleanId.length >= 6;
+    }
+
+    this.logger.log(`Tax ID validation for ${countryCode} (${taxId}): Valid=${isValid}`);
+    return { countryCode, taxId, isValid };
+  }
 }
