@@ -1,3 +1,4 @@
+import { DispatchGlobalModule } from './modules/dispatch-global/dispatch-global.module';
 import { VerificationGlobalModule } from './modules/verification-global/verification-global.module';
 import { TaxGlobalModule } from './modules/tax-global/tax-global.module';
 import { PaymentsGlobalModule } from './modules/payments-global/payments-global.module';
@@ -99,6 +100,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    DispatchGlobalModule,
     VerificationGlobalModule,
     TaxGlobalModule,
     PaymentsGlobalModule,
