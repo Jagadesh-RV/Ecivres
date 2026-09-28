@@ -26,4 +26,8 @@ export class DynamicLanguageLoaderService {
     const isRtl = this.rtlLanguages.has(lang);
     return { isRtl, direction: isRtl ? 'rtl' : 'ltr' };
   }
+
+  formatLocalizedCurrency(amount: number, currencyCode: string, locale = 'en-US'): string {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: currencyCode }).format(amount);
+  }
 }
