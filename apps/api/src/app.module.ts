@@ -1,3 +1,4 @@
+import { AcquisitionModule } from './modules/acquisition/acquisition.module';
 import { ExpansionConsoleModule } from './modules/expansion-console/expansion-console.module';
 import { CustomerExperienceGlobalModule } from './modules/customer-experience-global/customer-experience-global.module';
 import { DispatchGlobalModule } from './modules/dispatch-global/dispatch-global.module';
@@ -102,6 +103,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AcquisitionModule,
     ExpansionConsoleModule,
     CustomerExperienceGlobalModule,
     DispatchGlobalModule,
