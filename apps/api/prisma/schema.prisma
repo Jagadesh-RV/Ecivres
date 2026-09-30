@@ -751,3 +751,111 @@ model CountryRecord {
 
   @@index([code])
 }
+
+model AcquisitionRecord {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmContent      String?
+  referrerUrl     String?
+  referralCode    String?
+  firstSearchAt   DateTime?
+  firstBookingAt  DateTime?
+  firstPaymentAt  DateTime?
+  acquisitionCost Float    @default(0.0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([utmSource])
+  @@index([utmCampaign])
+}
+
+model MarketingCampaign {
+  id              String   @id @default(uuid())
+  title           String
+  code            String   @unique
+  description     String?
+  discountType    String   // PERCENTAGE, FIXED
+  discountValue   Float
+  minOrderValue   Float    @default(0.0)
+  maxDiscount     Float?
+  totalBudget     Float    @default(0.0)
+  spentBudget     Float    @default(0.0)
+  maxRedemptions  Int      @default(1000)
+  redemptionCount Int      @default(0)
+  startDate       DateTime
+  endDate         DateTime
+  isActive        Boolean  @default(true)
+  targetCategory  String?
+  targetCountry   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  redemptions     CampaignRedemption[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model CampaignRedemption {
+  id           String            @id @default(uuid())
+  campaignId   String
+  userId       String
+  bookingId    String?
+  discounted   Float
+  createdAt    DateTime          @default(now())
+
+  campaign     MarketingCampaign @relation(fields: [campaignId], references: [id])
+
+  @@index([campaignId])
+  @@index([userId])
+}
+
+model AbandonedEvent {
+  id           String   @id @default(uuid())
+  userId       String
+  eventType    String   // SEARCH, SERVICE_VIEW, PROVIDER_VIEW, BOOKING_FORM, PAYMENT
+  metadataJson String?
+  recovered    Boolean  @default(false)
+  recoveredAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventType])
+}
+
+model RefundPolicyRecord {
+  id               String   @id @default(uuid())
+  name             String
+  cancellationHours Int     @default(24)
+  refundPercentage Float    @default(100.0)
+  feeDeductionUsd  Float    @default(0.0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ExperimentRecord {
+  id           String   @id @default(uuid())
+  key          String   @unique
+  name         String
+  variantsJson String   // JSON string e.g. ["control", "variant_a"]
+  trafficPct   Float    @default(100.0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model NotificationPreferenceRecord {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  bookingAlerts       Boolean  @default(true)
+  paymentAlerts       Boolean  @default(true)
+  marketingPromotions Boolean  @default(true)
+  securityAlerts      Boolean  @default(true)
+  supportUpdates      Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
