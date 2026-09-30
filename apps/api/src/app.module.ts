@@ -1,3 +1,4 @@
+import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { AcquisitionModule } from './modules/acquisition/acquisition.module';
 import { ExpansionConsoleModule } from './modules/expansion-console/expansion-console.module';
 import { CustomerExperienceGlobalModule } from './modules/customer-experience-global/customer-experience-global.module';
@@ -103,6 +104,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    CampaignsModule,
     AcquisitionModule,
     ExpansionConsoleModule,
     CustomerExperienceGlobalModule,
