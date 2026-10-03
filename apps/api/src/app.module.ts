@@ -1,3 +1,4 @@
+import { ProviderLifecycleModule } from './modules/provider-lifecycle/provider-lifecycle.module';
 import { LiquidityModule } from './modules/liquidity/liquidity.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { AcquisitionModule } from './modules/acquisition/acquisition.module';
@@ -105,6 +106,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    ProviderLifecycleModule,
     LiquidityModule,
     CampaignsModule,
     AcquisitionModule,
