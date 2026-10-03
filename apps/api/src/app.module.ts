@@ -1,3 +1,4 @@
+import { UnitEconomicsModule } from './modules/unit-economics/unit-economics.module';
 import { AbandonedRecoveryModule } from './modules/abandoned-recovery/abandoned-recovery.module';
 import { CustomerLifecycleModule } from './modules/customer-lifecycle/customer-lifecycle.module';
 import { ProviderLifecycleModule } from './modules/provider-lifecycle/provider-lifecycle.module';
@@ -108,6 +109,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    UnitEconomicsModule,
     AbandonedRecoveryModule,
     CustomerLifecycleModule,
     ProviderLifecycleModule,
