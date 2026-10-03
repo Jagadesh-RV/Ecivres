@@ -1,3 +1,4 @@
+import { WhitelabelModule } from './modules/whitelabel/whitelabel.module';
 import { EnterpriseB2bModule } from './modules/enterprise-b2b/enterprise-b2b.module';
 import { GeoExpansionModule } from './modules/geo-expansion/geo-expansion.module';
 import { UnitEconomicsModule } from './modules/unit-economics/unit-economics.module';
@@ -111,6 +112,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    WhitelabelModule,
     EnterpriseB2bModule,
     GeoExpansionModule,
     UnitEconomicsModule,
