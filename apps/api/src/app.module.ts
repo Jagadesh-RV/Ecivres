@@ -1,3 +1,4 @@
+import { AbandonedRecoveryModule } from './modules/abandoned-recovery/abandoned-recovery.module';
 import { CustomerLifecycleModule } from './modules/customer-lifecycle/customer-lifecycle.module';
 import { ProviderLifecycleModule } from './modules/provider-lifecycle/provider-lifecycle.module';
 import { LiquidityModule } from './modules/liquidity/liquidity.module';
@@ -107,6 +108,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AbandonedRecoveryModule,
     CustomerLifecycleModule,
     ProviderLifecycleModule,
     LiquidityModule,
