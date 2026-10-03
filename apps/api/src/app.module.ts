@@ -1,3 +1,4 @@
+import { EnterpriseB2bModule } from './modules/enterprise-b2b/enterprise-b2b.module';
 import { GeoExpansionModule } from './modules/geo-expansion/geo-expansion.module';
 import { UnitEconomicsModule } from './modules/unit-economics/unit-economics.module';
 import { AbandonedRecoveryModule } from './modules/abandoned-recovery/abandoned-recovery.module';
@@ -110,6 +111,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    EnterpriseB2bModule,
     GeoExpansionModule,
     UnitEconomicsModule,
     AbandonedRecoveryModule,
