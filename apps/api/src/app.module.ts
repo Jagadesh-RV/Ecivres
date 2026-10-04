@@ -1,3 +1,4 @@
+import { AnomalyDetectionModule } from './modules/anomaly-detection/anomaly-detection.module';
 import { CommandCenterModule } from './modules/command-center/command-center.module';
 import { ScalingModule } from './modules/scaling/scaling.module';
 import { WhitelabelModule } from './modules/whitelabel/whitelabel.module';
@@ -114,6 +115,7 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AnomalyDetectionModule,
     CommandCenterModule,
     ScalingModule,
     WhitelabelModule,
