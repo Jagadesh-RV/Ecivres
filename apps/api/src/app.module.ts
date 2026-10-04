@@ -1,3 +1,6 @@
+import { AutonomousOpsEngineModule } from './modules/autonomous-ops-engine/autonomous-ops-engine.module';
+import { AnomalyDetectionModule } from './modules/anomaly-detection/anomaly-detection.module';
+import { CommandCenterModule } from './modules/command-center/command-center.module';
 import { ScalingModule } from './modules/scaling/scaling.module';
 import { WhitelabelModule } from './modules/whitelabel/whitelabel.module';
 import { EnterpriseB2bModule } from './modules/enterprise-b2b/enterprise-b2b.module';
@@ -113,6 +116,9 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AutonomousOpsEngineModule,
+    AnomalyDetectionModule,
+    CommandCenterModule,
     ScalingModule,
     WhitelabelModule,
     EnterpriseB2bModule,
