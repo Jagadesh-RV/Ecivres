@@ -60,6 +60,11 @@ import { ProviderCrmModule } from './modules/provider-crm/provider-crm.module';
 import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { Module } from '@nestjs/common';
+import { SwarmModule } from './modules/swarm/swarm.module';
+import { PolicyEngineModule } from './modules/policy-engine/policy-engine.module';
+import { SimulatorModule } from './modules/simulator/simulator.module';
+import { ForecastingModule } from './modules/forecasting/forecasting.module';
+import { FeatureEngineeringModule } from './modules/feature-engineering/feature-engineering.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -115,7 +120,8 @@ import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
 import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
-  imports: [
+  imports [
+    FeatureEngineeringModule,
     AutonomousOpsEngineModule,
     AnomalyDetectionModule,
     CommandCenterModule,
