@@ -1066,3 +1066,163 @@ model CapacitySnapshot {
   @@index([region, category])
   @@index([snapshotTime])
 }
+
+// Phase 17 — Autonomous Marketplace Decision Intelligence & AI Agent Models
+
+model DecisionContextRecord {
+  id            String   @id @default(uuid())
+  correlationId String
+  timestamp     DateTime @default(now())
+  market        String   @default("GLOBAL")
+  region        String   @default("GLOBAL")
+  category      String?
+  signals       Json
+  features      Json
+  riskLevel     String   @default("LOW")
+  createdAt     DateTime @default(now())
+
+  @@index([correlationId])
+  @@index([region, category])
+}
+
+model MarketplaceDecision {
+  id               String   @id @default(uuid())
+  decisionType     String
+  correlationId    String
+  contextId        String?
+  candidateActions Json
+  selectedAction   Json
+  confidence       Float
+  expectedImpact   Json
+  riskLevel        String   @default("LOW")
+  approvalRequired Boolean  @default(false)
+  approvalId       String?
+  explanation      String
+  status           String   @default("GENERATED")
+  executedAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([correlationId])
+  @@index([status])
+}
+
+model DemandRevenueForecast {
+  id             String   @id @default(uuid())
+  forecastType   String
+  targetHorizon  String
+  region         String   @default("GLOBAL")
+  category       String?
+  expectedValue  Float
+  lowerBound     Float
+  upperBound     Float
+  confidence     Float
+  method         String   @default("EXPONENTIAL_SMOOTHING")
+  inputMetadata  Json
+  explanation    String
+  generatedAt    DateTime @default(now())
+
+  @@index([forecastType, targetHorizon])
+  @@index([region, category])
+}
+
+model ScenarioSimulation {
+  id               String   @id @default(uuid())
+  scenarioName     String
+  baselineContext  Json
+  adjustedParams   Json
+  projectedMetrics Json
+  deltaPct         Json
+  confidence       Float
+  riskLevel        String   @default("LOW")
+  simulatedBy      String   @default("SYSTEM")
+  createdAt        DateTime @default(now())
+
+  @@index([scenarioName])
+}
+
+model AgentDefinition {
+  id                  String   @id @default(uuid())
+  agentId             String   @unique
+  name                String
+  version             String   @default("1.0.0")
+  purpose             String
+  allowedTools        String[]
+  allowedActions      String[]
+  forbiddenActions    String[]
+  requiredPermissions String[]
+  riskLevel           String   @default("LOW")
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([agentId])
+}
+
+model AgentExecution {
+  id            String               @id @default(uuid())
+  agentId       String
+  correlationId String
+  objective     String
+  status        String               @default("RUNNING")
+  steps         AgentExecutionStep[]
+  startedAt     DateTime             @default(now())
+  completedAt   DateTime?
+
+  @@index([agentId])
+  @@index([correlationId])
+}
+
+model AgentExecutionStep {
+  id           String         @id @default(uuid())
+  executionId  String
+  stepNumber   Int
+  toolName     String
+  inputPayload Json
+  outputResult Json?
+  status       String         @default("PENDING")
+  riskLevel    String         @default("LOW")
+  executedAt   DateTime       @default(now())
+  execution    AgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@index([executionId])
+}
+
+model AgentToolPermission {
+  id             String   @id @default(uuid())
+  agentId        String
+  toolName       String
+  permission     String
+  riskLevel      String   @default("LOW")
+  isAllowed      Boolean  @default(true)
+  requiresReview Boolean  @default(false)
+
+  @@unique([agentId, toolName])
+  @@index([agentId])
+}
+
+model AiEvaluationMetric {
+  id           String   @id @default(uuid())
+  modelName    String
+  evalType     String
+  score        Float
+  sampleCount  Int
+  evalContext  Json
+  evaluatedAt  DateTime @default(now())
+
+  @@index([modelName, evalType])
+}
+
+model DecisionAuditRecord {
+  id            String   @id @default(uuid())
+  decisionId    String
+  actorId       String
+  actionType    String
+  inputSnapshot Json
+  outputResult  Json
+  approvalState String   @default("APPROVED")
+  timestamp     DateTime @default(now())
+
+  @@index([decisionId])
+  @@index([actorId])
+}
