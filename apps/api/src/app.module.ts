@@ -1,3 +1,17 @@
+import { AutonomousOpsEngineModule } from './modules/autonomous-ops-engine/autonomous-ops-engine.module';
+import { AnomalyDetectionModule } from './modules/anomaly-detection/anomaly-detection.module';
+import { CommandCenterModule } from './modules/command-center/command-center.module';
+import { ScalingModule } from './modules/scaling/scaling.module';
+import { WhitelabelModule } from './modules/whitelabel/whitelabel.module';
+import { EnterpriseB2bModule } from './modules/enterprise-b2b/enterprise-b2b.module';
+import { GeoExpansionModule } from './modules/geo-expansion/geo-expansion.module';
+import { UnitEconomicsModule } from './modules/unit-economics/unit-economics.module';
+import { AbandonedRecoveryModule } from './modules/abandoned-recovery/abandoned-recovery.module';
+import { CustomerLifecycleModule } from './modules/customer-lifecycle/customer-lifecycle.module';
+import { ProviderLifecycleModule } from './modules/provider-lifecycle/provider-lifecycle.module';
+import { LiquidityModule } from './modules/liquidity/liquidity.module';
+import { CampaignsModule } from './modules/campaigns/campaigns.module';
+import { AcquisitionModule } from './modules/acquisition/acquisition.module';
 import { ExpansionConsoleModule } from './modules/expansion-console/expansion-console.module';
 import { CustomerExperienceGlobalModule } from './modules/customer-experience-global/customer-experience-global.module';
 import { DispatchGlobalModule } from './modules/dispatch-global/dispatch-global.module';
@@ -102,6 +116,20 @@ import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
   imports: [
+    AutonomousOpsEngineModule,
+    AnomalyDetectionModule,
+    CommandCenterModule,
+    ScalingModule,
+    WhitelabelModule,
+    EnterpriseB2bModule,
+    GeoExpansionModule,
+    UnitEconomicsModule,
+    AbandonedRecoveryModule,
+    CustomerLifecycleModule,
+    ProviderLifecycleModule,
+    LiquidityModule,
+    CampaignsModule,
+    AcquisitionModule,
     ExpansionConsoleModule,
     CustomerExperienceGlobalModule,
     DispatchGlobalModule,
