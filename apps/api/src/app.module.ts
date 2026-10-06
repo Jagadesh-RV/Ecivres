@@ -60,6 +60,7 @@ import { ProviderCrmModule } from './modules/provider-crm/provider-crm.module';
 import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { Module } from '@nestjs/common';
+import { SwarmModule } from './modules/swarm/swarm.module';
 import { PolicyEngineModule } from './modules/policy-engine/policy-engine.module';
 import { SimulatorModule } from './modules/simulator/simulator.module';
 import { ForecastingModule } from './modules/forecasting/forecasting.module';
