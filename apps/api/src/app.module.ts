@@ -1,3 +1,4 @@
+import { ClosedLoopModule } from './autonomous/closed-loop/closed-loop.module';
 import { AutonomousOpsEngineModule } from './modules/autonomous-ops-engine/autonomous-ops-engine.module';
 import { AnomalyDetectionModule } from './modules/anomaly-detection/anomaly-detection.module';
 import { CommandCenterModule } from './modules/command-center/command-center.module';
