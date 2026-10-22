@@ -70,7 +70,7 @@ describe('AuthService', () => {
       jest.spyOn(usersService, 'findOneByEmail').mockResolvedValue({ id: '1' } as any);
 
       await expect(
-        service.register({ email: 'test@example.com', password: 'password123' }),
+        service.register({ email: 'test@example.com', password: 'password123', name: 'Test' } as any),
       ).rejects.toThrow(ConflictException);
     });
 
@@ -81,7 +81,7 @@ describe('AuthService', () => {
       jest.spyOn(usersService, 'findOneById').mockResolvedValue({ id: '1', email: 'test@example.com' } as any);
       jest.spyOn(prisma.refreshToken, 'create').mockResolvedValue({} as any);
 
-      const result = await service.register({ email: 'test@example.com', password: 'password123' });
+      const result = await service.register({ email: 'test@example.com', password: 'password123', name: 'Test' } as any);
 
       expect(result).toHaveProperty('access_token');
       expect(result).toHaveProperty('refresh_token');

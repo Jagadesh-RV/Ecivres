@@ -63,4 +63,25 @@ export class ProductionQueueService {
   async getDlqJobs(): Promise<QueueJobPayload[]> {
     return this.dlqStore;
   }
+
+  async getQueueMetrics() {
+    let totalQueued = 0;
+    let totalProcessing = 0;
+    let totalCompleted = 0;
+    for (const jobs of this.queueStore.values()) {
+      for (const job of jobs) {
+        if (job.status === 'QUEUED') totalQueued++;
+        else if (job.status === 'PROCESSING') totalProcessing++;
+        else if (job.status === 'COMPLETED') totalCompleted++;
+      }
+    }
+    return {
+      status: 'HEALTHY',
+      totalQueued,
+      totalProcessing,
+      totalCompleted,
+      dlqCount: this.dlqStore.length,
+      timestamp: new Date().toISOString(),
+    };
+  }
 }

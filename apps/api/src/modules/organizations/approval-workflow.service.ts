@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-export interface BookingApprovalRequest {
-  bookingId: string;
-  requesterUserId: string;
-  amount: number;
-  departmentId: string;
+export class BookingApprovalRequest {
+  bookingId!: string;
+  requesterUserId!: string;
+  amount!: number;
+  departmentId!: string;
 }
 
 export interface ApprovalChainResult {

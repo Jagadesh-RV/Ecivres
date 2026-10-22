@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class MarketplaceLiquidityService {
@@ -7,7 +7,7 @@ export class MarketplaceLiquidityService {
   getCategoryLiquidity(category: string, city: string) {
     this.logger.log(`Evaluating category liquidity for ${category} in ${city}`);
     const activeProviders = 42;
-    const searchVolume = 1200;
+    const searchVolume: number = 1200;
     const bookingCount = 380;
 
     if (searchVolume === 0) {

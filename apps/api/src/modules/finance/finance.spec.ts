@@ -51,7 +51,7 @@ describe('Marketplace Finance Services', () => {
   });
 
   describe('MicroLoanService', () => {
-    let microLoanService: MicroLoanService;
+    let microLoanService: any;
 
     beforeEach(() => {
       const { MicroLoanService } = require('./micro-loan.service');

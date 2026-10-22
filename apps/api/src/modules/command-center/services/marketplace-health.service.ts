@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 export interface MarketplaceHealthMetrics {
@@ -45,7 +45,7 @@ export class MarketplaceHealthService {
   async getMarketplaceHealth(): Promise<MarketplaceHealthMetrics> {
     this.logger.log('Calculating marketplace health metrics from database...');
 
-    const activeCustomersCount = await this.prisma.user.count({ where: { role: 'CUSTOMER' } });
+    const activeCustomersCount = await this.prisma.user.count({ where: { userRoles: { some: { role: { name: 'CUSTOMER' } } } } });
     const activeProvidersCount = await this.prisma.providerProfile.count({ where: { isVerified: true } });
     const totalBookingsCount = await this.prisma.booking.count();
 

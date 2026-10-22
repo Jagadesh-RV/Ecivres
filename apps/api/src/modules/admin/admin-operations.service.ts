@@ -44,9 +44,10 @@ export class AdminOperationsService {
 
     const completedBookings = await this.prisma.booking.findMany({
       where: { status: 'COMPLETED' },
+      include: { payment: true, service: true },
     });
 
-    const grossMerchandiseValue = completedBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+    const grossMerchandiseValue = completedBookings.reduce((sum, b) => sum + (b.payment?.amount || (b as any).totalAmount || b.service?.price || 0), 0);
     const platformNetRevenue = Math.round(grossMerchandiseValue * 0.15); // 15% platform commission
 
     return {

@@ -41,7 +41,7 @@ describe('ServicesController', () => {
   });
 
   it('should get all services', async () => {
-    await controller.findAll();
+    await controller.findAll({} as any);
     expect(service.findAll).toHaveBeenCalled();
   });
 
