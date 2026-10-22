@@ -76,9 +76,10 @@ export class ProviderInventoryService {
 
     // Mock revenue lookup or fetch from bookings
     const bookings = await this.prisma.booking.findMany({
-      where: { providerId, status: 'COMPLETED' },
+      where: { service: { providerId }, status: 'COMPLETED' },
+      include: { payment: true, service: true },
     });
-    const grossRevenue = bookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+    const grossRevenue = bookings.reduce((sum, b) => sum + (b.payment?.amount || (b as any).totalAmount || b.service?.price || 0), 0);
 
     const taxableIncome = Math.max(0, grossRevenue - totalExpenses);
     const estimatedTax = Math.round(taxableIncome * taxRate);

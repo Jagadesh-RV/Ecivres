@@ -1,4 +1,4 @@
-﻿import 'reflect-metadata';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutomationPolicyService } from './services/automation-policy.service';
 import { AutomationApprovalService } from './services/automation-approval.service';
@@ -68,7 +68,7 @@ describe('AutonomousOpsEngineModule Services', () => {
       actorRole: 'ADMIN',
     });
     expect(evalRes.executed).toBe(true);
-    expect(evalRes.results[0].status).toBe('PENDING_APPROVAL');
+    expect(evalRes.results?.[0]?.status).toBe('PENDING_APPROVAL');
   });
 
   it('should approve a pending request', async () => {

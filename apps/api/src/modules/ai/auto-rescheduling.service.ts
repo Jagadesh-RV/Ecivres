@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-export interface RescheduleRequest {
-  bookingId: string;
-  reason: string;
-  preferredDays: string[];
+export class RescheduleRequest {
+  bookingId!: string;
+  reason!: string;
+  preferredDays!: string[];
 }
 
 export interface SuggestedRescheduleOption {

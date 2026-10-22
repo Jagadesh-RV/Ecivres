@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-export interface EmergencyDispatchRequest {
-  customerId: string;
-  emergencyType: 'PLUMBING_LEAK' | 'POWER_OUTAGE' | 'LOCKOUT' | 'HVAC_FAILURE';
-  addressId: string;
-  latitude: number;
-  longitude: number;
+export class EmergencyDispatchRequest {
+  customerId!: string;
+  emergencyType!: 'PLUMBING_LEAK' | 'POWER_OUTAGE' | 'LOCKOUT' | 'HVAC_FAILURE';
+  addressId!: string;
+  latitude!: number;
+  longitude!: number;
 }
 
 export interface EmergencyDispatchResult {

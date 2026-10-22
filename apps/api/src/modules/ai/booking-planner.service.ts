@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-export interface BookingPlanRequest {
-  userId: string;
-  goal: string;
+export class BookingPlanRequest {
+  userId!: string;
+  goal!: string;
   budgetLimit?: number;
   preferredTimeWindow?: string;
 }

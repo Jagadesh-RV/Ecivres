@@ -1228,6 +1228,54 @@ model DecisionAuditRecord {
 }
 
 
+model AutonomousDecisionLog {
+  id                String   @id @default(uuid())
+  decisionType      String
+  region            String   @default("GLOBAL")
+  recommendedAction String
+  expectedImpact    String
+  confidenceScore   Float
+  riskLevel         String   @default("LOW")
+  status            String   @default("GENERATED")
+  reasoning         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([decisionType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model WhatIfSimulation {
+  id                       String   @id @default(uuid())
+  scenarioType             String
+  region                   String   @default("GLOBAL")
+  category                 String?
+  parameterChangePct       Float
+  gmvDeltaPct              Float
+  revenueDeltaPct          Float
+  conversionImpactPct      Float
+  providerEarningsDeltaPct Float
+  riskAssessment           String
+  recommendation           String
+  createdAt                DateTime @default(now())
+
+  @@index([scenarioType])
+  @@index([region])
+}
+
+model DeploymentSnapshot {
+  id             String   @id @default(uuid())
+  snapshotId     String   @unique
+  releaseVersion String
+  imageDigest    String
+  activeStatus   String   @default("STABLE_BASELINE")
+  createdAt      DateTime @default(now())
+
+  @@index([snapshotId])
+  @@index([activeStatus])
+}
+
 // ==========================================
 // PHASE 18: AUTONOMOUS MARKETPLACE EVOLUTION
 // ==========================================

@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-export interface OfferNegotiationRequest {
-  serviceId: string;
-  originalPrice: number;
-  targetPrice: number;
-  userFlexibility: 'STRICT' | 'MODERATE' | 'HIGH';
+export class OfferNegotiationRequest {
+  serviceId!: string;
+  originalPrice!: number;
+  targetPrice!: number;
+  userFlexibility!: 'STRICT' | 'MODERATE' | 'HIGH';
 }
 
 export interface NegotiationResult {

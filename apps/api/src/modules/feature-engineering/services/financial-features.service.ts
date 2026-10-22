@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 export interface FinancialFeatures {
@@ -19,7 +19,7 @@ export class FinancialFeaturesService {
     const completedPayments = await this.prisma.payment.aggregate({
       where: {
         createdAt: { gte: oneDayAgo },
-        status: 'COMPLETED',
+        status: 'SUCCESS',
       },
       _sum: { amount: true },
       _count: { id: true },
@@ -32,8 +32,8 @@ export class FinancialFeaturesService {
       },
     });
 
-    const totalCount = completedPayments._count.id || 0;
-    const gmv = completedPayments._sum.amount || 0;
+    const totalCount = completedPayments._count?.id ?? 0;
+    const gmv = completedPayments._sum?.amount ?? 0;
     const aov = totalCount > 0 ? Number((gmv / totalCount).toFixed(2)) : 0;
     const refundRate = totalCount > 0 ? Number(((refundedPayments / totalCount) * 100).toFixed(2)) : 0;
     const takeRate = 15.0; // 15% platform take rate
