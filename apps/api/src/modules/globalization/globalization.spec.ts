@@ -31,7 +31,7 @@ describe('Global Expansion Services', () => {
   });
 
   describe('ContentTranslatorService', () => {
-    let translator: ContentTranslatorService;
+    let translator: any;
 
     beforeEach(() => {
       const { ContentTranslatorService } = require('./content-translator.service');

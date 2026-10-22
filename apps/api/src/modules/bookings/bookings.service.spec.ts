@@ -166,7 +166,7 @@ describe('BookingsService', () => {
 
     const result = await service.completeBooking('b1', 'p1', 'Job well done');
     expect(result.status).toBe('COMPLETED');
-    expect(result.payment.status).toBe('COMPLETED');
+    expect(result.payment?.status).toBe('COMPLETED');
   });
 });
 

@@ -19,13 +19,13 @@ export class AiCustomerInsightsService {
   async getCustomerInsights(customerId: string): Promise<CustomerInsights> {
     const bookings = await this.prisma.booking.findMany({
       where: { customerId },
-      include: { service: { include: { category: true } } },
+      include: { service: { include: { category: true } }, payment: true },
       orderBy: { createdAt: 'desc' },
     });
 
     const totalBookingsCount = bookings.length;
     const completed = bookings.filter((b) => b.status === 'COMPLETED');
-    const lifetimeValue = completed.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+    const lifetimeValue = completed.reduce((sum, b) => sum + (b.payment?.amount || (b as any).totalAmount || b.service?.price || 0), 0);
     const avgOrderValue = totalBookingsCount > 0 ? Math.round(lifetimeValue / totalBookingsCount) : 0;
 
     // Calculate category preferences

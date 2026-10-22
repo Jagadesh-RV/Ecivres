@@ -26,8 +26,8 @@ export class ProviderAnalyticsService {
 
     // Fetch bookings for this provider
     const bookings = await this.prisma.booking.findMany({
-      where: { providerId },
-      include: { review: true },
+      where: { service: { providerId } },
+      include: { review: true, payment: true, service: true },
     });
 
     const completedBookings = bookings.filter((b) => b.status === 'COMPLETED');
@@ -35,15 +35,15 @@ export class ProviderAnalyticsService {
 
     const dailyEarnings = completedBookings
       .filter((b) => b.createdAt >= startOfDay)
-      .reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      .reduce((sum, b) => sum + (b.payment?.amount || (b as any).totalAmount || b.service?.price || 0), 0);
 
     const weeklyEarnings = completedBookings
       .filter((b) => b.createdAt >= startOfWeek)
-      .reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      .reduce((sum, b) => sum + (b.payment?.amount || (b as any).totalAmount || b.service?.price || 0), 0);
 
     const monthlyEarnings = completedBookings
       .filter((b) => b.createdAt >= startOfMonth)
-      .reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      .reduce((sum, b) => sum + (b.payment?.amount || (b as any).totalAmount || b.service?.price || 0), 0);
 
     // Calculate peak hours
     const hourCounts: Record<number, number> = {};

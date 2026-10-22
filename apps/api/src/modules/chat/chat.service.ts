@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventsGateway } from '../events/events.gateway';
 
-export interface SendMessageDto {
+export class SendMessageDto {
   bookingId?: string;
-  recipientId: string;
-  content: string;
+  recipientId!: string;
+  content!: string;
 }
 
 @Injectable()

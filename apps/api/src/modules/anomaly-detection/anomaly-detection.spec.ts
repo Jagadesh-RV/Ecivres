@@ -1,4 +1,4 @@
-﻿import 'reflect-metadata';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnomalyRuleService } from './services/anomaly-rule.service';
 import { AnomalyEventService } from './services/anomaly-event.service';
@@ -54,7 +54,7 @@ describe('AnomalyDetectionModule Services', () => {
       region: 'us-east-1',
     });
     expect(res).toBeDefined();
-    expect(res.id).toBe('ano_1');
+    expect(res?.id).toBe('ano_1');
   });
 
   it('should update anomaly status', async () => {

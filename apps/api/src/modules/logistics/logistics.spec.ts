@@ -35,7 +35,7 @@ describe('Smart Logistics Engine Services', () => {
   });
 
   describe('FleetTelemetryService', () => {
-    let telemetry: FleetTelemetryService;
+    let telemetry: any;
 
     beforeEach(() => {
       const { FleetTelemetryService } = require('./fleet-telemetry.service');

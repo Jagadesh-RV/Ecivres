@@ -121,7 +121,8 @@ import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
 import { EdgeModule } from './modules/edge/edge.module';
 
 @Module({
-  imports [
+  imports: [
+    ClosedLoopModule,
     FeatureEngineeringModule,
     AutonomousOpsEngineModule,
     AnomalyDetectionModule,
