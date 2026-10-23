@@ -1443,3 +1443,80 @@ model KillSwitchLog {
   @@index([scope])
   @@index([activatedAt])
 }
+
+// ==========================================
+// Phase 19: Trust, Resilience & Scale Models
+// ==========================================
+
+model MarketplaceTrustIncident {
+  id                  String   @id @default(uuid())
+  tenantId            String   @default("GLOBAL")
+  targetType          String   // CUSTOMER, PROVIDER, BOOKING, REVIEW
+  targetId            String
+  incidentType        String   // BOOKING_ABUSE, REVIEW_MANIPULATION, PAYMENT_VELOCITY, PROVIDER_UNRELIABILITY
+  severity            String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  confidenceScore     Float    @default(0.85)
+  evidenceSignals     Json
+  status              String   @default("DETECTED") // DETECTED, IN_REVIEW, CONFIRMED, OVERRIDDEN, DISMISSED
+  reviewerId          String?
+  reviewNotes         String?
+  appealNotes         String?
+  requiresHumanReview Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([targetType, targetId])
+  @@index([status])
+  @@index([incidentType])
+}
+
+model DecisionExplanationRecord {
+  id                     String   @id @default(uuid())
+  decisionId             String   @unique
+  tenantId               String   @default("GLOBAL")
+  businessSummary        String
+  initiatingEvent        String
+  affectedResource       String
+  policyApplied          String
+  policyVersion          String   @default("v1.0")
+  autonomyLevel          Int      @default(3)
+  confidenceScore        Float    @default(0.9)
+  selectedAction         String
+  alternativesConsidered Json
+  keyEvidenceSignals     Json
+  tradeoffAnalysis       String
+  humanApprovalObtained  Boolean  @default(false)
+  createdAt              DateTime @default(now())
+
+  @@index([decisionId])
+  @@index([tenantId])
+}
+
+model CircuitBreakerStateRecord {
+  id                String    @id @default(uuid())
+  serviceName       String    @unique
+  state             String    @default("CLOSED") // CLOSED, OPEN, HALF_OPEN
+  failureCount      Int       @default(0)
+  successCount      Int       @default(0)
+  failureThreshold  Int       @default(5)
+  recoveryTimeMs    Int       @default(30000)
+  lastFailureAt     DateTime?
+  lastSuccessAt     DateTime?
+  lastStateChangeAt DateTime  @default(now())
+
+  @@index([serviceName])
+}
+
+model SelfHealingLoopBreakerRecord {
+  id                String   @id @default(uuid())
+  remediationKey    String   @unique
+  incidentCount     Int      @default(1)
+  maxAllowedPerHour Int      @default(5)
+  status            String   @default("ACTIVE") // ACTIVE, LOOP_BLOCKED, EXPIRED
+  lastRemediatedAt  DateTime @default(now())
+  firstRemediatedAt DateTime @default(now())
+
+  @@index([remediationKey])
+}
+
