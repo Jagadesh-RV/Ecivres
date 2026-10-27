@@ -1520,3 +1520,119 @@ model SelfHealingLoopBreakerRecord {
   @@index([remediationKey])
 }
 
+// ==========================================
+// Phase 20: Governance, Compliance & Enterprise Models
+// ==========================================
+
+model MarketplacePolicy {
+  id              String    @id @default(uuid())
+  tenantId        String    @default("GLOBAL")
+  name            String
+  category        String    // PRICING, SUPPLY, TRUST, REFUND, RISK
+  version         String    // e.g. "v1.0", "v1.1"
+  status          String    @default("DRAFT") // DRAFT, REVIEW, APPROVED, ACTIVE, RETIRED
+  rulesConfig     Json
+  authorId        String
+  approverId      String?
+  effectiveFrom   DateTime?
+  effectiveUntil  DateTime?
+  rollbackVersion String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([name, version, tenantId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([category])
+}
+
+model ImmutableAuditLog {
+  id             String   @id @default(uuid())
+  tenantId       String   @default("GLOBAL")
+  actorId        String
+  actorRole      String
+  action         String
+  targetResource String
+  targetId       String
+  previousHash   String
+  entryHash      String   // SHA-256(previousHash + payload)
+  metadata       Json
+  ipAddress      String?
+  correlationId  String
+  status         String   @default("SUCCESS") // SUCCESS, FAILED
+  failureReason  String?
+  timestamp      DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([actorId])
+  @@index([action])
+  @@index([targetResource])
+  @@index([timestamp])
+}
+
+model EnterpriseOrganization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  tier        String   @default("ENTERPRISE") // ENTERPRISE, BUSINESS, PRO
+  status      String   @default("ACTIVE") // ACTIVE, SUSPENDED
+  settings    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     OrganizationMember[]
+  @@index([status])
+}
+
+model OrganizationMember {
+  id          String   @id @default(uuid())
+  orgId       String
+  userId      String
+  role        String   @default("MEMBER") // OWNER, ADMIN, BILLING, MEMBER
+  permissions Json?
+  invitedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization EnterpriseOrganization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([orgId])
+  @@index([userId])
+}
+
+model DataPrivacyRequest {
+  id              String    @id @default(uuid())
+  tenantId        String    @default("GLOBAL")
+  userId          String
+  requestType     String    // DATA_EXPORT, ACCOUNT_DELETION, ANONYMIZATION
+  status          String    @default("PENDING") // PENDING, APPROVED, PROCESSING, COMPLETED, REJECTED
+  requestedAt     DateTime  @default(now())
+  processedAt     DateTime?
+  processedBy     String?
+  exportUrl       String?
+  exemptionReason String?
+  rejectionReason String?
+  metadata        Json?
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([status])
+}
+
+model DataRetentionPolicy {
+  id            String    @id @default(uuid())
+  tenantId      String    @default("GLOBAL")
+  category      String    // TELEMETRY, AUDIT_LOGS, INACTIVE_USERS, BOOKINGS
+  retentionDays Int       // e.g. 90, 365, 2555
+  action        String    @default("ARCHIVE") // ARCHIVE, PURGE, PSEUDONYMIZE
+  isActive      Boolean   @default(true)
+  lastRunAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([category, tenantId])
+  @@index([tenantId])
+}
+
+
