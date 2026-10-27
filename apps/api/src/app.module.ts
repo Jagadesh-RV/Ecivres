@@ -1,3 +1,4 @@
+import { GovernanceComplianceModule } from './modules/governance-compliance/governance-compliance.module';
 import { TrustResilienceModule } from './modules/trust-resilience/trust-resilience.module';
 import { ClosedLoopModule } from './autonomous/closed-loop/closed-loop.module';
 import { AutonomousOpsEngineModule } from './modules/autonomous-ops-engine/autonomous-ops-engine.module';
@@ -250,6 +251,7 @@ import { EdgeModule } from './modules/edge/edge.module';
     PlatformSettingsModule,
     FavoritesModule,
     TrustResilienceModule,
+    GovernanceComplianceModule,
     PrismaModule,
   ],
   controllers: [AppController],
