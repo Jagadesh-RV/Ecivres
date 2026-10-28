@@ -1636,3 +1636,123 @@ model DataRetentionPolicy {
 }
 
 
+
+
+// ==========================================
+// Phase 21: Autonomous Marketplace Ecosystem & Interoperability
+// ==========================================
+
+model PartnerApiKey {
+  id              String    @id @default(uuid())
+  organizationId  String
+  keyName         String
+  keyHash         String    @unique
+  keyPrefix       String
+  scopes          Json
+  rateLimitPerMin Int       @default(60)
+  status          String    @default("ACTIVE")
+  expiresAt       DateTime?
+  lastUsedAt      DateTime?
+  revokedAt       DateTime?
+  revokedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([keyPrefix])
+}
+
+model ExternalIntegrationConfig {
+  id                   String    @id @default(uuid())
+  tenantId             String    @default("GLOBAL")
+  providerType         String    // PAYMENT, NOTIFICATION, MAPPING, ACCOUNTING
+  providerName         String    // STRIPE, RAZORPAY, SENDGRID, TWILIO, GOOGLE_MAPS, QUICKBOOKS
+  credentialsEncrypted String    // Encrypted secret string / vault token
+  settings             Json?
+  status               String    @default("ACTIVE") // ACTIVE, DISABLED, DEGRADED
+  timeoutMs            Int       @default(5000)
+  retryLimit           Int       @default(3)
+  lastHealthCheckAt    DateTime?
+  healthStatus         String    @default("HEALTHY") // HEALTHY, UNHEALTHY, UNKNOWN
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([providerType, providerName, tenantId])
+  @@index([providerType])
+  @@index([status])
+}
+
+model InboundWebhookEvent {
+  id              String    @id @default(uuid())
+  tenantId        String    @default("GLOBAL")
+  provider        String    // STRIPE, RAZORPAY, SENDGRID, TWILIO
+  externalEventId String
+  signature       String
+  payload         Json
+  status          String    @default("PENDING") // PENDING, PROCESSING, PROCESSED, FAILED, DEAD_LETTER
+  retryCount      Int       @default(0)
+  maxRetries      Int       @default(5)
+  lastError       String?
+  processedAt     DateTime?
+  reconciledAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([provider, externalEventId])
+  @@index([status])
+  @@index([provider])
+  @@index([createdAt])
+}
+
+model MarketplaceRegion {
+  id                  String    @id @default(uuid())
+  code                String    @unique // US, IN, GB, AE, DE, SG, JP
+  name                String
+  currency            String    // USD, INR, GBP, AED, EUR, SGD, JPY
+  currencySymbol      String
+  defaultLocale       String    // en-US, hi-IN, en-GB, ar-AE, de-DE
+  timezone            String    // America/New_York, Asia/Kolkata, Europe/London
+  taxType             String    // SALES_TAX, GST, VAT
+  defaultTaxRate      Float     @default(0.0)
+  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, PLANNED
+  supportedGateways   Json      // e.g. ["STRIPE", "RAZORPAY", "APPLE_PAY"]
+  cancellationWindowHours Int   @default(24)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status])
+  @@index([currency])
+}
+
+model ExchangeRateRecord {
+  id           String    @id @default(uuid())
+  fromCurrency String    // USD, EUR, GBP, INR, etc.
+  toCurrency   String
+  rate         Float
+  provider     String    // OPEN_EXCHANGE_RATES, FIXER, MANUAL
+  effectiveAt  DateTime  @default(now())
+  validUntil   DateTime
+  createdAt    DateTime  @default(now())
+
+  @@unique([fromCurrency, toCurrency, effectiveAt])
+  @@index([fromCurrency, toCurrency])
+  @@index([validUntil])
+}
+
+model EcosystemIntelligenceSignal {
+  id             String    @id @default(uuid())
+  regionCode     String
+  metricType     String    // LIQUIDITY_RATIO, DEMAND_SURGE, SUPPLY_IMBALANCE, CONVERSION_DRIFT
+  signalType     String    // FACT, STATISTICAL_ESTIMATE, PREDICTION, RECOMMENDATION
+  observedValue  Float
+  baselineValue  Float?
+  confidence     Float     @default(1.0)
+  evidenceJson   Json?
+  metadata       Json?
+  recordedAt     DateTime  @default(now())
+
+  @@index([regionCode])
+  @@index([metricType])
+  @@index([recordedAt])
+}
