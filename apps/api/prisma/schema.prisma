@@ -1739,3 +1739,20 @@ model ExchangeRateRecord {
   @@index([fromCurrency, toCurrency])
   @@index([validUntil])
 }
+
+model EcosystemIntelligenceSignal {
+  id             String    @id @default(uuid())
+  regionCode     String
+  metricType     String    // LIQUIDITY_RATIO, DEMAND_SURGE, SUPPLY_IMBALANCE, CONVERSION_DRIFT
+  signalType     String    // FACT, STATISTICAL_ESTIMATE, PREDICTION, RECOMMENDATION
+  observedValue  Float
+  baselineValue  Float?
+  confidence     Float     @default(1.0)
+  evidenceJson   Json?
+  metadata       Json?
+  recordedAt     DateTime  @default(now())
+
+  @@index([regionCode])
+  @@index([metricType])
+  @@index([recordedAt])
+}
