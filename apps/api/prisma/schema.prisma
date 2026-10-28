@@ -1724,3 +1724,18 @@ model MarketplaceRegion {
   @@index([status])
   @@index([currency])
 }
+
+model ExchangeRateRecord {
+  id           String    @id @default(uuid())
+  fromCurrency String    // USD, EUR, GBP, INR, etc.
+  toCurrency   String
+  rate         Float
+  provider     String    // OPEN_EXCHANGE_RATES, FIXER, MANUAL
+  effectiveAt  DateTime  @default(now())
+  validUntil   DateTime
+  createdAt    DateTime  @default(now())
+
+  @@unique([fromCurrency, toCurrency, effectiveAt])
+  @@index([fromCurrency, toCurrency])
+  @@index([validUntil])
+}
