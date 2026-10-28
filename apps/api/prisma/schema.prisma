@@ -1636,3 +1636,29 @@ model DataRetentionPolicy {
 }
 
 
+
+
+// ==========================================
+// Phase 21: Autonomous Marketplace Ecosystem & Interoperability
+// ==========================================
+
+model PartnerApiKey {
+  id              String    @id @default(uuid())
+  organizationId  String
+  keyName         String
+  keyHash         String    @unique
+  keyPrefix       String
+  scopes          Json
+  rateLimitPerMin Int       @default(60)
+  status          String    @default("ACTIVE")
+  expiresAt       DateTime?
+  lastUsedAt      DateTime?
+  revokedAt       DateTime?
+  revokedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([keyPrefix])
+}
