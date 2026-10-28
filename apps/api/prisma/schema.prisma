@@ -1704,3 +1704,23 @@ model InboundWebhookEvent {
   @@index([provider])
   @@index([createdAt])
 }
+
+model MarketplaceRegion {
+  id                  String    @id @default(uuid())
+  code                String    @unique // US, IN, GB, AE, DE, SG, JP
+  name                String
+  currency            String    // USD, INR, GBP, AED, EUR, SGD, JPY
+  currencySymbol      String
+  defaultLocale       String    // en-US, hi-IN, en-GB, ar-AE, de-DE
+  timezone            String    // America/New_York, Asia/Kolkata, Europe/London
+  taxType             String    // SALES_TAX, GST, VAT
+  defaultTaxRate      Float     @default(0.0)
+  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, PLANNED
+  supportedGateways   Json      // e.g. ["STRIPE", "RAZORPAY", "APPLE_PAY"]
+  cancellationWindowHours Int   @default(24)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status])
+  @@index([currency])
+}
