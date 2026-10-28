@@ -1662,3 +1662,23 @@ model PartnerApiKey {
   @@index([status])
   @@index([keyPrefix])
 }
+
+model ExternalIntegrationConfig {
+  id                   String    @id @default(uuid())
+  tenantId             String    @default("GLOBAL")
+  providerType         String    // PAYMENT, NOTIFICATION, MAPPING, ACCOUNTING
+  providerName         String    // STRIPE, RAZORPAY, SENDGRID, TWILIO, GOOGLE_MAPS, QUICKBOOKS
+  credentialsEncrypted String    // Encrypted secret string / vault token
+  settings             Json?
+  status               String    @default("ACTIVE") // ACTIVE, DISABLED, DEGRADED
+  timeoutMs            Int       @default(5000)
+  retryLimit           Int       @default(3)
+  lastHealthCheckAt    DateTime?
+  healthStatus         String    @default("HEALTHY") // HEALTHY, UNHEALTHY, UNKNOWN
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([providerType, providerName, tenantId])
+  @@index([providerType])
+  @@index([status])
+}
