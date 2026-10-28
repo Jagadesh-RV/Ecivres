@@ -1682,3 +1682,25 @@ model ExternalIntegrationConfig {
   @@index([providerType])
   @@index([status])
 }
+
+model InboundWebhookEvent {
+  id              String    @id @default(uuid())
+  tenantId        String    @default("GLOBAL")
+  provider        String    // STRIPE, RAZORPAY, SENDGRID, TWILIO
+  externalEventId String
+  signature       String
+  payload         Json
+  status          String    @default("PENDING") // PENDING, PROCESSING, PROCESSED, FAILED, DEAD_LETTER
+  retryCount      Int       @default(0)
+  maxRetries      Int       @default(5)
+  lastError       String?
+  processedAt     DateTime?
+  reconciledAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([provider, externalEventId])
+  @@index([status])
+  @@index([provider])
+  @@index([createdAt])
+}
