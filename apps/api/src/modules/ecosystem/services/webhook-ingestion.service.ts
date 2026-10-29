@@ -1,4 +1,4 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { WebhookVerifierService } from './webhook-verifier.service';
 import { WebhookIdempotencyService } from './webhook-idempotency.service';
@@ -6,11 +6,25 @@ import { InboundWebhookDto, WebhookProcessResultDto } from '../dto/webhook.dto';
 
 export type WebhookEventStatus = 'PENDING' | 'PROCESSING' | 'PROCESSED' | 'FAILED' | 'DEAD_LETTER';
 
+export interface WebhookEventRecord {
+  id: string;
+  provider: string;
+  externalEventId: string;
+  signature: string;
+  payload: Record<string, any>;
+  status: WebhookEventStatus;
+  retryCount: number;
+  maxRetries: number;
+  lastError?: string;
+  processedAt?: Date;
+  createdAt: Date;
+}
+
 @Injectable()
 export class WebhookIngestionService {
   private readonly logger = new Logger(WebhookIngestionService.name);
   private readonly eventHandlers = new Map<string, (payload: any) => Promise<void>>();
-  private readonly inMemoryEvents = new Map<string, any>();
+  private readonly inMemoryEvents = new Map<string, WebhookEventRecord>();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -52,15 +66,16 @@ export class WebhookIngestionService {
     this.idempotency.acquireLock(dto.provider, dto.externalEventId);
 
     const eventRecordId = `evt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-    const eventRecord = {
+    const eventRecord: WebhookEventRecord = {
       id: eventRecordId,
       provider: dto.provider.toUpperCase(),
       externalEventId: dto.externalEventId,
       signature: dto.signature,
       payload: dto.payload,
-      status: 'PROCESSING' as WebhookEventStatus,
+      status: 'PROCESSING',
       retryCount: 0,
       maxRetries: 5,
+      createdAt: new Date(),
     };
     this.inMemoryEvents.set(eventRecordId, eventRecord);
 
@@ -90,6 +105,7 @@ export class WebhookIngestionService {
 
       // 6. Transition to PROCESSED
       eventRecord.status = 'PROCESSED';
+      eventRecord.processedAt = new Date();
       try {
         await this.prisma.inboundWebhookEvent.updateMany({
           where: { provider: dto.provider.toUpperCase(), externalEventId: dto.externalEventId },
@@ -110,6 +126,7 @@ export class WebhookIngestionService {
       // Record failure
       eventRecord.status = 'FAILED';
       eventRecord.retryCount += 1;
+      eventRecord.lastError = err.message;
 
       try {
         await this.prisma.inboundWebhookEvent.updateMany({
@@ -140,7 +157,7 @@ export class WebhookIngestionService {
    */
   calculateRetryDelayMs(retryCount: number, baseMs: number = 1000, maxMs: number = 60000): number {
     const expDelay = Math.min(maxMs, baseMs * Math.pow(2, retryCount));
-    const jitter = 0.8 + Math.random() * 0.4; // 80% to 120% jitter
+    const jitter = 0.8 + Math.random() * 0.4;
     return Math.floor(expDelay * jitter);
   }
 
@@ -170,5 +187,35 @@ export class WebhookIngestionService {
     this.logger.log(`Retrying event ${eventId} (attempt ${event.retryCount}) after ${delay}ms delay`);
 
     return 'PROCESSING';
+  }
+
+  /**
+   * Retrieves events currently in DEAD_LETTER status for audit or intervention.
+   */
+  getDeadLetterEvents(limit: number = 50): WebhookEventRecord[] {
+    const deadLetters: WebhookEventRecord[] = [];
+    for (const record of this.inMemoryEvents.values()) {
+      if (record.status === 'DEAD_LETTER') {
+        deadLetters.push(record);
+        if (deadLetters.length >= limit) break;
+      }
+    }
+    return deadLetters;
+  }
+
+  /**
+   * Manually requeues a dead letter event for re-evaluation.
+   */
+  requeueDeadLetterEvent(eventId: string): WebhookEventRecord {
+    const event = this.inMemoryEvents.get(eventId);
+    if (!event) {
+      throw new NotFoundException(`Dead letter event '${eventId}' not found.`);
+    }
+
+    event.status = 'PENDING';
+    event.retryCount = 0;
+    event.lastError = undefined;
+    this.logger.log(`Re-queued dead letter event ${eventId} for processing`);
+    return event;
   }
 }
