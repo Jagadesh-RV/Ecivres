@@ -1,7 +1,12 @@
 import { Injectable, Logger, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { CreatePartnerApiKeyDto, PartnerKeyCreatedResponseDto } from '../dto/partner.dto';
+import {
+  CreatePartnerApiKeyDto,
+  PartnerKeyCreatedResponseDto,
+  RotatePartnerApiKeyDto,
+  RevokePartnerApiKeyDto,
+} from '../dto/partner.dto';
 
 export interface PartnerKeyRecord {
   id: string;
@@ -142,5 +147,55 @@ export class PartnerApiService {
 
     record.lastUsedAt = new Date();
     return record;
+  }
+
+  /**
+   * Revokes an existing key immediately.
+   */
+  async revokeApiKey(dto: RevokePartnerApiKeyDto, revokedBy: string = 'system'): Promise<PartnerKeyRecord> {
+    let targetRecord: PartnerKeyRecord | undefined;
+    for (const record of this.inMemoryKeys.values()) {
+      if (record.id === dto.keyId) {
+        targetRecord = record;
+        break;
+      }
+    }
+
+    if (!targetRecord) {
+      throw new NotFoundException(`Partner API key '${dto.keyId}' not found.`);
+    }
+
+    targetRecord.status = 'REVOKED';
+    targetRecord.revokedAt = new Date();
+    targetRecord.revokedBy = revokedBy;
+
+    try {
+      await this.prisma.partnerApiKey.update({
+        where: { id: dto.keyId },
+        data: {
+          status: 'REVOKED',
+          revokedAt: targetRecord.revokedAt,
+          revokedBy,
+        },
+      });
+    } catch {}
+
+    this.logger.warn(`REVOKED partner API key ${dto.keyId}. Reason: ${dto.reason}`);
+    return targetRecord;
+  }
+
+  /**
+   * Rotates a key by revoking the old key and issuing a new one with same scopes and settings.
+   */
+  async rotateApiKey(dto: RotatePartnerApiKeyDto, operator: string = 'system'): Promise<PartnerKeyCreatedResponseDto> {
+    const revoked = await this.revokeApiKey({ keyId: dto.keyId, reason: dto.reason }, operator);
+
+    return this.createApiKey({
+      organizationId: revoked.organizationId,
+      keyName: `${revoked.keyName} (Rotated)`,
+      scopes: revoked.scopes,
+      rateLimitPerMin: revoked.rateLimitPerMin,
+      expiresInDays: 90,
+    });
   }
 }
