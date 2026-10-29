@@ -17,6 +17,14 @@ export interface RegionConfigRecord {
   cancellationWindowHours: number;
 }
 
+export interface AddressComponents {
+  line1: string;
+  line2?: string;
+  city: string;
+  stateProvince?: string;
+  postalCode: string;
+}
+
 @Injectable()
 export class RegionalMarketService {
   private readonly logger = new Logger(RegionalMarketService.name);
@@ -140,5 +148,58 @@ export class RegionalMarketService {
 
     this.logger.log(`Registered marketplace region: ${dto.name} (${key})`);
     return record;
+  }
+
+  /**
+   * Formats an address according to standard regional postal conventions.
+   */
+  formatAddress(regionCode: string, components: AddressComponents): string {
+    const code = regionCode.toUpperCase();
+    switch (code) {
+      case 'US':
+        return `${components.line1}, ${components.city}, ${components.stateProvince || ''} ${components.postalCode}, USA`;
+      case 'GB':
+        return `${components.line1}, ${components.city}, ${components.postalCode}, United Kingdom`;
+      case 'IN':
+        return `${components.line1}, ${components.city}, ${components.stateProvince || ''} - ${components.postalCode}, India`;
+      case 'DE':
+        return `${components.line1}, ${components.postalCode} ${components.city}, Germany`;
+      default:
+        return `${components.line1}, ${components.city} ${components.postalCode}`;
+    }
+  }
+
+  /**
+   * Converts a UTC timestamp into region-local formatted string.
+   */
+  resolveLocalTime(regionCode: string, utcDate: Date = new Date()): string {
+    const region = this.inMemoryRegions.get(regionCode.toUpperCase());
+    const tz = region?.timezone || 'UTC';
+    const locale = region?.defaultLocale || 'en-US';
+
+    return utcDate.toLocaleString(locale, { timeZone: tz });
+  }
+
+  /**
+   * Validates postal code regex based on country conventions.
+   */
+  isValidPostalCode(regionCode: string, postalCode: string): boolean {
+    const code = regionCode.toUpperCase();
+    const clean = postalCode.trim();
+
+    switch (code) {
+      case 'US':
+        return /^\d{5}(-\d{4})?$/.test(clean);
+      case 'GB':
+        return /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i.test(clean);
+      case 'IN':
+        return /^\d{6}$/.test(clean);
+      case 'DE':
+        return /^\d{5}$/.test(clean);
+      case 'SG':
+        return /^\d{6}$/.test(clean);
+      default:
+        return clean.length >= 3 && clean.length <= 10;
+    }
   }
 }
