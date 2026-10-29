@@ -21,6 +21,15 @@ export interface SurgeAnomalyResult {
   cappedMultiplier?: number;
 }
 
+export interface RecommendationConversionMetrics {
+  totalDelivered: number;
+  totalConverted: number;
+  conversionRate: number;
+  baselineConversionRate: number;
+  driftPercentage: number;
+  isDrifting: boolean;
+}
+
 @Injectable()
 export class EcosystemIntelligenceService {
   private readonly logger = new Logger(EcosystemIntelligenceService.name);
@@ -153,6 +162,47 @@ export class EcosystemIntelligenceService {
       anomalyScore: Math.round(anomalyScore * 100) / 100,
       recommendation,
       cappedMultiplier,
+    };
+  }
+
+  /**
+   * Analyzes recommendation conversion rates and measures conversion drift against baseline.
+   */
+  async evaluateRecommendationConversion(
+    regionCode: string,
+    deliveredCount: number,
+    convertedCount: number,
+    baselineRate: number = 0.22, // 22% expected conversion
+  ): Promise<RecommendationConversionMetrics> {
+    const safeDelivered = Math.max(1, deliveredCount);
+    const conversionRate = Math.round((convertedCount / safeDelivered) * 1000) / 1000;
+    const driftPercentage = Math.round(((conversionRate - baselineRate) / baselineRate) * 1000) / 10;
+    // Flag drift if conversion drops more than 20% relative to baseline
+    const isDrifting = driftPercentage < -20.0;
+
+    if (isDrifting) {
+      this.logger.warn(
+        `CONVERSION DRIFT DETECTED in ${regionCode}: Current=${conversionRate * 100}% vs Baseline=${baselineRate * 100}% (${driftPercentage}%)`,
+      );
+
+      await this.recordSignal({
+        regionCode,
+        metricType: 'CONVERSION_DRIFT',
+        signalType: 'FACT',
+        observedValue: conversionRate,
+        baselineValue: baselineRate,
+        confidence: deliveredCount >= 50 ? 0.98 : 0.75,
+        evidenceJson: { deliveredCount, convertedCount, driftPercentage },
+      });
+    }
+
+    return {
+      totalDelivered: deliveredCount,
+      totalConverted: convertedCount,
+      conversionRate,
+      baselineConversionRate: baselineRate,
+      driftPercentage,
+      isDrifting,
     };
   }
 }
