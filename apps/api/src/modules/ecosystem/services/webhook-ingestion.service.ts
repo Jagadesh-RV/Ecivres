@@ -10,6 +10,7 @@ export type WebhookEventStatus = 'PENDING' | 'PROCESSING' | 'PROCESSED' | 'FAILE
 export class WebhookIngestionService {
   private readonly logger = new Logger(WebhookIngestionService.name);
   private readonly eventHandlers = new Map<string, (payload: any) => Promise<void>>();
+  private readonly inMemoryEvents = new Map<string, any>();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -50,11 +51,23 @@ export class WebhookIngestionService {
     // 3. Concurrency Lock
     this.idempotency.acquireLock(dto.provider, dto.externalEventId);
 
-    let eventRecordId = `evt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const eventRecordId = `evt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const eventRecord = {
+      id: eventRecordId,
+      provider: dto.provider.toUpperCase(),
+      externalEventId: dto.externalEventId,
+      signature: dto.signature,
+      payload: dto.payload,
+      status: 'PROCESSING' as WebhookEventStatus,
+      retryCount: 0,
+      maxRetries: 5,
+    };
+    this.inMemoryEvents.set(eventRecordId, eventRecord);
+
     try {
-      // 4. Create Durable Record in PENDING status
+      // 4. Create Durable Record
       try {
-        const created = await this.prisma.inboundWebhookEvent.create({
+        await this.prisma.inboundWebhookEvent.create({
           data: {
             id: eventRecordId,
             provider: dto.provider.toUpperCase(),
@@ -64,7 +77,6 @@ export class WebhookIngestionService {
             status: 'PROCESSING',
           },
         });
-        eventRecordId = created.id;
       } catch (err: any) {
         this.logger.warn(`Could not persist webhook event record to database: ${err.message}`);
       }
@@ -77,6 +89,7 @@ export class WebhookIngestionService {
       }
 
       // 6. Transition to PROCESSED
+      eventRecord.status = 'PROCESSED';
       try {
         await this.prisma.inboundWebhookEvent.updateMany({
           where: { provider: dto.provider.toUpperCase(), externalEventId: dto.externalEventId },
@@ -95,6 +108,9 @@ export class WebhookIngestionService {
       };
     } catch (err: any) {
       // Record failure
+      eventRecord.status = 'FAILED';
+      eventRecord.retryCount += 1;
+
       try {
         await this.prisma.inboundWebhookEvent.updateMany({
           where: { provider: dto.provider.toUpperCase(), externalEventId: dto.externalEventId },
@@ -117,5 +133,42 @@ export class WebhookIngestionService {
     } finally {
       this.idempotency.releaseLock(dto.provider, dto.externalEventId);
     }
+  }
+
+  /**
+   * Calculates exponential retry delay with jitter.
+   */
+  calculateRetryDelayMs(retryCount: number, baseMs: number = 1000, maxMs: number = 60000): number {
+    const expDelay = Math.min(maxMs, baseMs * Math.pow(2, retryCount));
+    const jitter = 0.8 + Math.random() * 0.4; // 80% to 120% jitter
+    return Math.floor(expDelay * jitter);
+  }
+
+  /**
+   * Retries an event. If exceeding max retries, moves to DEAD_LETTER.
+   */
+  async retryEvent(eventId: string): Promise<WebhookEventStatus> {
+    const event = this.inMemoryEvents.get(eventId);
+    if (!event) {
+      return 'FAILED';
+    }
+
+    if (event.retryCount >= event.maxRetries) {
+      event.status = 'DEAD_LETTER';
+      this.logger.error(`Webhook event ${eventId} exceeded max retries (${event.maxRetries}). Moved to DEAD_LETTER.`);
+      try {
+        await this.prisma.inboundWebhookEvent.updateMany({
+          where: { id: eventId },
+          data: { status: 'DEAD_LETTER' },
+        });
+      } catch {}
+      return 'DEAD_LETTER';
+    }
+
+    event.retryCount += 1;
+    const delay = this.calculateRetryDelayMs(event.retryCount);
+    this.logger.log(`Retrying event ${eventId} (attempt ${event.retryCount}) after ${delay}ms delay`);
+
+    return 'PROCESSING';
   }
 }
