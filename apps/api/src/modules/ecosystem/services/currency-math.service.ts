@@ -5,6 +5,8 @@ export interface MoneyValue {
   currency: string;   // ISO 4217 (USD, EUR, GBP, INR, JPY)
 }
 
+export type RoundingMode = 'HALF_EVEN' | 'HALF_UP' | 'CEIL' | 'FLOOR';
+
 @Injectable()
 export class CurrencyMathService {
   // Minor unit decimal places for ISO currencies
@@ -17,14 +19,30 @@ export class CurrencyMathService {
     CAD: 2,
     AUD: 2,
     SGD: 2,
-    JPY: 0, // Zero-decimal currency
+    JPY: 0,
     KRW: 0,
-    KWD: 3, // Three-decimal currency
+    KWD: 3,
     BHD: 3,
+  };
+
+  private readonly currencySymbols: Record<string, string> = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    INR: '₹',
+    AED: 'AED ',
+    CAD: 'CA$',
+    AUD: 'A$',
+    SGD: 'S$',
+    JPY: '¥',
   };
 
   getDecimals(currency: string): number {
     return this.currencyDecimals[currency.toUpperCase()] ?? 2;
+  }
+
+  getSymbol(currency: string): string {
+    return this.currencySymbols[currency.toUpperCase()] ?? `${currency.toUpperCase()} `;
   }
 
   fromMajorUnits(amount: number, currency: string): MoneyValue {
@@ -58,11 +76,35 @@ export class CurrencyMathService {
     };
   }
 
-  multiplyBasisPoints(money: MoneyValue, basisPoints: number): MoneyValue {
-    // 10,000 basis points = 100%
-    const result = Math.round((money.minorUnits * basisPoints) / 10000);
+  multiplyBasisPoints(money: MoneyValue, basisPoints: number, mode: RoundingMode = 'HALF_UP'): MoneyValue {
+    const raw = (money.minorUnits * basisPoints) / 10000;
+    let rounded: number;
+
+    switch (mode) {
+      case 'CEIL':
+        rounded = Math.ceil(raw);
+        break;
+      case 'FLOOR':
+        rounded = Math.floor(raw);
+        break;
+      case 'HALF_EVEN': {
+        const floor = Math.floor(raw);
+        const diff = raw - floor;
+        if (diff === 0.5) {
+          rounded = floor % 2 === 0 ? floor : floor + 1;
+        } else {
+          rounded = Math.round(raw);
+        }
+        break;
+      }
+      case 'HALF_UP':
+      default:
+        rounded = Math.round(raw);
+        break;
+    }
+
     return {
-      minorUnits: result,
+      minorUnits: rounded,
       currency: money.currency,
     };
   }
@@ -94,6 +136,22 @@ export class CurrencyMathService {
     }
 
     return results;
+  }
+
+  /**
+   * Formats money into a localized display representation.
+   */
+  formatDisplay(money: MoneyValue, locale: string = 'en-US'): string {
+    const major = this.toMajorUnits(money);
+    const decimals = this.getDecimals(money.currency);
+    const symbol = this.getSymbol(money.currency);
+
+    const formattedNumber = major.toLocaleString(locale, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+
+    return `${symbol}${formattedNumber}`;
   }
 
   private assertSameCurrency(a: MoneyValue, b: MoneyValue): void {
