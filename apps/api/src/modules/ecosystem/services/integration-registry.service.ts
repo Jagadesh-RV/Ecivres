@@ -1,9 +1,13 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { CircuitBreakerService } from '../../trust-resilience/circuit-breaker.service';
 import {
   IIntegrationAdapter,
   IntegrationProviderType,
   IntegrationHealthCheckResult,
+  IntegrationExecutionOptions,
+  IntegrationResult,
+  IntegrationCircuitOpenException,
 } from '../interfaces/integration.interface';
 import { PaymentIntegrationAdapter } from '../adapters/payment-integration.adapter';
 import { NotificationIntegrationAdapter } from '../adapters/notification-integration.adapter';
@@ -17,6 +21,7 @@ export class IntegrationRegistryService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly circuitBreaker: CircuitBreakerService,
     private readonly paymentAdapter: PaymentIntegrationAdapter,
     private readonly notificationAdapter: NotificationIntegrationAdapter,
     private readonly mappingAdapter: MappingIntegrationAdapter,
@@ -68,6 +73,33 @@ export class IntegrationRegistryService {
     );
 
     return Promise.all(healthPromises);
+  }
+
+  /**
+   * Executes an operation through the adapter wrapped with circuit-breaker protection and telemetry.
+   */
+  async executeWithResilience<TInput = any, TOutput = any>(
+    providerName: string,
+    operation: string,
+    payload: TInput,
+    options?: IntegrationExecutionOptions,
+  ): Promise<IntegrationResult<TOutput>> {
+    const adapter = this.getAdapter(providerName);
+
+    if (this.circuitBreaker && !this.circuitBreaker.canExecute(adapter.providerName)) {
+      this.logger.warn(`Execution blocked: Circuit breaker OPEN for ${adapter.providerName}`);
+      throw new IntegrationCircuitOpenException(adapter.providerName);
+    }
+
+    const result = await adapter.execute<TInput, TOutput>(operation, payload, options);
+
+    if (result.success) {
+      this.circuitBreaker?.recordSuccess(adapter.providerName);
+    } else if (result.isTransient) {
+      this.circuitBreaker?.recordFailure(adapter.providerName);
+    }
+
+    return result;
   }
 
   async getIntegrationStatus(providerType: string, providerName: string) {
