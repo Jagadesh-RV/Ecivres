@@ -11,6 +11,16 @@ export interface ImbalanceDetectionResult {
   evaluatedAt: Date;
 }
 
+export interface SurgeAnomalyResult {
+  regionCode: string;
+  requestedMultiplier: number;
+  baselineMultiplier: number;
+  isAnomaly: boolean;
+  anomalyScore: number;
+  recommendation: 'APPROVE' | 'CAP_TO_SAFE_CEILING' | 'REJECT';
+  cappedMultiplier?: number;
+}
+
 @Injectable()
 export class EcosystemIntelligenceService {
   private readonly logger = new Logger(EcosystemIntelligenceService.name);
@@ -79,7 +89,6 @@ export class EcosystemIntelligenceService {
 
     const confidence = availableProviders + pendingBookingRequests >= 20 ? 0.95 : 0.65;
 
-    // Record signal as STATISTICAL_ESTIMATE
     await this.recordSignal({
       regionCode,
       metricType: 'SUPPLY_IMBALANCE',
@@ -97,6 +106,53 @@ export class EcosystemIntelligenceService {
       recommendation,
       confidence,
       evaluatedAt: new Date(),
+    };
+  }
+
+  /**
+   * Inspects pricing surge requests and flags price-gouging anomalies or sudden spikes.
+   */
+  async detectPricingSurgeAnomaly(
+    regionCode: string,
+    requestedMultiplier: number,
+    baselineMultiplier: number = 1.0,
+    maxPermittedMultiplier: number = 2.0,
+  ): Promise<SurgeAnomalyResult> {
+    const deviation = requestedMultiplier - baselineMultiplier;
+    const isAnomaly = requestedMultiplier > maxPermittedMultiplier || deviation > 1.2;
+    const anomalyScore = Math.min(1.0, Math.max(0.0, deviation / 1.5));
+
+    let recommendation: 'APPROVE' | 'CAP_TO_SAFE_CEILING' | 'REJECT';
+    let cappedMultiplier: number | undefined;
+
+    if (requestedMultiplier > maxPermittedMultiplier) {
+      recommendation = 'CAP_TO_SAFE_CEILING';
+      cappedMultiplier = maxPermittedMultiplier;
+    } else if (isAnomaly) {
+      recommendation = 'REJECT';
+    } else {
+      recommendation = 'APPROVE';
+      cappedMultiplier = requestedMultiplier;
+    }
+
+    await this.recordSignal({
+      regionCode,
+      metricType: 'DEMAND_SURGE',
+      signalType: 'RECOMMENDATION',
+      observedValue: requestedMultiplier,
+      baselineValue: baselineMultiplier,
+      confidence: 0.92,
+      evidenceJson: { isAnomaly, anomalyScore, recommendation, cappedMultiplier },
+    });
+
+    return {
+      regionCode: regionCode.toUpperCase(),
+      requestedMultiplier,
+      baselineMultiplier,
+      isAnomaly,
+      anomalyScore: Math.round(anomalyScore * 100) / 100,
+      recommendation,
+      cappedMultiplier,
     };
   }
 }
