@@ -1,3 +1,4 @@
+import { EcosystemModule } from './modules/ecosystem/ecosystem.module';
 import { GovernanceComplianceModule } from './modules/governance-compliance/governance-compliance.module';
 import { TrustResilienceModule } from './modules/trust-resilience/trust-resilience.module';
 import { ClosedLoopModule } from './autonomous/closed-loop/closed-loop.module';
@@ -252,6 +253,7 @@ import { EdgeModule } from './modules/edge/edge.module';
     FavoritesModule,
     TrustResilienceModule,
     GovernanceComplianceModule,
+    EcosystemModule,
     PrismaModule,
   ],
   controllers: [AppController],
