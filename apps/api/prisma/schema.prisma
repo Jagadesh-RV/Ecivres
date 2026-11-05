@@ -1756,3 +1756,45 @@ model EcosystemIntelligenceSignal {
   @@index([metricType])
   @@index([recordedAt])
 }
+
+
+// ==========================================
+// PHASE 23: RELIABILITY, SLOs & SELF-HEALING
+// ==========================================
+
+model ServiceLevelObjectiveRecord {
+  id                          String    @id @default(uuid())
+  workflowName                String    @unique
+  targetAvailability          Float     @default(99.9)
+  currentAvailability         Float     @default(100.0)
+  latencyTargetMs             Int       @default(250)
+  p95LatencyMs                Int       @default(50)
+  errorBudgetRemainingPercent  Float     @default(100.0)
+  burnRate                    Float     @default(0.0)
+  budgetStatus                String    @default("HEALTHY") // HEALTHY, WARNING, EXHAUSTED
+  totalEvents                 Int       @default(0)
+  failedEvents                Int       @default(0)
+  windowDays                  Int       @default(30)
+  updatedAt                   DateTime  @updatedAt
+
+  @@index([workflowName])
+  @@index([budgetStatus])
+}
+
+model SelfHealingExecutionAudit {
+  id                  String    @id @default(uuid())
+  executionId         String    @unique
+  triggerReason       String
+  actionType          String
+  targetComponent     String
+  status              String    @default("EXECUTED") // EXECUTED, BLOCKED_LOOP, BLOCKED_KILL_SWITCH, FAILED, THROTTLED
+  loopBreakerCount    Int       @default(1)
+  durationMs          Int       @default(0)
+  details             String?
+  operatorAttribution String?
+  executedAt          DateTime  @default(now())
+
+  @@index([actionType])
+  @@index([status])
+  @@index([executedAt])
+}

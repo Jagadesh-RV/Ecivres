@@ -1,3 +1,4 @@
+import { ReliabilityModule } from './modules/reliability/reliability.module';
 import { EcosystemModule } from './modules/ecosystem/ecosystem.module';
 import { GovernanceComplianceModule } from './modules/governance-compliance/governance-compliance.module';
 import { TrustResilienceModule } from './modules/trust-resilience/trust-resilience.module';
@@ -254,6 +255,7 @@ import { EdgeModule } from './modules/edge/edge.module';
     TrustResilienceModule,
     GovernanceComplianceModule,
     EcosystemModule,
+    ReliabilityModule,
     PrismaModule,
   ],
   controllers: [AppController],
