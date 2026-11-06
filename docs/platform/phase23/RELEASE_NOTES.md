@@ -51,3 +51,4 @@ The following additive models were integrated into `apps/api/prisma/schema.prism
 - **Monorepo Typecheck:** Zero errors.
 - **API Build:** Clean compilation via `nest build`.
 - **Web Build:** 37/37 static and dynamic pages compiled cleanly via `next build`.
+

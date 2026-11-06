@@ -59,3 +59,4 @@ kubectl rollout status deployment/ecivres-api -n production
 
 ### 3.3 Database Rollback Strategy
 Because schema changes in Phase 23 are strictly additive (`ServiceLevelObjectiveRecord` and `SelfHealingExecutionAudit`), rolling back the application container does **not** require rolling back database schema, preventing catastrophic data loss or migration locking.
+

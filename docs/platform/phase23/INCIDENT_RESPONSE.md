@@ -60,3 +60,4 @@ A blameless Post-Incident Review is mandatory for all SEV1 and SEV2 incidents wi
 2. What was the root cause (5 Whys methodology)?
 3. Why did automated self-healing succeed or fail to mitigate the issue?
 4. What preventive action items will eliminate this failure mode permanently?
+
