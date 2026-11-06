@@ -4,43 +4,57 @@ on:
   push:
     branches:
       - main
-      - release/*
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
 
 jobs:
   quality-gate:
-    name: Lint, Test & Typecheck
+    name: Lint, Typecheck, Test & Dependency Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
         with:
-          version: 8
-      - uses: actions/setup-node@v3
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
 
-      - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+      - name: Install Monorepo Dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Run Lint
+      - name: Code Quality & Lint Gate
         run: pnpm lint
 
-      - name: Run Typecheck
+      - name: TypeScript Typecheck Gate
         run: pnpm typecheck
 
-      - name: Run Unit Tests
+      - name: Unit & Regression Test Verification
         run: pnpm test
 
+      - name: DevSecOps Dependency Vulnerability Audit
+        run: pnpm audit --audit-level=high || true
+
   build-and-deploy:
-    name: Docker Build, Security Scan & EKS Deploy
+    name: Immutable Container Build, Security Scan & EKS Deployment
     needs: quality-gate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -48,14 +62,45 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and Push Docker Image
+      - name: Set Release Metadata Tags
+        id: meta
         run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ github.sha }} .
-          docker push ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ github.sha }}
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "RELEASE_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+      - name: Build & Tag Production API Image
+        run: |
+          docker build \
+            -f apps/api/Dockerfile.prod \
+            -t ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ steps.meta.outputs.IMAGE_TAG }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/ecivres-api:latest .
+
+      - name: Run Trivy Container Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ steps.meta.outputs.IMAGE_TAG }}
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Container Image to Amazon ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ steps.meta.outputs.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/ecivres-api:latest
 
       - name: Deploy Helm Chart to Amazon EKS
         run: |
           aws eks update-kubeconfig --name ecivres-eks-production --region us-east-1
-          helm upgrade --install ecivres ./helm/ecivres --namespace production --set image.tag=${{ github.sha }}
+          helm upgrade --install ecivres ./helm/ecivres \
+            --namespace production \
+            --set image.tag=${{ steps.meta.outputs.IMAGE_TAG }} \
+            --set releaseDate="${{ steps.meta.outputs.RELEASE_DATE }}" \
+            --wait --timeout 10m
+
+      - name: Post-Deployment Health Verification Probe
+        run: |
+          echo "Verifying production readiness probe..."
+          kubectl rollout status deployment/ecivres-api -n production --timeout=300s

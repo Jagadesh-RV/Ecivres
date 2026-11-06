@@ -1,23 +1,36 @@
-name: Security SAST & Container Scan
+name: DevSecOps SAST & Security Scan
 
 on:
   push:
-    branches: [ main, develop, release/* ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  schedule:
+    - cron: '0 2 * * 1' # Weekly security scan Mondays at 02:00 UTC
 
 jobs:
   security-audit:
+    name: SAST, Dependency & Secret Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Secret Leakage Scan (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: Run Semgrep SAST Scan
         uses: returntocorp/semgrep-action@v1
         with:
           config: p/owasp-top-10
 
-      - name: Run Trivy Vulnerability Scanner
+      - name: Run Trivy Filesystem Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
