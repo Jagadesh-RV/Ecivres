@@ -94,3 +94,4 @@ Every self-healing proposal transitions through distinct observable states:
 - `BLOCKED_LOOP`: Loop breaker tripped after 5 attempts within 1 hour.
 - `EXECUTED`: Action executed successfully within bounded limits.
 - `FAILED`: Technical execution error during recovery logic.
+

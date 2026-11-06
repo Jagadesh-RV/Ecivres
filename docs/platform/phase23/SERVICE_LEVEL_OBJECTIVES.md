@@ -62,3 +62,4 @@ $$R_{\text{burn}} = \frac{F_{\text{actual}}}{F_{\text{allowed}}}$$
 - `budgetStatus` (`HEALTHY`, `WARNING`, `EXHAUSTED`)
 - `totalEvents` & `failedEvents`
 - `updatedAt`
+
