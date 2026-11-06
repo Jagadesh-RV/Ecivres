@@ -116,3 +116,4 @@ An inspection of `apps/api/src/app.controller.ts` and `apps/api/src/modules/trus
 - **Local Host:** Windows 11 host with powershell terminal.
 - **Sandbox Boundary:** Node/git operations requiring `.git` and network push operate via direct verified bypass commands.
 - **Live Database:** Tests execute against NestJS mockable Prisma services and integration fixtures to ensure deterministic assertions without corrupting external production stores.
+

@@ -47,3 +47,4 @@ In the event of a catastrophic primary region outage:
    - Execute `/health/ready` probe to confirm database connectivity and worker readiness.
 6. **Communicate Resolution:**
    - Update status page to reflect completed failover.
+

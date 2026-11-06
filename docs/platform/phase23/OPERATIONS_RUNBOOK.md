@@ -123,3 +123,4 @@ POST /reliability/self-healing/execute
 - Check worker process memory: `GET /health/live`.
 - If memory heap ratio > 92%, restart worker pod gracefully: `kubectl rollout restart deployment/ecivres-worker -n production`.
 - Draining in-flight tasks is handled automatically by `GracefulShutdownService`.
+

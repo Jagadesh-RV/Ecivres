@@ -7,8 +7,12 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
 import helmet from 'helmet';
 import compression from 'compression';
+import { validateProductionEnvironment } from './config/env-validation';
 
 async function bootstrap() {
+  // Validate production configuration & DevSecOps security gates
+  validateProductionEnvironment();
+
   const app = await NestFactory.create(AppModule);
 
   // API Versioning

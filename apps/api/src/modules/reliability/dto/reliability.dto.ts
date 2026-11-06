@@ -77,3 +77,4 @@ export class RecordSloEventDto {
   @IsOptional()
   metadata?: Record<string, any>;
 }
+
