@@ -21,7 +21,13 @@ jobs:
       - name: Terraform Format Check
         run: terraform fmt -check -recursive terraform/
 
-      - name: Terraform Init & Validate
+      - name: Terraform Init & Validate Staging
+        run: |
+          cd terraform/environments/staging
+          terraform init -backend=false
+          terraform validate
+
+      - name: Terraform Init & Validate Production
         run: |
           cd terraform/environments/prod
           terraform init -backend=false
