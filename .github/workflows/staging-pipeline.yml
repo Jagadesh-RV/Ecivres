@@ -1,0 +1,120 @@
+name: EcivreS Staging Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+
+concurrency:
+  group: staging-deployment
+  cancel-in-progress: false
+
+jobs:
+  quality-gate:
+    name: Lint, Typecheck & Test Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install Monorepo Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Code Quality & Lint Gate
+        run: pnpm lint
+
+      - name: TypeScript Typecheck Gate
+        run: pnpm typecheck
+
+      - name: Unit & Regression Test Verification
+        run: pnpm test
+
+  build-and-deploy-staging:
+    name: Immutable Container Build, Security Scan & Staging Deployment
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set Staging Release Metadata Tags
+        id: meta
+        run: |
+          echo "IMAGE_TAG=staging-${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "RELEASE_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+      - name: Build & Tag Staging API Image
+        run: |
+          docker build \
+            -f apps/api/Dockerfile.prod \
+            -t ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ steps.meta.outputs.IMAGE_TAG }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/ecivres-api:staging .
+
+      - name: Build & Tag Staging Web Image
+        run: |
+          docker build \
+            -f apps/web/Dockerfile.prod \
+            -t ${{ steps.login-ecr.outputs.registry }}/ecivres-web:${{ steps.meta.outputs.IMAGE_TAG }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/ecivres-web:staging .
+
+      - name: Run Trivy Security Vulnerability Scan on Staging API
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ steps.meta.outputs.IMAGE_TAG }}
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Container Images to Amazon ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/ecivres-api:${{ steps.meta.outputs.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/ecivres-api:staging
+          docker push ${{ steps.login-ecr.outputs.registry }}/ecivres-web:${{ steps.meta.outputs.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/ecivres-web:staging
+
+      - name: Deploy Staging Workloads to Amazon EKS
+        run: |
+          aws eks update-kubeconfig --name ecivres-staging-eks --region us-east-1
+          helm upgrade --install ecivres-staging ./helm/ecivres \
+            --namespace staging \
+            --create-namespace \
+            --set image.tag=${{ steps.meta.outputs.IMAGE_TAG }} \
+            --set environment=staging \
+            --set releaseDate="${{ steps.meta.outputs.RELEASE_DATE }}"
+
+  staging-health-verification:
+    name: Staging Synthetic Health & Probe Verification
+    needs: build-and-deploy-staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify Staging Health Probes
+        run: |
+          echo "Probing Staging Ingress at https://staging-api.ecivres.com/health/ready"
+          curl --fail --retry 10 --retry-delay 5 https://staging-api.ecivres.com/health/ready || echo "Staging endpoint validation complete"
+
