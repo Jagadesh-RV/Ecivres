@@ -8,6 +8,7 @@ import { PermissionsGuard } from '../src/common/guards/permissions.guard';
 import { Permissions } from '../src/common/decorators/permissions.decorator';
 import { JwtAuthGuard } from '../src/modules/auth/guards/jwt-auth.guard';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('test-rbac')
 class TestRbacController {
@@ -28,143 +29,101 @@ class TestRbacController {
 
 describe('RBAC & Permissions (e2e)', () => {
   let app: INestApplication;
-  let prisma: PrismaService;
   let adminToken: string;
   let customerToken: string;
-  let adminId: string;
-  let customerId: string;
+  const adminId = 'usr_admin_mock_1';
+  const customerId = 'usr_customer_mock_2';
+
+  const mockPrisma = {
+    user: {
+      findUnique: jest.fn().mockImplementation(({ where }) => {
+        if (where.id === adminId) {
+          return Promise.resolve({
+            id: adminId,
+            email: 'admin@ecivres.local',
+            userRoles: [
+              {
+                role: {
+                  name: 'ADMIN',
+                  rolePermissions: [
+                    { permission: { name: 'read:test' } },
+                  ],
+                },
+              },
+            ],
+          });
+        }
+        if (where.id === customerId) {
+          return Promise.resolve({
+            id: customerId,
+            email: 'customer@ecivres.local',
+            userRoles: [
+              {
+                role: {
+                  name: 'CUSTOMER',
+                  rolePermissions: [],
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve(null);
+      }),
+      deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+    },
+    $connect: jest.fn().mockResolvedValue(undefined),
+    $disconnect: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
       controllers: [TestRbacController],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockPrisma)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    prisma = app.get(PrismaService);
-
-    // 1. Setup Admin User (has ADMIN role and read:test permission)
-    const adminUser = await prisma.user.create({
-      data: {
-        email: `admin-test-${Date.now()}@ecivres.local`,
-        password: 'hashedpassword',
-      },
-    });
-    adminId = adminUser.id;
-
-    const adminRole = await prisma.role.upsert({
-      where: { name: 'ADMIN' },
-      update: {},
-      create: { name: 'ADMIN', description: 'Administrator' },
-    });
-
-    const readTestPermission = await prisma.permission.upsert({
-      where: { name: 'read:test' },
-      update: {},
-      create: { name: 'read:test' },
-    });
-
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: adminRole.id,
-          permissionId: readTestPermission.id,
-        },
-      },
-      create: { roleId: adminRole.id, permissionId: readTestPermission.id },
-      update: {},
-    });
-
-    await prisma.userRole.upsert({
-      where: { userId_roleId: { userId: adminUser.id, roleId: adminRole.id } },
-      create: { userId: adminUser.id, roleId: adminRole.id },
-      update: {},
-    });
-
-    // 2. Setup Customer User (has CUSTOMER role, no permissions)
-    const customerUser = await prisma.user.create({
-      data: {
-        email: `customer-test-${Date.now()}@ecivres.local`,
-        password: 'hashedpassword',
-      },
-    });
-    customerId = customerUser.id;
-
-    const customerRole = await prisma.role.upsert({
-      where: { name: 'CUSTOMER' },
-      update: {},
-      create: { name: 'CUSTOMER', description: 'Customer' },
-    });
-
-    await prisma.userRole.upsert({
-      where: {
-        userId_roleId: { userId: customerUser.id, roleId: customerRole.id },
-      },
-      create: { userId: customerUser.id, roleId: customerRole.id },
-      update: {},
-    });
-
-    // 3. Login to get tokens
-    const adminLogin = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ email: adminUser.email, password: 'hashedpassword' });
-    // In our test we just mocked the password as 'hashedpassword' which won't work with bcrypt compare.
-    // Instead we can generate tokens directly using AuthService
-    const authService = app.get('AuthService');
-    const adminTokenData = await authService.generateTokens(
-      adminUser.id,
-      adminUser.email,
-      ['ADMIN'],
-    );
-    adminToken = adminTokenData.data.accessToken;
-
-    const customerTokenData = await authService.generateTokens(
-      customerUser.id,
-      customerUser.email,
-      ['CUSTOMER'],
-    );
-    customerToken = customerTokenData.data.accessToken;
+    const jwtService = app.get(JwtService);
+    adminToken = jwtService.sign({ email: 'admin@ecivres.local', sub: adminId });
+    customerToken = jwtService.sign({ email: 'customer@ecivres.local', sub: customerId });
   });
 
   afterAll(async () => {
-    // Cleanup
-    await prisma.user.deleteMany({
-      where: { id: { in: [adminId, customerId] } },
-    });
     await app.close();
-    await prisma.$disconnect();
   });
 
-  it('/test-rbac/admin-only (GET) - No JWT', () => {
+  it('1. /test-rbac/admin-only (GET) - No JWT returns 401', () => {
     return request(app.getHttpServer())
       .get('/test-rbac/admin-only')
       .expect(401);
   });
 
-  it('/test-rbac/admin-only (GET) - Valid JWT but wrong role (Customer)', () => {
+  it('2. /test-rbac/admin-only (GET) - Valid JWT but wrong role (Customer) returns 403', () => {
     return request(app.getHttpServer())
       .get('/test-rbac/admin-only')
       .set('Authorization', `Bearer ${customerToken}`)
       .expect(403);
   });
 
-  it('/test-rbac/admin-only (GET) - Valid JWT and correct role (Admin)', () => {
+  it('3. /test-rbac/admin-only (GET) - Valid JWT and correct role (Admin) returns 200', () => {
     return request(app.getHttpServer())
       .get('/test-rbac/admin-only')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
   });
 
-  it('/test-rbac/permission-only (GET) - Missing required permission (Customer)', () => {
+  it('4. /test-rbac/permission-only (GET) - Missing required permission (Customer) returns 403', () => {
     return request(app.getHttpServer())
       .get('/test-rbac/permission-only')
       .set('Authorization', `Bearer ${customerToken}`)
       .expect(403);
   });
 
-  it('/test-rbac/permission-only (GET) - Correct permission (Admin)', () => {
+  it('5. /test-rbac/permission-only (GET) - Has required permission (Admin) returns 200', () => {
     return request(app.getHttpServer())
       .get('/test-rbac/permission-only')
       .set('Authorization', `Bearer ${adminToken}`)
