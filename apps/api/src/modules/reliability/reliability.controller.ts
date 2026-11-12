@@ -55,6 +55,14 @@ export class ReliabilityController {
   }
 
   /**
+   * Dedicated runtime infrastructure connectivity probe (PostgreSQL & Redis).
+   */
+  @Get('health/connectivity')
+  async getConnectivity() {
+    return this.healthService.checkRuntimeConnectivity();
+  }
+
+  /**
    * Deep dependency status (Database, External Adapters, Circuit Breakers, System Resources).
    * Redacts sensitive topology, hostnames, and credentials.
    */
