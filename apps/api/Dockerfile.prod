@@ -27,6 +27,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5001
 
+# Install dumb-init for graceful signal handling (PID 1 process reaper)
+RUN apk add --no-cache dumb-init
 RUN npm install -g pnpm@9.15.4
 
 # Copy dependency manifests
@@ -56,4 +58,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 
 EXPOSE 5001
 
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "apps/api/dist/main.js"]
