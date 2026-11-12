@@ -3,10 +3,41 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5433/ecivres_staging?schema=public';
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+export const STAGING_ROLES = ['ADMIN', 'CUSTOMER', 'PROVIDER', 'OWNER', 'MEMBER', 'BILLING'];
+
+export const STAGING_ORGANIZATIONS = [
+  {
+    id: 'org_alpha_corp',
+    name: 'Alpha Corporation',
+    slug: 'alpha-corp',
+    tier: 'ENTERPRISE',
+    status: 'ACTIVE',
+    settings: { netTermsDays: 30, approvalThresholdUsd: 5000 },
+  },
+  {
+    id: 'org_beta_industries',
+    name: 'Beta Industries',
+    slug: 'beta-industries',
+    tier: 'BUSINESS',
+    status: 'ACTIVE',
+    settings: { netTermsDays: 15, approvalThresholdUsd: 2500 },
+  },
+];
+
+export const STAGING_USERS = [
+  { email: 'staging-admin@ecivres.com', role: 'ADMIN' },
+  { email: 'alpha-owner@alpha.corp', role: 'OWNER', orgId: 'org_alpha_corp' },
+  { email: 'alpha-member@alpha.corp', role: 'MEMBER', orgId: 'org_alpha_corp' },
+  { email: 'beta-owner@beta.industries', role: 'OWNER', orgId: 'org_beta_industries' },
+  { email: 'beta-member@beta.industries', role: 'MEMBER', orgId: 'org_beta_industries' },
+];
+
+export const STAGING_CATEGORIES = [
+  'HVAC & Cooling',
+  'Electrical Systems',
+  'Plumbing & Drainage',
+  'Commercial Cleaning',
+];
 
 export interface StagingSeedResult {
   tenantsCreated: number;
@@ -15,15 +46,24 @@ export interface StagingSeedResult {
   categoriesCreated: number;
 }
 
-export async function runStagingSeed(): Promise<StagingSeedResult> {
+export async function runStagingSeed(customPrisma?: any): Promise<StagingSeedResult> {
+  let prisma = customPrisma;
+  let localPool: Pool | null = null;
+
+  if (!prisma) {
+    const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5433/ecivres_staging?schema=public';
+    localPool = new Pool({ connectionString });
+    const adapter = new PrismaPg(localPool);
+    prisma = new PrismaClient({ adapter });
+  }
+
   console.log('[Staging Seed] Initializing staging seed data...');
 
   const passwordHash = await bcrypt.hash('StagingSecurePasswd2026!', 10);
 
   // 1. Roles & Core Tenancy Roles
-  const roleNames = ['ADMIN', 'CUSTOMER', 'PROVIDER', 'OWNER', 'MEMBER', 'BILLING'];
   const roles: Record<string, any> = {};
-  for (const name of roleNames) {
+  for (const name of STAGING_ROLES) {
     roles[name] = await prisma.role.upsert({
       where: { name },
       update: {},
@@ -32,43 +72,17 @@ export async function runStagingSeed(): Promise<StagingSeedResult> {
   }
 
   // 2. Enterprise Tenants
-  const tenantAlpha = await prisma.enterpriseOrganization.upsert({
-    where: { slug: 'alpha-corp' },
-    update: {},
-    create: {
-      id: 'org_alpha_corp',
-      name: 'Alpha Corporation',
-      slug: 'alpha-corp',
-      tier: 'ENTERPRISE',
-      status: 'ACTIVE',
-      settings: { netTermsDays: 30, approvalThresholdUsd: 5000 },
-    },
-  });
-
-  const tenantBeta = await prisma.enterpriseOrganization.upsert({
-    where: { slug: 'beta-industries' },
-    update: {},
-    create: {
-      id: 'org_beta_industries',
-      name: 'Beta Industries',
-      slug: 'beta-industries',
-      tier: 'BUSINESS',
-      status: 'ACTIVE',
-      settings: { netTermsDays: 15, approvalThresholdUsd: 2500 },
-    },
-  });
+  for (const org of STAGING_ORGANIZATIONS) {
+    await prisma.enterpriseOrganization.upsert({
+      where: { slug: org.slug },
+      update: {},
+      create: org,
+    });
+  }
 
   // 3. Staging Users
-  const stagingUsers = [
-    { email: 'staging-admin@ecivres.com', role: 'ADMIN' },
-    { email: 'alpha-owner@alpha.corp', role: 'OWNER', orgId: tenantAlpha.id },
-    { email: 'alpha-member@alpha.corp', role: 'MEMBER', orgId: tenantAlpha.id },
-    { email: 'beta-owner@beta.industries', role: 'OWNER', orgId: tenantBeta.id },
-    { email: 'beta-member@beta.industries', role: 'MEMBER', orgId: tenantBeta.id },
-  ];
-
   let usersCount = 0;
-  for (const u of stagingUsers) {
+  for (const u of STAGING_USERS) {
     const user = await prisma.user.upsert({
       where: { email: u.email },
       update: {},
@@ -79,19 +93,21 @@ export async function runStagingSeed(): Promise<StagingSeedResult> {
     });
     usersCount++;
 
-    await prisma.userRole.upsert({
-      where: {
-        userId_roleId: {
+    if (roles[u.role]) {
+      await prisma.userRole.upsert({
+        where: {
+          userId_roleId: {
+            userId: user.id,
+            roleId: roles[u.role].id,
+          },
+        },
+        update: {},
+        create: {
           userId: user.id,
           roleId: roles[u.role].id,
         },
-      },
-      update: {},
-      create: {
-        userId: user.id,
-        roleId: roles[u.role].id,
-      },
-    });
+      });
+    }
 
     if (u.orgId) {
       await prisma.organizationMember.upsert({
@@ -109,14 +125,14 @@ export async function runStagingSeed(): Promise<StagingSeedResult> {
   }
 
   // 4. Staging Categories
-  const categories = ['HVAC & Cooling', 'Electrical Systems', 'Plumbing & Drainage', 'Commercial Cleaning'];
   let categoriesCount = 0;
-  for (const catName of categories) {
+  for (const catName of STAGING_CATEGORIES) {
+    const id = `cat_${catName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
     await prisma.category.upsert({
-      where: { id: `cat_${catName.toLowerCase().replace(/[^a-z0-9]/g, '_')}` },
+      where: { id },
       update: {},
       create: {
-        id: `cat_${catName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+        id,
         name: catName,
         description: `Staging category for ${catName}`,
       },
@@ -125,10 +141,16 @@ export async function runStagingSeed(): Promise<StagingSeedResult> {
   }
 
   console.log('[Staging Seed] Completed successfully.');
+
+  if (localPool) {
+    await prisma.$disconnect();
+    await localPool.end();
+  }
+
   return {
-    tenantsCreated: 2,
+    tenantsCreated: STAGING_ORGANIZATIONS.length,
     usersCreated: usersCount,
-    rolesCreated: roleNames.length,
+    rolesCreated: STAGING_ROLES.length,
     categoriesCreated: categoriesCount,
   };
 }
@@ -142,9 +164,5 @@ if (require.main === module) {
     .catch((err) => {
       console.error('Seed error:', err);
       process.exit(1);
-    })
-    .finally(async () => {
-      await prisma.$disconnect();
-      await pool.end();
     });
 }
