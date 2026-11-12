@@ -38,15 +38,15 @@ module "kms" {
 
 resource "aws_security_group" "db_sg" {
   name        = "ecivres-${var.environment}-db-sg"
-  description = "Staging Database Security Group"
+  description = "Staging Database Security Group (Private Subnets Only)"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-    description = "PostgreSQL ingress from VPC"
+    cidr_blocks = var.private_subnet_cidrs
+    description = "PostgreSQL ingress restricted to private application subnets"
   }
 
   egress {
@@ -64,15 +64,15 @@ resource "aws_security_group" "db_sg" {
 
 resource "aws_security_group" "redis_sg" {
   name        = "ecivres-${var.environment}-redis-sg"
-  description = "Staging Redis Security Group"
+  description = "Staging Redis Security Group (Private Subnets Only)"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-    description = "Redis ingress from VPC"
+    cidr_blocks = var.private_subnet_cidrs
+    description = "Redis ingress restricted to private application subnets"
   }
 
   egress {
