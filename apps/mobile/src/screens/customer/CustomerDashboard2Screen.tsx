@@ -19,7 +19,7 @@ export const CustomerDashboard2Screen: React.FC = () => {
         <Text style={styles.emergencyIcon}>🚨</Text>
         <View style={styles.emergencyTextContainer}>
           <Text style={styles.emergencyTitle}>Emergency Services Needed?</Text>
-          <Text style={styles.emergencySub}>Plumbing, Electrical & Locksmith in < 30 mins</Text>
+          <Text style={styles.emergencySub}>Plumbing, Electrical & Locksmith in {'< 30 mins'}</Text>
         </View>
       </TouchableOpacity>
 
