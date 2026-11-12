@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecivres.fullname" . }}-config
+  labels:
+    {{- include "ecivres.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.env.NODE_ENV | default "staging" | quote }}
+  PORT: {{ .Values.service.port | default "5001" | quote }}
+  API_PREFIX: "/api"
+  CORS_ORIGIN: {{ .Values.env.CORS_ORIGIN | default "https://staging.ecivres.com" | quote }}
+  LOG_LEVEL: {{ .Values.env.LOG_LEVEL | default "info" | quote }}
+  {{- range $key, $val := .Values.config }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
