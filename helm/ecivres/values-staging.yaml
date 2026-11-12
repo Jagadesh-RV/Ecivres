@@ -1,0 +1,41 @@
+# Staging Helm values for EcivreS API Workloads
+replicaCount: 2
+
+image:
+  repository: ecivres-api
+  pullPolicy: Always
+  tag: "staging"
+
+service:
+  type: ClusterIP
+  port: 5001
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: staging-api.ecivres.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
+
+env:
+  NODE_ENV: staging
+  API_PORT: "5001"
