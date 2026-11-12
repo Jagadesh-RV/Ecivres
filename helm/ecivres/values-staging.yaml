@@ -21,6 +21,10 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
+  tls:
+    - secretName: ecivres-staging-tls
+      hosts:
+        - staging-api.ecivres.com
 
 resources:
   limits:
