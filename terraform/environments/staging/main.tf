@@ -17,6 +17,9 @@ provider "aws" {
       Environment = var.environment
       Project     = "EcivreS"
       ManagedBy   = "Terraform"
+      CostCenter  = var.cost_center
+      Owner       = var.owner
+      Release     = "v20.0.0-real-cloud-staging-operations"
     }
   }
 }

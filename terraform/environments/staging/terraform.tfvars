@@ -8,4 +8,6 @@ db_instance_class    = "db.t4g.small"
 db_password          = "CHANGE_ME_VIA_AWS_SECRETS_MANAGER"
 redis_node_type      = "cache.t4g.micro"
 kubernetes_version   = "1.29"
+cost_center          = "engineering-staging"
+owner                = "platform-ops@ecivres.com"
 
