@@ -101,7 +101,7 @@ export class OperationalMetricsService {
   /**
    * Increments circuit breaker trip counter.
    */
-  recordCircuitTrip(): void {
+  recordCircuitTrip(serviceName?: string): void {
     this.circuitTrips++;
   }
 
