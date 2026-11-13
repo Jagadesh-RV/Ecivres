@@ -1,0 +1,62 @@
+name: Helm Chart CI & Template Validation
+
+on:
+  push:
+    paths:
+      - 'helm/**'
+      - '.github/workflows/helm-ci.yml'
+  pull_request:
+    paths:
+      - 'helm/**'
+      - '.github/workflows/helm-ci.yml'
+
+concurrency:
+  group: helm-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  helm-validation:
+    name: Lint & Template Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.2'
+
+      - name: Helm Dependency Update
+        run: |
+          if [ -f helm/ecivres/Chart.lock ] || [ -f helm/ecivres/requirements.yaml ]; then
+            helm dependency update helm/ecivres
+          fi
+
+      - name: Helm Lint (Base Values)
+        run: |
+          helm lint helm/ecivres --strict
+
+      - name: Helm Lint (Staging Values)
+        run: |
+          helm lint helm/ecivres -f helm/ecivres/values-staging.yaml --strict
+
+      - name: Helm Template Rendering Validation (Staging)
+        run: |
+          helm template staging helm/ecivres \
+            --namespace ecivres-staging \
+            -f helm/ecivres/values-staging.yaml \
+            --set image.tag=v20.0.0-staging \
+            > staging-rendered-manifests.yaml
+          
+          echo "Rendered staging manifests successfully ($(wc -l < staging-rendered-manifests.yaml) lines)"
+
+      - name: Verify Key Kubernetes Resources in Rendered Manifests
+        run: |
+          grep -q "kind: Deployment" staging-rendered-manifests.yaml || { echo "Missing Deployment"; exit 1; }
+          grep -q "kind: Service" staging-rendered-manifests.yaml || { echo "Missing Service"; exit 1; }
+          grep -q "kind: Ingress" staging-rendered-manifests.yaml || { echo "Missing Ingress"; exit 1; }
+          grep -q "kind: Job" staging-rendered-manifests.yaml || { echo "Missing Migration Job"; exit 1; }
+          grep -q "kind: HorizontalPodAutoscaler" staging-rendered-manifests.yaml || { echo "Missing HPA"; exit 1; }
+          echo "All core Kubernetes manifests verified in rendered output."
