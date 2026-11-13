@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "../providers/query-provider";
 import { AuthProvider } from "../providers/auth-provider";
+import { StagingBanner } from "../components/layout/StagingBanner";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { Toaster } from "@/components/ui/sonner";
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased flex flex-col">
         <QueryProvider>
           <AuthProvider>
+            <StagingBanner />
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
