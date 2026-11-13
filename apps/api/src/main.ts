@@ -6,6 +6,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import helmet from 'helmet';
 import compression from 'compression';
 import { validateProductionEnvironment } from './config/env-validation';
@@ -52,6 +53,9 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Distributed Tracing: Attach and propagate request correlation ID
+  app.use(new CorrelationIdMiddleware().use);
 
   // Custom Permissions-Policy and Anti-Sniffing headers
   app.use(new SecurityHeadersMiddleware().use);
