@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
+import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 import helmet from 'helmet';
 import compression from 'compression';
 import { validateProductionEnvironment } from './config/env-validation';
@@ -21,7 +22,7 @@ async function bootstrap() {
   // API Versioning
   app.setGlobalPrefix('api/v1');
 
-  // Security Headers (XSS, Clickjacking protection)
+  // Security Headers (XSS, Clickjacking protection, HSTS, strict CSP)
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -30,11 +31,30 @@ async function bootstrap() {
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
           scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
+          frameAncestors: ["'none'"],
+          formAction: ["'self'"],
         },
       },
       crossOriginEmbedderPolicy: false,
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+      frameguard: {
+        action: 'deny',
+      },
+      noSniff: true,
+      referrerPolicy: {
+        policy: 'strict-origin-when-cross-origin',
+      },
     }),
   );
+
+  // Custom Permissions-Policy and Anti-Sniffing headers
+  app.use(new SecurityHeadersMiddleware().use);
 
   // Gzip Compression for Performance
   app.use(
