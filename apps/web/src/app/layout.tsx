@@ -4,6 +4,7 @@ import "./globals.css";
 import { QueryProvider } from "../providers/query-provider";
 import { AuthProvider } from "../providers/auth-provider";
 import { StagingBanner } from "../components/layout/StagingBanner";
+import { ApiHealthIndicator } from "../components/layout/ApiHealthIndicator";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { Toaster } from "@/components/ui/sonner";
@@ -37,6 +38,7 @@ export default function RootLayout({
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
+            <ApiHealthIndicator />
             <Toaster />
           </AuthProvider>
         </QueryProvider>
