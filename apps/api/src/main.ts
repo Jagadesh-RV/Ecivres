@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -87,6 +87,21 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   });
 
-  await app.listen(process.env.API_PORT ?? 5001, '0.0.0.0');
+  const port = process.env.API_PORT ?? 5001;
+  await app.listen(port, '0.0.0.0');
+
+  const logger = new Logger('Bootstrap');
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const appVersion = process.env.APP_VERSION || 'v20.0.0-real-cloud-staging-operations';
+
+  logger.log(`================================================================`);
+  logger.log(`  EcivreS Platform API — Online & Operational                   `);
+  logger.log(`  Environment : ${nodeEnv.toUpperCase()}`);
+  logger.log(`  Release Tag : ${appVersion}`);
+  logger.log(`  Process PID : ${process.pid}`);
+  logger.log(`  Port Bind   : 0.0.0.0:${port}`);
+  logger.log(`  Health Check: http://localhost:${port}/api/v1/health`);
+  logger.log(`  API Docs    : http://localhost:${port}/api/docs`);
+  logger.log(`================================================================`);
 }
 void bootstrap();
