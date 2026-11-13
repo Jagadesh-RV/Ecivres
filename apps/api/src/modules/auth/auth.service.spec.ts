@@ -157,5 +157,31 @@ describe('AuthService', () => {
       expect(result).toEqual({ success: true, message: 'All active user sessions revoked' });
       expect((prisma.refreshToken as any).deleteMany).toHaveBeenCalledWith({ where: { userId: 'u-1' } });
     });
+
+    it('should detect refresh token replay, invalidate entire token family, and throw UnauthorizedException', async () => {
+      const secret = 'secret';
+      jest.spyOn(configService, 'get').mockReturnValue(secret);
+      const computedHmac = `HMAC:${crypto.createHmac('sha256', secret).update('stolen-token').digest('hex')}`;
+
+      const mockSavedToken = {
+        id: 'rt-stolen',
+        tokenHash: computedHmac,
+        userId: 'u-victim',
+        expiresAt: new Date(Date.now() + 86400000),
+        user: { id: 'u-victim', email: 'victim@test.com' },
+      };
+      jest.spyOn(prisma.refreshToken, 'findMany').mockResolvedValue([mockSavedToken] as any);
+      jest.spyOn(usersService, 'findOneById').mockResolvedValue({ id: 'u-victim', email: 'victim@test.com' } as any);
+      jest.spyOn(prisma.refreshToken, 'delete').mockResolvedValue({} as any);
+      jest.spyOn(prisma.refreshToken, 'create').mockResolvedValue({} as any);
+      (prisma.refreshToken as any).deleteMany = jest.fn().mockResolvedValue({ count: 5 });
+
+      // First refresh succeeds and rotates the token
+      await service.refresh('stolen-token');
+
+      // Second refresh with the same token is an attacker replay attempt!
+      await expect(service.refresh('stolen-token')).rejects.toThrow(UnauthorizedException);
+      expect((prisma.refreshToken as any).deleteMany).toHaveBeenCalledWith({ where: { userId: 'u-victim' } });
+    });
   });
 });

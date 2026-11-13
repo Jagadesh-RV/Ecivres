@@ -55,6 +55,14 @@ export class ReliabilityController {
   }
 
   /**
+   * Dedicated runtime infrastructure connectivity probe (PostgreSQL & Redis).
+   */
+  @Get('health/connectivity')
+  async getConnectivity() {
+    return this.healthService.checkRuntimeConnectivity();
+  }
+
+  /**
    * Deep dependency status (Database, External Adapters, Circuit Breakers, System Resources).
    * Redacts sensitive topology, hostnames, and credentials.
    */
@@ -70,11 +78,29 @@ export class ReliabilityController {
   }
 
   /**
-   * Operational metrics snapshot: request rate, error rate, p50/p95/p99 latency percentiles.
+   * Operational metrics snapshot: request rate, error rate, p50/p95/p99 latency percentiles (JSON format).
    */
   @Get('reliability/metrics')
   getMetrics() {
     return this.metricsService.getMetricsSnapshot();
+  }
+
+  /**
+   * Prometheus standard metrics scraper endpoint (text exposition format).
+   */
+  @Get('metrics')
+  getPrometheusMetrics(@Res() res: Response) {
+    res.setHeader('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    return res.send(this.metricsService.toPrometheusFormat());
+  }
+
+  /**
+   * Alias for prometheus metrics under reliability route namespace.
+   */
+  @Get('reliability/metrics/prometheus')
+  getPrometheusMetricsAlias(@Res() res: Response) {
+    res.setHeader('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    return res.send(this.metricsService.toPrometheusFormat());
   }
 
   /**

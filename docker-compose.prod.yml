@@ -31,6 +31,11 @@ services:
         limits:
           cpus: '2.0'
           memory: 4G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7-alpine
@@ -51,6 +56,11 @@ services:
         limits:
           cpus: '1.0'
           memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api:
     build:
@@ -80,6 +90,11 @@ services:
         limits:
           cpus: '2.0'
           memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   web:
     build:
@@ -100,6 +115,11 @@ services:
         limits:
           cpus: '1.5'
           memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   worker:
     build:
@@ -125,6 +145,11 @@ services:
         limits:
           cpus: '1.0'
           memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     image: nginx:1.25-alpine

@@ -10,6 +10,7 @@ import { SloTrackerService } from './slo-tracker.service';
 import { SelfHealingOrchestratorService } from './self-healing-orchestrator.service';
 import { GracefulShutdownService } from './graceful-shutdown.service';
 import { IncidentManagerService } from './incident-manager.service';
+import { CircuitBreakerDrillService } from './circuit-breaker-drill.service';
 import { ReliabilityController } from './reliability.controller';
 
 @Module({
@@ -27,6 +28,7 @@ import { ReliabilityController } from './reliability.controller';
     SelfHealingOrchestratorService,
     GracefulShutdownService,
     IncidentManagerService,
+    CircuitBreakerDrillService,
   ],
   exports: [
     DependencyHealthService,
@@ -35,6 +37,7 @@ import { ReliabilityController } from './reliability.controller';
     SelfHealingOrchestratorService,
     GracefulShutdownService,
     IncidentManagerService,
+    CircuitBreakerDrillService,
   ],
 })
 export class ReliabilityModule {}

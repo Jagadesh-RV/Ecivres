@@ -1,0 +1,58 @@
+name: Pull Request Verification Matrix
+
+on:
+  pull_request:
+    branches: [ develop, main ]
+  push:
+    branches: [ 'feature/**', 'fix/**' ]
+
+concurrency:
+  group: pr-verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  matrix-verify:
+    name: ${{ matrix.package }} (${{ matrix.task }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: api
+            task: lint-and-typecheck
+            command: pnpm --filter api run lint && pnpm --filter api run typecheck
+          - package: api
+            task: unit-tests
+            command: pnpm --filter api run test -- --maxWorkers=2
+          - package: web
+            task: typecheck-and-lint
+            command: pnpm --filter web run typecheck && pnpm --filter web run lint
+          - package: mobile
+            task: typecheck-and-test
+            command: pnpm --filter mobile run typecheck && pnpm --filter mobile run test -- --passWithNoTests
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+
+      - name: Generate Prisma Client
+        if: matrix.package == 'api'
+        run: pnpm --filter api exec prisma generate
+
+      - name: Execute ${{ matrix.task }} for ${{ matrix.package }}
+        run: ${{ matrix.command }}
