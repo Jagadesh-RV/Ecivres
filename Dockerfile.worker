@@ -22,6 +22,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV IS_WORKER=true
 
+# Install dumb-init for graceful worker task signal handling
+RUN apk add --no-cache dumb-init
 RUN npm install -g pnpm@9.15.4
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -41,4 +43,5 @@ WORKDIR /app
 RUN chown -R node:node /app
 USER node
 
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "apps/api/dist/main.js"]

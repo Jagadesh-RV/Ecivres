@@ -1,10 +1,13 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
+import { CacheHeaderInterceptor } from './common/interceptors/cache-header.interceptor';
+import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import helmet from 'helmet';
 import compression from 'compression';
 import { validateProductionEnvironment } from './config/env-validation';
@@ -15,10 +18,13 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  // Enable graceful shutdown lifecycle hooks for SIGTERM / SIGINT
+  app.enableShutdownHooks();
+
   // API Versioning
   app.setGlobalPrefix('api/v1');
 
-  // Security Headers (XSS, Clickjacking protection)
+  // Security Headers (XSS, Clickjacking protection, HSTS, strict CSP)
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -27,11 +33,33 @@ async function bootstrap() {
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
           scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
+          frameAncestors: ["'none'"],
+          formAction: ["'self'"],
         },
       },
       crossOriginEmbedderPolicy: false,
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+      frameguard: {
+        action: 'deny',
+      },
+      noSniff: true,
+      referrerPolicy: {
+        policy: 'strict-origin-when-cross-origin',
+      },
     }),
   );
+
+  // Distributed Tracing: Attach and propagate request correlation ID
+  app.use(new CorrelationIdMiddleware().use);
+
+  // Custom Permissions-Policy and Anti-Sniffing headers
+  app.use(new SecurityHeadersMiddleware().use);
 
   // Gzip Compression for Performance
   app.use(
@@ -45,7 +73,11 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global Interceptors
-  app.useGlobalInterceptors(new LoggingInterceptor(), new PerformanceInterceptor());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new PerformanceInterceptor(),
+    new CacheHeaderInterceptor(),
+  );
 
   // Global Validation Pipe
   app.useGlobalPipes(
@@ -87,6 +119,21 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   });
 
-  await app.listen(process.env.API_PORT ?? 5001, '0.0.0.0');
+  const port = process.env.API_PORT ?? 5001;
+  await app.listen(port, '0.0.0.0');
+
+  const logger = new Logger('Bootstrap');
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const appVersion = process.env.APP_VERSION || 'v20.0.0-real-cloud-staging-operations';
+
+  logger.log(`================================================================`);
+  logger.log(`  EcivreS Platform API — Online & Operational                   `);
+  logger.log(`  Environment : ${nodeEnv.toUpperCase()}`);
+  logger.log(`  Release Tag : ${appVersion}`);
+  logger.log(`  Process PID : ${process.pid}`);
+  logger.log(`  Port Bind   : 0.0.0.0:${port}`);
+  logger.log(`  Health Check: http://localhost:${port}/api/v1/health`);
+  logger.log(`  API Docs    : http://localhost:${port}/api/docs`);
+  logger.log(`================================================================`);
 }
 void bootstrap();

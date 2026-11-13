@@ -58,3 +58,15 @@ variable "kubernetes_version" {
   default     = "1.29"
 }
 
+variable "cost_center" {
+  type        = string
+  description = "Cost allocation center for staging infrastructure"
+  default     = "engineering-staging"
+}
+
+variable "owner" {
+  type        = string
+  description = "Platform team owner tag"
+  default     = "platform-ops@ecivres.com"
+}
+

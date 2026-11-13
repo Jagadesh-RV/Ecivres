@@ -101,7 +101,7 @@ export class OperationalMetricsService {
   /**
    * Increments circuit breaker trip counter.
    */
-  recordCircuitTrip(): void {
+  recordCircuitTrip(serviceName?: string): void {
     this.circuitTrips++;
   }
 
@@ -226,6 +226,46 @@ export class OperationalMetricsService {
       }
     }
     return result;
+  }
+
+  /**
+   * Formats current operational metrics into standard Prometheus text exposition format.
+   */
+  toPrometheusFormat(): string {
+    const snapshot = this.getMetricsSnapshot();
+    const lines: string[] = [
+      '# HELP ecivres_http_requests_total Total number of processed HTTP requests.',
+      '# TYPE ecivres_http_requests_total counter',
+      `ecivres_http_requests_total ${snapshot.totalRequests}`,
+      '',
+      '# HELP ecivres_http_errors_total Total number of HTTP 5xx errors.',
+      '# TYPE ecivres_http_errors_total counter',
+      `ecivres_http_errors_total ${snapshot.totalErrors}`,
+      '',
+      '# HELP ecivres_error_rate_percent Current rolling HTTP error rate percentage.',
+      '# TYPE ecivres_error_rate_percent gauge',
+      `ecivres_error_rate_percent ${snapshot.errorRatePercent}`,
+      '',
+      '# HELP ecivres_http_request_duration_ms HTTP request latency percentiles in milliseconds.',
+      '# TYPE ecivres_http_request_duration_ms gauge',
+      `ecivres_http_request_duration_ms{quantile="0.50"} ${snapshot.latencies.p50Ms}`,
+      `ecivres_http_request_duration_ms{quantile="0.95"} ${snapshot.latencies.p95Ms}`,
+      `ecivres_http_request_duration_ms{quantile="0.99"} ${snapshot.latencies.p99Ms}`,
+      '',
+      '# HELP ecivres_circuit_trips_total Total circuit breaker trip events.',
+      '# TYPE ecivres_circuit_trips_total counter',
+      `ecivres_circuit_trips_total ${snapshot.circuitTrips}`,
+      '',
+      '# HELP ecivres_retry_attempts_total Total resilience retry attempts.',
+      '# TYPE ecivres_retry_attempts_total counter',
+      `ecivres_retry_attempts_total ${snapshot.retryAttempts}`,
+      '',
+      '# HELP ecivres_dead_letter_events_total Dead letter queue dropped messages.',
+      '# TYPE ecivres_dead_letter_events_total counter',
+      `ecivres_dead_letter_events_total ${snapshot.deadLetterEvents}`,
+      '',
+    ];
+    return lines.join('\n');
   }
 }
 

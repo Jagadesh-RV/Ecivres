@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +15,9 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+  private readonly recentlyRevokedTokens = new Map<string, { userId: string; revokedAt: number }>();
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -116,6 +120,18 @@ export class AuthService {
     this.processingRefreshTokens.add(computedHmac);
 
     try {
+      // Replay Detection Gate: Detect re-submission of superseded refresh tokens
+      const revokedEntry = this.recentlyRevokedTokens.get(computedHmac);
+      if (revokedEntry) {
+        this.logger.warn(
+          `[SECURITY ALERT] Refresh token replay attack detected for userId '${revokedEntry.userId}'. Entire token family invalidated.`,
+        );
+        await this.revokeAllTokensForUser(revokedEntry.userId);
+        throw new UnauthorizedException(
+          'Refresh token replay detected. All active sessions invalidated for security.',
+        );
+      }
+
       // Find all unexpired tokens
       const activeTokens = await this.prisma.refreshToken.findMany({
         where: {
@@ -148,6 +164,20 @@ export class AuthService {
       await this.prisma.refreshToken.delete({
         where: { id: matchedToken.id },
       });
+
+      // Register old token in replay detection cache
+      this.recentlyRevokedTokens.set(computedHmac, {
+        userId: matchedToken.userId,
+        revokedAt: Date.now(),
+      });
+
+      // Bounded cleanup: prune entries older than 24 hours
+      const now = Date.now();
+      for (const [key, value] of this.recentlyRevokedTokens.entries()) {
+        if (now - value.revokedAt > 24 * 60 * 60 * 1000) {
+          this.recentlyRevokedTokens.delete(key);
+        }
+      }
 
       const user = matchedToken.user;
       const payload = { email: user.email, sub: user.id };

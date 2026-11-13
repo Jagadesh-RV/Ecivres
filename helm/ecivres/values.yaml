@@ -33,3 +33,15 @@ autoscaling:
   minReplicas: 3
   maxReplicas: 15
   targetCPUUtilizationPercentage: 70
+
+secrets:
+  enabled: false
+  databaseUrl: ""
+  redisUrl: ""
+  jwtSecret: ""
+  jwtRefreshSecret: ""
+
+migration:
+  enabled: true
+  backoffLimit: 3
+  timeoutSeconds: 300

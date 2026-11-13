@@ -1,0 +1,129 @@
+networks:
+  ecivres-staging-network:
+    driver: bridge
+
+volumes:
+  postgres_staging_data:
+    name: ecivres_postgres_staging_data
+  redis_staging_data:
+    name: ecivres_redis_staging_data
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ecivres-postgres-staging
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ecivres_staging_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-ecivres_staging}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    networks:
+      - ecivres-staging-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ecivres_staging_user} -d ${POSTGRES_DB:-ecivres_staging}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecivres-redis-staging
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - ecivres-staging-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.prod
+    container_name: ecivres-api-staging
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      NODE_ENV: staging
+      API_PORT: 5001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ecivres_staging_user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-ecivres_staging}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-staging_access_secret_entropy_64_bytes_0123456789abcdef0123456789abc}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-staging_refresh_secret_entropy_64_bytes_0123456789abcdef0123456789abc}
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5001,https://staging.ecivres.com
+    networks:
+      - ecivres-staging-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.prod
+    container_name: ecivres-web-staging
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: staging
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:5001/api/v1
+    networks:
+      - ecivres-staging-network
+    depends_on:
+      - api
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

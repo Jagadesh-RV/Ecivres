@@ -51,4 +51,18 @@ describe('Phase 24: DevSecOps Environment Configuration & Secret Hardening', () 
     expect(parsed.DATABASE_URL).toBeDefined();
     expect(parsed.JWT_ACCESS_SECRET).toBeDefined();
   });
+
+  it('should accept valid high-entropy configuration in staging environment', () => {
+    const stagingConfig = {
+      NODE_ENV: 'staging',
+      DATABASE_URL: 'postgresql://staging_user:StagingPasswd9821@staging-db.internal:5432/ecivres_staging',
+      JWT_ACCESS_SECRET: 'staging_access_secret_entropy_64_bytes_0123456789abcdef0123456789abc',
+      JWT_REFRESH_SECRET: 'staging_refresh_secret_entropy_64_bytes_0123456789abcdef0123456789abc',
+      CORS_ORIGINS: 'https://staging.ecivres.com,https://staging-api.ecivres.com',
+    };
+
+    const parsed = validateProductionEnvironment(stagingConfig);
+    expect(parsed.NODE_ENV).toBe('staging');
+    expect(parsed.CORS_ORIGINS).toContain('https://staging.ecivres.com');
+  });
 });

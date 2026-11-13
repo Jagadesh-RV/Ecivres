@@ -18,11 +18,21 @@ out
 coverage
 .turbo
 .pnpm-store
+*.tsbuildinfo
+
+# Sub-projects excluded from backend/web images
+apps/mobile
+docs
+terraform
+helm
+backups
+*.dump
 
 # Environment files & secrets
 .env
 .env.*
 !.env.example
+!.env.staging.example
 *.pem
 *.key
 *.cert

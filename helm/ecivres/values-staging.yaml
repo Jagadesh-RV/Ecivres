@@ -21,6 +21,10 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
+  tls:
+    - secretName: ecivres-staging-tls
+      hosts:
+        - staging-api.ecivres.com
 
 resources:
   limits:
@@ -39,3 +43,15 @@ autoscaling:
 env:
   NODE_ENV: staging
   API_PORT: "5001"
+
+secrets:
+  enabled: true
+  databaseUrl: "postgresql://postgres:password@localhost:5433/ecivres_staging?schema=public"
+  redisUrl: "redis://localhost:6379"
+  jwtSecret: "staging-jwt-secret-key-32chars-minimum-ecivres"
+  jwtRefreshSecret: "staging-jwt-refresh-secret-key-32chars-ecivres"
+
+migration:
+  enabled: true
+  backoffLimit: 3
+  timeoutSeconds: 300
