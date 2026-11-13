@@ -45,3 +45,8 @@ docker-data/
 # Prisma
 *.db
 *.sqlite
+
+# Database Backups
+backups/*.sql
+backups/*.sql.sha256
+!backups/.gitkeep
