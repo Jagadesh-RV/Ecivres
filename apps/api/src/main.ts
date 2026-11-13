@@ -15,6 +15,9 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  // Enable graceful shutdown lifecycle hooks for SIGTERM / SIGINT
+  app.enableShutdownHooks();
+
   // API Versioning
   app.setGlobalPrefix('api/v1');
 

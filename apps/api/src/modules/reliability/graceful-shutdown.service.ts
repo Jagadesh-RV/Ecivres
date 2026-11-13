@@ -7,8 +7,17 @@ export class GracefulShutdownService implements OnApplicationShutdown {
   private isShuttingDown = false;
   private activeRequestCount = 0;
   private readonly DRAIN_TIMEOUT_MS = 10000;
+  private readonly teardownCallbacks: Array<() => Promise<void> | void> = [];
 
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Registers a custom teardown callback (e.g. cache drain, worker stop)
+   * executed during graceful termination.
+   */
+  registerTeardownHook(hook: () => Promise<void> | void): void {
+    this.teardownCallbacks.push(hook);
+  }
 
   /**
    * Tracks an incoming request to prevent terminating mid-transaction during rollout.
@@ -65,6 +74,15 @@ export class GracefulShutdownService implements OnApplicationShutdown {
       );
     } else {
       this.logger.log(`All in-flight requests drained cleanly in ${Date.now() - startTime}ms.`);
+    }
+
+    // Execute registered custom teardown hooks (cache, worker queue draining)
+    for (const hook of this.teardownCallbacks) {
+      try {
+        await hook();
+      } catch (hookErr: any) {
+        this.logger.error(`Error executing teardown hook: ${hookErr?.message}`);
+      }
     }
 
     // Gracefully disconnect database client
