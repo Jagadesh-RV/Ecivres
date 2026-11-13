@@ -50,3 +50,8 @@ secrets:
   redisUrl: "redis://localhost:6379"
   jwtSecret: "staging-jwt-secret-key-32chars-minimum-ecivres"
   jwtRefreshSecret: "staging-jwt-refresh-secret-key-32chars-ecivres"
+
+migration:
+  enabled: true
+  backoffLimit: 3
+  timeoutSeconds: 300

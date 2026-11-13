@@ -40,3 +40,8 @@ secrets:
   redisUrl: ""
   jwtSecret: ""
   jwtRefreshSecret: ""
+
+migration:
+  enabled: true
+  backoffLimit: 3
+  timeoutSeconds: 300
