@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
+import { CacheHeaderInterceptor } from './common/interceptors/cache-header.interceptor';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import helmet from 'helmet';
@@ -72,7 +73,11 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global Interceptors
-  app.useGlobalInterceptors(new LoggingInterceptor(), new PerformanceInterceptor());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new PerformanceInterceptor(),
+    new CacheHeaderInterceptor(),
+  );
 
   // Global Validation Pipe
   app.useGlobalPipes(
