@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     height: 220,
     padding: 16,
-    justify: 'space-between',
+    justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: '#1E293B',
     alignItems: 'center',
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   pinContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     width: '80%',
     marginVertical: 20,
   },

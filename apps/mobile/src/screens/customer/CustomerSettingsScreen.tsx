@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { ScreenContainer, Card } from '../../components/ui';
 import { colors, typography, spacing } from '../../theme';
-import { useAuthStore } from '../../stores/auth-store';
+import { useAuthStore } from '../../stores/authStore';
 import client from '../../services/api/client';
 
 export const CustomerSettingsScreen = ({ navigation }: any) => {

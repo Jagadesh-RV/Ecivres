@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AdminHomeScreen } from '../screens/admin/AdminHomeScreen';
-import { ProfileScreen } from '../screens/auth/ProfileScreen';
+import { EditProfileScreen } from '../screens/profile/EditProfileScreen';
 import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -26,7 +26,7 @@ export const AdminTabNavigator = () => {
       />
       <Tab.Screen
         name="AdminProfile"
-        component={ProfileScreen}
+        component={EditProfileScreen}
         options={{ tabBarLabel: 'Account' }}
       />
     </Tab.Navigator>
