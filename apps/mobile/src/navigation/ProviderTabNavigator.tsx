@@ -1,11 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ProviderHomeScreen } from '../screens/provider/ProviderHomeScreen';
+import { ProviderDashboard } from '../screens/provider/ProviderDashboard';
 import { ProviderBookingsScreen } from '../screens/provider/ProviderBookingsScreen';
 import { ProviderServicesScreen } from '../screens/provider/ProviderServicesScreen';
 import { ProviderAvailabilityScreen } from '../screens/provider/ProviderAvailabilityScreen';
 import { ProviderEarningsScreen } from '../screens/provider/ProviderEarningsScreen';
-import { ProfileScreen } from '../screens/auth/ProfileScreen';
+import { EditProfileScreen } from '../screens/profile/EditProfileScreen';
 import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -25,7 +25,7 @@ export const ProviderTabNavigator = () => {
     >
       <Tab.Screen
         name="ProviderHome"
-        component={ProviderHomeScreen}
+        component={ProviderDashboard}
         options={{ tabBarLabel: 'Dashboard' }}
       />
       <Tab.Screen
@@ -50,7 +50,7 @@ export const ProviderTabNavigator = () => {
       />
       <Tab.Screen
         name="ProviderProfile"
-        component={ProfileScreen}
+        component={EditProfileScreen}
         options={{ tabBarLabel: 'Profile' }}
       />
     </Tab.Navigator>

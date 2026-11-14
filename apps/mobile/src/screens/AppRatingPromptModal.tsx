@@ -28,7 +28,7 @@ export const AppRatingPromptModal = () => {
 };
 
 const styles = StyleSheet.create({
-  card: { padding: 20, backgroundColor: '#ffffff', borderRadius: 16, border: '1px solid #e2e8f0', alignItems: 'center' },
+  card: { padding: 20, backgroundColor: '#ffffff', borderRadius: 16, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'center' },
   title: { fontSize: 18, fontWeight: 'bold', color: '#0f172a' },
   desc: { fontSize: 12, color: '#64748b', textAlign: 'center', marginVertical: 10 },
   stars: { flexDirection: 'row', gap: 8, marginVertical: 12 },

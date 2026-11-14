@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { ScreenContainer, Card } from '../../components/ui';
 import { colors, typography, spacing } from '../../theme';
 import client from '../../services/api/client';
@@ -55,7 +55,7 @@ export const CustomerFavoritesScreen = ({ navigation }: any) => {
               <Text style={styles.price}>${item.price?.toFixed(2)}</Text>
               <TouchableOpacity
                 style={styles.bookButton}
-                onPress={() => alert(`Direct booking for ${item.name} initiated!`)}
+                onPress={() => Alert.alert('Booking', `Direct booking for ${item.name} initiated!`)}
               >
                 <Text style={styles.bookButtonText}>Book Now</Text>
               </TouchableOpacity>

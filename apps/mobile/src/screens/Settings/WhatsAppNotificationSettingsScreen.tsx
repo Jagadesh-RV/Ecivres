@@ -18,6 +18,6 @@ export const WhatsAppNotificationSettingsScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#f8fafc' },
   title: { fontSize: 20, fontWeight: '700', color: '#0f172a', marginBottom: 16 },
-  row: { flexDirection: 'row', justifyContent: 'between', alignItems: 'center', padding: 16, backgroundColor: '#ffffff', borderRadius: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#ffffff', borderRadius: 10 },
   label: { fontSize: 14, color: '#334155', flex: 1 },
 });

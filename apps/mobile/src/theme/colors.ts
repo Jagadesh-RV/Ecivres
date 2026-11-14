@@ -14,6 +14,7 @@ export const colors = {
   border: '#E2E8F0', // Slate 200
   
   error: '#EF4444', // Red 500
+  danger: '#EF4444', // Red 500
   success: '#10B981', // Emerald 500
   warning: '#F59E0B', // Amber 500
   info: '#3B82F6', // Blue 500

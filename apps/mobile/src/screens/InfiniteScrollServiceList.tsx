@@ -35,7 +35,7 @@ export const InfiniteScrollServiceList = () => {
           <Text style={styles.price}>{item.price}</Text>
         </View>
       )}
-      ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="#4f46e5" style={{ marginVertical: 16 }} /> : null}
+      ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="#4f46e5" style={{ marginVertical: 16 }} /> : undefined}
     />
   );
 };
