@@ -10,6 +10,7 @@ interface AuthState {
   login: (userData: any, accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
+  fetchCurrentUser: () => Promise<void>;
   updateUser: (userData: any) => void;
 }
 
@@ -71,6 +72,18 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isAuthenticated: false, isProfileComplete: false, isLoading: false });
     }
   },
+
+  fetchCurrentUser: async () => {
+    try {
+      const response = await client.get('/users/me');
+      const userData = response.data;
+      const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
+      set({ user: userData, isAuthenticated: true, isProfileComplete });
+    } catch {
+      // Ignore or preserve existing state
+    }
+  },
+
   updateUser: (userData) => {
     const isProfileComplete = userData.hasCustomerProfile || userData.hasProviderProfile || false;
     set({ user: userData, isProfileComplete });

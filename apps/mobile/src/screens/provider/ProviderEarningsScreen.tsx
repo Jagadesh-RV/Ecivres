@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { ScreenContainer, Card, Badge } from '../../components/ui';
 import { colors, typography, spacing } from '../../theme';
 import client from '../../services/api/client';
@@ -46,7 +46,7 @@ export const ProviderEarningsScreen = () => {
               </Text>
               <TouchableOpacity
                 style={styles.payoutButton}
-                onPress={() => alert('Payout request sent to Stripe Connected Account!')}
+                onPress={() => Alert.alert('Payout', 'Payout request sent to Stripe Connected Account!')}
               >
                 <Text style={styles.payoutButtonText}>Request Instant Payout</Text>
               </TouchableOpacity>

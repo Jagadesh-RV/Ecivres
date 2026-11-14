@@ -4,6 +4,7 @@ export const typography = {
   fontFamily: {
     regular: Platform.OS === 'ios' ? 'System' : 'Roboto',
     medium: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium',
+    semibold: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium',
     bold: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium', // Can map to a custom bold font later
   },
   fontSize: {

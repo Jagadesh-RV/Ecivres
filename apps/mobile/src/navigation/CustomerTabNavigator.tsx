@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator();
 export const CustomerTabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={({ route }: { route: any }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
@@ -26,7 +26,7 @@ export const CustomerTabNavigator = () => {
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarIcon: ({ color }) => {
+        tabBarIcon: ({ color }: { color?: string }) => {
           let icon = '🏠';
           if (route.name === 'Bookings') icon = '📅';
           if (route.name === 'Favorites') icon = '❤️';

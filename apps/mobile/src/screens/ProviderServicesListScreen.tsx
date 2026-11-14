@@ -38,7 +38,7 @@ export const ProviderServicesListScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f8fafc' },
-  header: { flexDirection: 'row', justifyBetween: 'space-between', alignItems: 'center', marginBottom: 16 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   title: { fontSize: 20, fontWeight: 'bold', color: '#0f172a' },
   addBtn: { backgroundColor: '#4f46e5', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
   addText: { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
