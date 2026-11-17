@@ -4,9 +4,9 @@
 
 > [!IMPORTANT]
 > **LIVE CLOUD STAGING PROVISIONING STATUS: HELD / AWAITING HUMAN AUTHORIZATION**
-> 
+>
 > Pursuant to Non-Negotiable Rule 1 ("Never claim a task is complete without command output"), Rule 2 ("Never substitute simulated execution for real execution"), Rule 3 ("Never invent cloud deployment URLs, resource IDs, or metrics"), and Rule 6 ("Never execute paid cloud provisioning without explicit human authorization"), live AWS cloud infrastructure has **not** been instantiated. No billable cloud costs were incurred.
-> 
+>
 > All staging deployment configurations, container images, Helm manifests, database migration jobs, and DNS/TLS route topologies are verified and primed for execution upon human administrative sign-off.
 
 ---
@@ -17,11 +17,11 @@
 graph TD
     Client["Client Traffic (Browser, Mobile App)"] --> Edge["CloudFront CDN / Route 53 (staging.ecivres.com)"]
     Edge --> Ingress["NGINX Ingress Controller / TLS Secret"]
-    
+
     subgraph EKS Staging Cluster (ecivres-staging-eks)
         Ingress --> WebSvc["ecivres-web:3000 (Next.js Standalone SSR)"]
         Ingress --> APISvc["ecivres-api:5001 (NestJS Gateway)"]
-        
+
         APISvc --> MigrationHook["Helm Pre-Upgrade Job (prisma migrate deploy)"]
         APISvc --> DB[(AWS RDS PostgreSQL 17 / db.t4g.medium)]
         APISvc --> Cache[(AWS ElastiCache Redis 7.2 / cache.t4g.medium)]
@@ -35,6 +35,7 @@ graph TD
 ## 3. Staging Configuration & Secrets Provisioning
 
 The staging environment is driven by `.env.staging.example` and Helm staging secrets:
+
 - **Target Ingress Domains:**
   - Web UI: `https://staging.ecivres.com`
   - API Gateway: `https://staging-api.ecivres.com`
