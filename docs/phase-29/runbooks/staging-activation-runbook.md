@@ -3,7 +3,7 @@
 **Document ID:** `RUNBOOK-PHASE29-STAGING-001`  
 **Target Environment:** Staging (`staging.ecivres.com`)  
 **Audience:** Site Reliability Engineers (SRE), Cloud Operations, Release Managers  
-**Version:** 1.0.0  
+**Version:** 1.0.0
 
 ---
 
@@ -33,29 +33,40 @@ Before executing any deployment or infrastructure activation, verify the operato
 ## 2. Standard Deployment Procedure
 
 ### Step 1: Pre-Flight Verification & Secrets
+
 Verify environment secrets exist in AWS Secrets Manager:
+
 ```bash
 aws secretsmanager describe-secret --secret-id ecivres/staging/app-secrets --region us-east-1
 ```
+
 Ensure required keys are populated: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `ENCRYPTION_KEY`.
 
 ### Step 2: Database Migration Execution
+
 Run Prisma migrations in the isolated staging network:
+
 ```bash
 cd apps/api
 pnpm exec prisma migrate deploy
 ```
+
 Verify zero pending migrations:
+
 ```bash
 pnpm exec prisma migrate status
 ```
 
 ### Step 3: Container Image Build & ECR Push
+
 Authenticate Docker with AWS ECR:
+
 ```bash
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
 ```
+
 Build and tag staging images:
+
 ```bash
 # API
 docker build -t 123456789012.dkr.ecr.us-east-1.amazonaws.com/ecivres-api:v21.0.0 -f apps/api/Dockerfile.prod .
@@ -67,7 +78,9 @@ docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/ecivres-web:v21.0.0
 ```
 
 ### Step 4: Infrastructure Provisioning (Terraform)
-*Note: Requires explicit human authorization before executing `apply`.*
+
+_Note: Requires explicit human authorization before executing `apply`._
+
 ```bash
 cd infrastructure/terraform/environments/staging
 terraform init
@@ -76,7 +89,9 @@ terraform apply staging.tfplan
 ```
 
 ### Step 5: Kubernetes Manifest Deployment (Helm)
+
 Deploy or upgrade the staging release:
+
 ```bash
 helm upgrade --install ecivres-staging deploy/helm/ecivres \
   --namespace staging \
@@ -88,6 +103,7 @@ helm upgrade --install ecivres-staging deploy/helm/ecivres \
 ```
 
 ### Step 6: Post-Deployment Smoke & Health Validation
+
 ```bash
 # Verify Kubernetes rollout status
 kubectl rollout status deployment/ecivres-api -n staging
@@ -105,7 +121,9 @@ curl -f https://staging.ecivres.com
 ## 3. Rollback & Emergency Procedures
 
 ### 3.1 Helm Application Rollback
+
 If errors or SLO breaches occur post-deployment:
+
 ```bash
 # Inspect release history
 helm history ecivres-staging -n staging
@@ -115,7 +133,9 @@ helm rollback ecivres-staging 0 -n staging --wait --timeout 5m
 ```
 
 ### 3.2 Database Disaster Recovery (Restore Drill)
+
 In the event of catastrophic data corruption or accidental migration loss:
+
 1. Locate latest encrypted automated snapshot in S3:
    ```bash
    aws s3 ls s3://ecivres-staging-backups/database/ --recursive | sort | tail -n 1
@@ -127,7 +147,9 @@ In the event of catastrophic data corruption or accidental migration loss:
 3. Verify table count ($113$) and index count ($241$) post-restore.
 
 ### 3.3 Emergency Kill Switch Activation
+
 To immediately suspend all automated background jobs, worker redrives, and self-healing actions:
+
 ```bash
 curl -X POST https://api.staging.ecivres.com/api/reliability/kill-switch \
   -H "Authorization: Bearer <OPERATOR_TOKEN>" \
@@ -140,6 +162,7 @@ curl -X POST https://api.staging.ecivres.com/api/reliability/kill-switch \
 ## 4. Secret & Credential Rotation
 
 ### Database Password Rotation:
+
 1. Generate new 32+ character high-entropy secret.
 2. Update AWS Secrets Manager secret `ecivres/staging/database-password`.
 3. Update RDS Master User Password:
@@ -152,6 +175,7 @@ curl -X POST https://api.staging.ecivres.com/api/reliability/kill-switch \
    ```
 
 ### JWT Signing Key Rotation:
+
 1. Stage second key in environment: `JWT_SECONDARY_SECRET=<NEW_KEY>`.
 2. Deploy API pods allowing token verification against either key.
 3. Promote secondary key to primary after token expiration window ($15\text{ minutes}$).
@@ -160,8 +184,8 @@ curl -X POST https://api.staging.ecivres.com/api/reliability/kill-switch \
 
 ## 5. Incident Escalation Matrix
 
-| Severity | Definition | Initial Response SLA | Escalation Target | Actions |
-| :--- | :--- | :--- | :--- | :--- |
-| **SEV1** | Staging down, all health probes failing, data corruption risk | $< 15 \text{ min}$ | Lead SRE + DevOps Lead + Backend Lead | Initiate incident call, execute rollback or DR restore |
-| **SEV2** | High error rates ($> 2\%$), single tier failure (e.g. web down, API up) | $< 30 \text{ min}$ | On-call SRE + Tier Engineer | Inspect CloudWatch logs, restart failed pods |
-| **SEV3** | Minor performance degradation, non-blocking bug | $< 2 \text{ hours}$ | On-call Engineer | Log ticket, schedule standard release fix |
+| Severity | Definition                                                              | Initial Response SLA | Escalation Target                     | Actions                                                |
+| :------- | :---------------------------------------------------------------------- | :------------------- | :------------------------------------ | :----------------------------------------------------- |
+| **SEV1** | Staging down, all health probes failing, data corruption risk           | $< 15 \text{ min}$   | Lead SRE + DevOps Lead + Backend Lead | Initiate incident call, execute rollback or DR restore |
+| **SEV2** | High error rates ($> 2\%$), single tier failure (e.g. web down, API up) | $< 30 \text{ min}$   | On-call SRE + Tier Engineer           | Inspect CloudWatch logs, restart failed pods           |
+| **SEV3** | Minor performance degradation, non-blocking bug                         | $< 2 \text{ hours}$  | On-call Engineer                      | Log ticket, schedule standard release fix              |
