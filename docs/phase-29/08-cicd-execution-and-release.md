@@ -2,21 +2,21 @@
 
 ## 1. Executive Summary
 
-This document presents the Continuous Integration, Continuous Delivery (CI/CD), and DevSecOps automated pipeline architecture for **EcivreS Phase 29**. 
+This document presents the Continuous Integration, Continuous Delivery (CI/CD), and DevSecOps automated pipeline architecture for **EcivreS Phase 29**.
 All automated workflows are configured in `.github/workflows/` to enforce reproducible quality gates, container image builds, Helm manifest validation, and zero-trust security controls across the multi-package monorepo.
 
 ---
 
 ## 2. Automated Pipeline Inventory & Trigger Specifications
 
-| Workflow File | Trigger Events | Concurrency Control | Primary Responsibilities | Target Environments |
-| :--- | :--- | :--- | :--- | :--- |
-| `.github/workflows/pr-verification.yml` | `pull_request` to `develop`, `main`; `push` to `feature/**` | Per-branch cancellation | Parallel matrix lint, TypeScript typecheck, unit tests across API, Web, Mobile | Ephemeral PR Runners |
-| `.github/workflows/helm-ci.yml` | `push`, `pull_request` modifying `helm/**` | Per-branch cancellation | Helm linting, template rendering, and manifest structure verification | GitHub Actions Ubuntu |
-| `.github/workflows/staging-pipeline.yml` | Push to `develop` | Serialized deployment | Build multi-arch images, push to registry, run DB migrations, deploy Helm to staging EKS | `staging` (`ecivres-staging`) |
-| `.github/workflows/production-pipeline.yml` | Tag push `v*.*.*`, manual dispatch | Environment gate approval | Production promotion, canary deployment, automated rollbacks on failure | `production` (`ecivres-prod`) |
-| `.github/workflows/terraform-ci.yml` | Changes in `terraform/**` | Per-branch cancellation | `terraform fmt`, `terraform validate`, `terraform plan` execution | AWS Staging / Prod Accounts |
-| `.github/workflows/security-scan.yml` | Weekly schedule, push to `main` | Single execution | Trivy container vulnerability scanning, CodeQL static analysis, Secret leak detection | Security Dashboard |
+| Workflow File                               | Trigger Events                                              | Concurrency Control       | Primary Responsibilities                                                                 | Target Environments           |
+| :------------------------------------------ | :---------------------------------------------------------- | :------------------------ | :--------------------------------------------------------------------------------------- | :---------------------------- |
+| `.github/workflows/pr-verification.yml`     | `pull_request` to `develop`, `main`; `push` to `feature/**` | Per-branch cancellation   | Parallel matrix lint, TypeScript typecheck, unit tests across API, Web, Mobile           | Ephemeral PR Runners          |
+| `.github/workflows/helm-ci.yml`             | `push`, `pull_request` modifying `helm/**`                  | Per-branch cancellation   | Helm linting, template rendering, and manifest structure verification                    | GitHub Actions Ubuntu         |
+| `.github/workflows/staging-pipeline.yml`    | Push to `develop`                                           | Serialized deployment     | Build multi-arch images, push to registry, run DB migrations, deploy Helm to staging EKS | `staging` (`ecivres-staging`) |
+| `.github/workflows/production-pipeline.yml` | Tag push `v*.*.*`, manual dispatch                          | Environment gate approval | Production promotion, canary deployment, automated rollbacks on failure                  | `production` (`ecivres-prod`) |
+| `.github/workflows/terraform-ci.yml`        | Changes in `terraform/**`                                   | Per-branch cancellation   | `terraform fmt`, `terraform validate`, `terraform plan` execution                        | AWS Staging / Prod Accounts   |
+| `.github/workflows/security-scan.yml`       | Weekly schedule, push to `main`                             | Single execution          | Trivy container vulnerability scanning, CodeQL static analysis, Secret leak detection    | Security Dashboard            |
 
 ---
 
@@ -29,28 +29,28 @@ flowchart TD
     PR["Pull Request / Branch Push"] --> Checkout["actions/checkout@v4"]
     Checkout --> SetupNode["Setup Node.js 20 & pnpm 9"]
     SetupNode --> InstallDeps["pnpm install --frozen-lockfile"]
-    
+
     InstallDeps --> MatrixAPI["Matrix: API"]
     InstallDeps --> MatrixWeb["Matrix: Web"]
     InstallDeps --> MatrixMobile["Matrix: Mobile"]
-    
+
     subgraph API Gate
         MatrixAPI --> APILint["pnpm --filter api run lint"]
         APILint --> APITypecheck["pnpm --filter api run typecheck"]
         APITypecheck --> APIPrisma["pnpm --filter api exec prisma generate"]
         APIPrisma --> APITest["pnpm --filter api run test -- --maxWorkers=2"]
     end
-    
+
     subgraph Web Gate
         MatrixWeb --> WebTypecheck["pnpm --filter web run typecheck"]
         WebTypecheck --> WebLint["pnpm --filter web run lint"]
     end
-    
+
     subgraph Mobile Gate
         MatrixMobile --> MobileTypecheck["pnpm --filter mobile run typecheck"]
         MobileTypecheck --> MobileTest["pnpm --filter mobile run test -- --passWithNoTests"]
     end
-    
+
     APITest --> AllPassed{"All Checks Succeeded?"}
     WebLint --> AllPassed
     MobileTest --> AllPassed
