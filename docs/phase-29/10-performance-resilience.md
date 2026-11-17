@@ -13,6 +13,7 @@
 Stage J validates the operational performance, concurrency latency percentiles, and resilience boundaries of the EcivreS backend application under simulated stress, dependency degradation, and incident scenarios.
 
 All synthetic benchmarks and chaos recovery drills executed with zero regressions:
+
 - **Performance & Concurrency:** 3/3 e2e test cases passed in 3.706s.
 - **Reliability & Chaos Recovery:** 21/21 test cases passed across 5 reliability modules in 2.254s.
 - **Total Stage J Automated Verifications:** 24 passed, 0 failed.
@@ -40,12 +41,12 @@ Time:        3.706 s
 
 ### 2.2 Latency Percentiles & SLA Compliance
 
-| Metric / Endpoint | Target SLA | Measured Value | Compliance Status |
-| :--- | :--- | :--- | :--- |
-| **Concurrent Health Check (p50)** | $< 100 \text{ ms}$ | $5.2 \text{ ms}$ | **PASS (Exceeds SLA)** |
-| **Concurrent Health Check (p95)** | $< 200 \text{ ms}$ | $14.8 \text{ ms}$ | **PASS (Exceeds SLA)** |
-| **Database Deep Connectivity** | Valid JSON `{ status: HEALTHY }` | Executed in $14 \text{ ms}$ | **PASS** |
-| **Public Caching Interceptor** | `Cache-Control` header verified | `public, max-age=60, s-maxage=300, stale-while-revalidate=120` | **PASS** |
+| Metric / Endpoint                 | Target SLA                       | Measured Value                                                 | Compliance Status      |
+| :-------------------------------- | :------------------------------- | :------------------------------------------------------------- | :--------------------- |
+| **Concurrent Health Check (p50)** | $< 100 \text{ ms}$               | $5.2 \text{ ms}$                                               | **PASS (Exceeds SLA)** |
+| **Concurrent Health Check (p95)** | $< 200 \text{ ms}$               | $14.8 \text{ ms}$                                              | **PASS (Exceeds SLA)** |
+| **Database Deep Connectivity**    | Valid JSON `{ status: HEALTHY }` | Executed in $14 \text{ ms}$                                    | **PASS**               |
+| **Public Caching Interceptor**    | `Cache-Control` header verified  | `public, max-age=60, s-maxage=300, stale-while-revalidate=120` | **PASS**               |
 
 ---
 
@@ -119,12 +120,12 @@ Time:        2.254 s
 
 Cross-verifying results from Stage I disaster recovery drill (`scripts/restore-staging-drill.ps1`) and multi-region failover automation (`scripts/dr-failover-simulation.sh`):
 
-| Resilience Dimension | SLO Target | Actual Verified Result | Verification Method |
-| :--- | :--- | :--- | :--- |
-| **Recovery Point Objective (RPO)** | $< 15 \text{ minutes}$ | **$0.19 \text{ minutes}$** | Measured delta between backup generation and restore drill |
-| **Recovery Time Objective (RTO) - Local Restore** | $< 10 \text{ minutes}$ | **$0.005 \text{ seconds (5 ms)}$** | Staging PostgreSQL database restoration drill |
-| **Recovery Time Objective (RTO) - Regional Failover** | $< 2 \text{ minutes}$ | **$42 \text{ seconds}$** | Read-replica promotion & Route53 failover simulation |
-| **Data Integrity Verification** | $100\%$ schema match | **113 tables, 241 indices verified** | Post-restore automated database catalog audit |
+| Resilience Dimension                                  | SLO Target             | Actual Verified Result               | Verification Method                                        |
+| :---------------------------------------------------- | :--------------------- | :----------------------------------- | :--------------------------------------------------------- |
+| **Recovery Point Objective (RPO)**                    | $< 15 \text{ minutes}$ | **$0.19 \text{ minutes}$**           | Measured delta between backup generation and restore drill |
+| **Recovery Time Objective (RTO) - Local Restore**     | $< 10 \text{ minutes}$ | **$0.005 \text{ seconds (5 ms)}$**   | Staging PostgreSQL database restoration drill              |
+| **Recovery Time Objective (RTO) - Regional Failover** | $< 2 \text{ minutes}$  | **$42 \text{ seconds}$**             | Read-replica promotion & Route53 failover simulation       |
+| **Data Integrity Verification**                       | $100\%$ schema match   | **113 tables, 241 indices verified** | Post-restore automated database catalog audit              |
 
 ---
 
