@@ -36,6 +36,7 @@ ecivres_circuit_breaker_trips_total{service="redis"} 0
 ## 3. Distributed Tracing & Correlation ID Propagation
 
 Every HTTP interaction with the EcivreS platform is tagged with a unique request correlation ID by `CorrelationIdMiddleware`:
+
 - **Header:** `X-Correlation-Id: req-<uuid-v4>`
 - **Downstream Propagation:** Attached to NestJS execution context, forwarded to database queries in query comments, and echoed in response headers.
 - **Verification:** Unit tested in `observability-telemetry.spec.ts` (4/4 passed).
@@ -47,9 +48,10 @@ Every HTTP interaction with the EcivreS platform is tagged with a unique request
 In compliance with the mandate ("Do not describe a backup as recoverable until a restore has actually been tested"), a logical backup and restore drill was executed against the staging schema.
 
 ### 4.1 Backup Execution Log (`scripts/backup-staging-database.ps1`)
+
 ```
 ==========================================================
- EcivreS Platform — Database Logical Backup Utility        
+ EcivreS Platform — Database Logical Backup Utility
 ==========================================================
   Created backup directory: backups/staging
 
@@ -69,9 +71,10 @@ In compliance with the mandate ("Do not describe a backup as recoverable until a
 ```
 
 ### 4.2 Non-Destructive Restore Drill Log (`scripts/restore-staging-drill.ps1`)
+
 ```
 ==========================================================
- EcivreS Platform — Database Restore & DR Drill Utility   
+ EcivreS Platform — Database Restore & DR Drill Utility
 ==========================================================
 
 [1/4] Locating Latest Logical Backup Archive...
@@ -91,9 +94,9 @@ In compliance with the mandate ("Do not describe a backup as recoverable until a
   Measured Recovery Point (RPO): 0.19 minutes (Target: < 1 hour)
 
 ==========================================================
- Disaster Recovery Drill: 100% SUCCESSFUL                 
- Archive: ecivres_staging_backup_20261114_171709.sql                           
- Measured RTO: 5 ms | RPO: 0.19 mins    
+ Disaster Recovery Drill: 100% SUCCESSFUL
+ Archive: ecivres_staging_backup_20261114_171709.sql
+ Measured RTO: 5 ms | RPO: 0.19 mins
 ==========================================================
 ```
 
